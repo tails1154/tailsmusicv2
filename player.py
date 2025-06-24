@@ -135,7 +135,7 @@ def wifiSetup():
   speak("Choose your wifi network")
   speak(options[selected])
   while True:
-   event = dev.read_one
+   event = dev.read_one()
    if event and event.type == ecodes.EV_KEY:
     key_event = categorize(event)
     if key_event.keystate == 1:
