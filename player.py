@@ -142,13 +142,12 @@ def wifiSetup():
      key = key_event.keycode
      if key == 'KEY_PREVIOUSSONG':
       selected = (selected + 1) % len(options)
+      speak(options[selected])
      elif key == 'KEY_NEXTSONG':
       wifiName = options[selected]
       pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
       speak("Enter your wifi password.")
-      speak("For an easier setup,")
-      speak("Connect TailsMusic to")
-      speak("Your monitor and type")
+      speak("For an easier setup, Connect TailsMusic to Your monitor and type")
       speak("n... m... t... u... i... with a keyboard")
       speak("and press enter.")
       options = [
@@ -177,6 +176,9 @@ def wifiSetup():
           if key == 'KEY_PREVIOUSSONG':
            selected = (selected + 1) % len(options)
            speak(options[selected])
+           sleep(1)
+          elif key == 'KEY_CDPLAY' or key == 'KEY_CDPAUSE':
+           selected = (selected + 1) % len(options)
            sleep(1)
           elif key == 'KEY_NEXTSONG':
            choice = options[selected]
