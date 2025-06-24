@@ -70,3 +70,21 @@ Event: time 1750784635.070529, -------------- SYN_REPORT ------------
 The part after `code 201` or code whatever in the ()'s is what you need to note down. Press it again and see if it has a PLAY function and note that down too if it does.
 
 Now, edit (`nano`) player.py and replace all instances of "KEY_CDPLAY" and "KEY_CDPAUSE" with the ones we noted down earlier (set "KEY_CDPAUSE" to the same one as you set the first one if you onlyy had one "KEY_whatever".)
+
+
+
+## Menus
+
+
+Usage is simple, you can press back or skip or pause/play and they do what you would expect in NORMAL mode.
+
+If you pause, then press skip you can access some menus.
+
+To navigate (most) menus, the controls are:
+
+Back: Advance selector
+Skip: Select
+
+In a few menus there is this control
+
+Play/Pause: Move Selector Backwards
