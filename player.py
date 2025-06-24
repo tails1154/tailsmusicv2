@@ -239,7 +239,7 @@ def run_script_menu():
                         try:
                             subprocess.run(["cp", "apps/" + options[selected], "app.py"])
                             import app
-                             app.start()
+                            app.start()
                             speak("Script finished")
                         except Exception as e:
                             speak(f"Error running script: {str(e)}")
