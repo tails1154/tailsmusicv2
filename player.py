@@ -128,7 +128,7 @@ def wifiSetup():
  networks = wifi.scan_wifi()
  if networks:
   options = []
-  for i, (ssid, signal) in enumerate(netorks):
+  for i, (ssid, signal) in enumerate(networks):
    options.append(f"{i+1}. {ssid} ({signal}%)")
   pygame.mixer.music.stop()
   selected = 0
