@@ -1,3 +1,4 @@
 songs/*
 playlists/*
 __pycache__/
+app.py
