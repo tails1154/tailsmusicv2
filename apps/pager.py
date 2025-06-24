@@ -131,7 +131,7 @@ class PagerClient:
             self._sync_offline_messages()
             messages = self.check_messages()
             for msg in messages:
-               tools.speak(f"[{msg['sender']}] {msg['message']}")
+               api.speak(f"[{msg['sender']}] {msg['message']}")
             if api.isRightPressed():
              return
             time.sleep(self.poll_interval)
@@ -151,9 +151,9 @@ class APP:
          recipient_id="RPi-2",                    # Who to listen for
          poll_interval=5                          # Check every 5 seconds
      )
-     tools.speak("Sending Page")
+     api.speak("Sending Page")
      # Send a test message
      client.send_message("Hello from the RPi!")
-     tools.speak("Waiting for page in background")
+     api.speak("Waiting for page in background")
      # Start listening for messages
      client.run(api)
