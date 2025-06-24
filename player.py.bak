@@ -1,15 +1,30 @@
+#!/bin/python3
+print("TailsMusic preinit")
+print("Loading Modules")
+print("(0/8) os")
 import os
+print("(1/8) pygame")
 import pygame
+print("(2/8) evdev")
 from evdev import InputDevice, categorize, ecodes, list_devices
+print("(3/8) time")
 from time import sleep
+import time
+print("(4/8) threading")
 import threading
+print("(5/8) subprocess")
 import subprocess
+print("(6/8) json")
 import json
+print("(7/8) random")
+import random
+print("(8/8) wifi.py")
+import wifi
+
 
 print("TailsMusic Loading...")
-print("Modules: (7/7)")
-print("All Modules Loaded!")
-
+#print("Modules Loaded!")
+#print("All Modules Loaded!")
 print("Finding SIMOLIO")
 def find_simolio():
     for path in list_devices():
@@ -43,16 +58,20 @@ def speak(text):
                 print(f"TTS subprocess error: {e}")
     threading.Thread(target=run_tts, daemon=True).start()
 
+
 print("Loading Music Files")
-playlist = [os.path.join(MUSIC_DIR, f) for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
+playlist = sorted(
+    [os.path.join(MUSIC_DIR, f) for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
+)
 if not playlist:
     speak("No songs found.")
     exit()
-
 index = 0
 paused = False
 print("Loading Audio Driver")
 pygame.mixer.init()
+print("Loading Sounds...")
+dialup = pygame.mixer.Sound("/home/pi/mp3player/sfx/dialup.mp3")
 pygame.mixer.music.load(playlist[index])
 pygame.mixer.music.play()
 
@@ -60,8 +79,8 @@ def next_song():
     global index
     index += 1
     if index >= len(playlist):
-        speak("Playlist finished. Exiting.")
-        exit(0)
+        index = 0
+        #exit(0)
     pygame.mixer.music.load(playlist[index])
     pygame.mixer.music.play()
 
@@ -78,15 +97,164 @@ def toggle_pause():
     else:
         pygame.mixer.music.pause()
     paused = not paused
+    
+def manual_tts():
+ options = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "space", "Done"]
+ selected = 0
+ speak(options[selected])
+ toSpeak = ""
+ while True:
+  event = dev.read_one()
+  if event and event.type == ecodes.EV_KEY:
+   key_event = categorize(event)
+   if key_event.keystate == 1:
+    key = key_event.keycode
+    if key == 'KEY_PREVIOUSSONG':
+     selected = (selected + 1) % len(options)
+     speak(options[selected])
+    elif key == 'KEY_NEXTSONG':
+     choice = options[selected]
+     speak(choice)
+     if choice == "space":
+      toSpeak += " "
+     elif choice == "Done":
+      speak(toSpeak)
+      break
+     else:
+      toSpeak += choice
+      
+def wifiSetup():
+ speak("Loading wifi networks")
+ pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
+ pygame.mixer.music.play()
+ networks = wifi.scan_wifi()
+ if networks:
+  options = []
+  for i, (ssid, signal) in enumerate(networks):
+   options.append(f"{ssid}")
+  pygame.mixer.music.stop()
+  selected = 0
+  speak("Choose your wifi network")
+  speak(options[selected])
+  while True:
+   event = dev.read_one()
+   if event and event.type == ecodes.EV_KEY:
+    key_event = categorize(event)
+    if key_event.keystate == 1:
+     key = key_event.keycode
+     if key == 'KEY_PREVIOUSSONG':
+      selected = (selected + 1) % len(options)
+      speak(options[selected])
+     elif key == 'KEY_NEXTSONG':
+      wifiName = options[selected]
+      pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
+      speak("Enter your wifi password.")
+      speak("For an easier setup, Connect TailsMusic to Your monitor and type")
+      speak("n... m... t... u... i... with a keyboard and press enter.")
+      speak("Enter your wifi password") # we "need" to say it twice because people get bored and forget what they were doing lol
+      options = [
+    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+    "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
+    "u", "v", "w", "x", "y", "z",
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+    "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+    "U", "V", "W", "X", "Y", "Z",
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+    "!", "@", "#", "$", "%", "^", "&", "*", "(", ")",
+    "-", "_", "=", "+", "[", "{", "]", "}", "\\", "|",
+    ";", ":", "'", "\"", ",", "<", ".", ">", "/", "?", "`", "~", "space", "Done"
+      ]
+      selected = 0
+      wifiPass = ""
+      speak(options[selected])
+      while True:
+       event = dev.read_one()
+       if event and event.type == ecodes.EV_KEY:
+        key_event = categorize(event)
+        if key_event.keystate == 1:
+         key = key_event.keycode
+         if key_event.keystate == 1:
+          key = key_event.keycode
+          print(key)
+          if key == 'KEY_PREVIOUSSONG':
+           selected = (selected + 1) % len(options)
+           speak(options[selected])
+           sleep(1)
+          elif key == 'KEY_PLAYCD' or key == 'KEY_PAUSECD':
+           selected = (selected - 1) % len(options)
+           speak(options[selected])
+           sleep(1)
+          elif key == 'KEY_NEXTSONG':
+           choice = options[selected]
+           if choice == "space":
+            wifiPass += ""
+           elif choice == "Done":
+            speak("Connecting")
+            pygame.mixer.music.play()
+            try:
+             wifi.connect_wifi(wifiName, wifiPass)
+            except Exception as e:
+             pygame.mixer.music.stop()
+             speak("Error connecting: " + str(e))
+             break
+            pygame.mixer.music.stop()
+            speak("Your IP is " + str(wifi.get_ip()))
+            break
+           else:
+            wifiPass += options[selected]
+
+def run_script_menu():
+    # Get all .py files in apps/ directory
+    py_files = []
+    apps_dir = os.path.join(os.path.dirname(__file__), 'apps')
+    if os.path.exists(apps_dir):
+        py_files = [os.path.join(root, f) 
+                   for root, _, files in os.walk(apps_dir) 
+                   for f in files if f.endswith('.py')]
+    
+    if not py_files:
+        speak("No scripts found in apps directory")
+        return
+    
+    options = [os.path.basename(f) for f in py_files] + ["Back"]
+    selected = 0
+    speak(options[selected])
+    
+    while True:
+        event = dev.read_one()
+        if event and event.type == ecodes.EV_KEY:
+            key_event = categorize(event)
+            if key_event.keystate == 1:
+                key = key_event.keycode
+                if key == 'KEY_PREVIOUSSONG':
+                    selected = (selected + 1) % len(options)
+                    speak(options[selected])
+                    sleep(1)
+                elif key == 'KEY_NEXTSONG':
+                    if options[selected] == "Back":
+                        return
+                    else:
+                        script_path = py_files[selected]
+                        speak(f"Running {options[selected]}")
+                        if True:
+                            subprocess.run(["cp", "apps/" + options[selected], "app.py"])
+                            import app as appModule
+                            app = appModule.APP(dev)
+                            app.start()
+                            speak("Script finished")
+                        #except Exception as e:
+                        #    speak(f"Error running script: {str(e)}")
+                        return
 
 def shutdown_menu():
-    options = ["Playlists", "Shut Down", "Back"]
+    options = ["Playlists", "Random Song", "Manual TTS", "Rescan Songs", 
+               "Connect to WiFi", "Get IP", "Open App", "Shut Down", "Back"]
     selected = 0
     speak(options[selected])
     while True:
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
-            try:
+            if True:
                 key_event = categorize(event)
                 if key_event.keystate == 1:
                     key = key_event.keycode
@@ -103,9 +271,33 @@ def shutdown_menu():
                             return
                         elif choice == "Playlists":
                             playlist_menu()
+                        elif choice == "Random Song":
+                            song_files = sorted([f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')], key=str.lower)
+                            random_song = random.choice(song_files) if song_files else None
+                            pygame.mixer.music.load("songs/" + random_song)
+                            pygame.mixer.music.play()
+                            while pygame.mixer.music.get_busy():
+                                 event = dev.read_one()
+                                 if event and event.type == ecodes.EV_KEY:
+                                  key_event = categorize(event)
+                                  if key_event.keystate == 1:
+                                      key = key_event.keycode
+                                      if key == 'KEY_NEXTSONG':
+                                           pygame.mixer.music.stop()
+                                           break
+                        elif choice == "Manual TTS":
+                              manual_tts()
+                        elif choice == "Rescan Songs":
+                              speak("Rescanning")
+                              exit(0)
+                        elif choice == "Connect to WiFi":
+                              wifiSetup()
+                        elif choice == "Get IP":
+                              speak("Your IP is: " + wifi.get_ip())
+                        elif choice == "Open App":
+                              run_script_menu()
+                              return
                         break
-            except Exception as e:
-                print(f"Shutdown menu error: {e}")
 
 def playlist_menu():
     def list_playlists():
@@ -139,22 +331,25 @@ def playlist_menu():
                 except Exception as e:
                     print(f"Playlist menu error: {e}")
 
-playlist_counter = 0
+playlist_counter = max((int(f.removeprefix("playlist").removesuffix(".json")) for f in os.listdir("/home/pi/mp3player/playlists/") if f.startswith("playlist") and f.endswith(".json")), default=-1) + 1
 def create_playlist():
     global playlist_counter
     songs = []
-    song_files = [f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
+    #song_files = [f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
+    song_files = sorted([f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')])
+
     speak(f"Creating playlist {playlist_counter}")
     selected = 0
     while True:
         options = ["Add song", "Finish"]
-        speak(options[selected])
+        #speak(options[selected])
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
             try:
                 key_event = categorize(event)
                 if key_event.keystate == 1:
                     key = key_event.keycode
+                    print(key)
                     if key == 'KEY_PREVIOUSSONG':
                         selected = (selected + 1) % len(options)
                         speak(options[selected])
@@ -178,6 +373,10 @@ def create_playlist():
                                             k = k_event.keycode
                                             if k == 'KEY_PREVIOUSSONG':
                                                 song_selected = (song_selected + 1) % len(song_files)
+                                                speak(song_files[song_selected])
+                                                sleep(1)
+                                            elif k == 'KEY_PLAYCD' or k == 'KEY_PAUSECD':
+                                                song_selected = (song_selected - 1) % len(song_files)
                                                 speak(song_files[song_selected])
                                                 sleep(1)
                                             elif k == 'KEY_NEXTSONG':
@@ -209,7 +408,7 @@ def manage_playlist(name):
                     elif key == 'KEY_NEXTSONG':
                         choice = options[selected]
                         if choice == "Back":
-                            return
+                          break
                         elif choice == "Delete":
                             speak("Confirm delete")
                             while True:
@@ -226,13 +425,25 @@ def manage_playlist(name):
                                             speak("Cancel")
                                             break
                         elif choice == "Play":
-                            for song in songs:
-                                pygame.mixer.music.load(song)
-                                pygame.mixer.music.play()
-                                while pygame.mixer.music.get_busy():
-                                    sleep(1)
-                            speak("Playlist done")
-                            return
+                              #print(songs)
+                              #print(songs[1])
+                              for song in songs:
+                               print(song)
+                               #speak("Playlist done")
+                               pygame.mixer.music.load(song)
+                               pygame.mixer.music.play()
+                               while pygame.mixer.music.get_busy():
+                                event = dev.read_one()
+                                if event and event.type == ecodes.EV_KEY:
+                                 key_event = categorize(event)
+                                 if key_event.keystate == 1:
+                                  key = key_event.keycode
+                                  if key == 'KEY_NEXTSONG':
+                                   pygame.mixer.music.stop()
+                                   #break
+
+                              speak("Playlist done")
+                              return
             except Exception as e:
                 print(f"Manage playlist error: {e}")
 
@@ -241,7 +452,7 @@ print(f"Listening on {INPUT_DEVICE}...")
 while True:
     event = dev.read_one()
     if event and event.type == ecodes.EV_KEY:
-        try:
+        if True:
             key_event = categorize(event)
             if key_event.keystate == 1:
                 key = key_event.keycode
@@ -254,8 +465,6 @@ while True:
                         next_song()
                 elif key == 'KEY_PREVIOUSSONG':
                     prev_song()
-        except Exception as e:
-            print(f"Main loop error: {e}")
     if not pygame.mixer.music.get_busy() and not paused:
         sleep(0.5)
         next_song()

@@ -48,7 +48,7 @@ ln -s /home/pi/tailsmusicv2 /home/pi/mp3player
 ## **3. Install Dependencies**  
 ```bash
 sudo apt update
-sudo apt install -y pulseaudio pulseaudio-module-bluetooth espeak-ng evtest python3-evdev
+sudo apt install -y pulseaudio pulseaudio-module-bluetooth espeak evtest python3-evdev
 ```
 
 ---
