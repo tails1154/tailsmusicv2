@@ -129,7 +129,7 @@ def wifiSetup():
  if networks:
   options = []
   for i, (ssid, signal) in enumerate(networks):
-   options.append(f"{i+1}. {ssid} ({signal}%)")
+   options.append(f"{ssid}")
   pygame.mixer.music.stop()
   selected = 0
   speak("Choose your wifi network")
