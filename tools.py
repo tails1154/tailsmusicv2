@@ -20,7 +20,11 @@ class API:
   threading.Thread(target=run_tts, daemon=True).start()
  def isRightPressed(self):
   event = self.device.read_one()
-  if event and event.type == ecodes.EV_KEY and key_event.keystate == 1 and key == "KEY_NEXTSONG":
-   return True
-  else:
-   return False
+  if event and event.type == ecodes.EV_KEY:
+   key_event = categorize(event)
+   if key_event.keystate == 1:
+    key = key_event.keycode
+    if key == "KEY_NEXTSONG":
+      return True
+   # else:
+  return False
