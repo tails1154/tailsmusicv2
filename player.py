@@ -392,7 +392,7 @@ print(f"Listening on {INPUT_DEVICE}...")
 while True:
     event = dev.read_one()
     if event and event.type == ecodes.EV_KEY:
-        try:
+        if True:
             key_event = categorize(event)
             if key_event.keystate == 1:
                 key = key_event.keycode
@@ -405,8 +405,8 @@ while True:
                         next_song()
                 elif key == 'KEY_PREVIOUSSONG':
                     prev_song()
-        except Exception as e:
-            print(f"Main loop error: {e}")
+        #except Exception as e:
+        #    print(f"Main loop error: {e}")
     if not pygame.mixer.music.get_busy() and not paused:
         sleep(0.5)
         next_song()
