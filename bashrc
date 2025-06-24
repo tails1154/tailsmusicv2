@@ -112,8 +112,8 @@ if ! shopt -oq posix; then
   fi
 fi
 echo "Press Ctrl-C now to enter terminal"
-echo "Waiting 1 second"
-sleep 1
+echo "Waiting 2 seconds"
+sleep 2
 while [ yes ]; do
 echo "Stopping pulseaudio"
 pulseaudio --kill
