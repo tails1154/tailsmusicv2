@@ -1,0 +1,123 @@
+print("TailsMusic Loading...")
+print("Modules: (0/7)")
+import os
+print("Modules: (1/7)")
+import pyttsx3
+print("Modules: (2/7)")
+import pygame
+print("Modules: (3/7)")
+from evdev import InputDevice, categorize, ecodes
+print("Modules: (4/7)")
+from time import sleep
+print("Modules: (5/7)")
+import random
+print("Modules (6/7)")
+from evdev import InputDevice, list_devices
+print("Modules (7/7)")
+print("All Modules Loaded!")
+
+print("Finding SIMOLIO")
+
+def find_simolio():
+    for path in list_devices():
+        dev = InputDevice(path)
+        if "SIMOLIO" in dev.name:
+            return path
+    return None
+
+device_path = find_simolio()
+if device_path:
+    print("Using SIMOLIO device:", device_path)
+    dev = InputDevice(device_path)
+else:
+    print("SIMOLIO Bluetooth media button device not found.")
+    exit(1)
+
+# CONFIG
+MUSIC_DIR = '/home/pi/mp3player/songs'
+INPUT_DEVICE = device_path
+
+print("Starting Voice")
+tts = pyttsx3.init()
+tts.setProperty('rate', 150)
+
+def speak(text):
+    tts.say(text)
+    tts.runAndWait()
+
+print("Loading Music Files")
+playlist = [os.path.join(MUSIC_DIR, f) for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
+if not playlist:
+    speak("No songs found.")
+    exit()
+
+index = 0
+paused = False
+print("Loading Audio Driver")
+pygame.mixer.init()
+pygame.mixer.music.load(playlist[index])
+pygame.mixer.music.play()
+
+def next_song():
+    global index
+    index += 1
+    if index >= len(playlist):
+        speak("Playlist finished. Exiting.")
+        exit(0)
+    pygame.mixer.music.load(playlist[index])
+    #speak(f"Next: {os.path.basename(playlist[index])}")
+    pygame.mixer.music.play()
+
+def prev_song():
+    global index
+    index = (index - 1) % len(playlist)
+    pygame.mixer.music.load(playlist[index])
+    #speak(f"Previous: {os.path.basename(playlist[index])}")
+    pygame.mixer.music.play()
+
+def toggle_pause():
+    global paused
+    if paused:
+        pygame.mixer.music.unpause()
+    else:
+        pygame.mixer.music.pause()
+    paused = not paused
+
+import subprocess
+
+dev = InputDevice(INPUT_DEVICE)
+print(f"Listening on {INPUT_DEVICE}...")
+
+for event in dev.read_loop():
+    if event.type == ecodes.EV_KEY:
+        key_event = categorize(event)
+        if key_event.keystate == 1:
+            print("Got Event keycode:" + key_event.keycode)
+            if key_event.keycode == 'KEY_PLAYCD' or key_event.keycode == 'KEY_PAUSECD':
+                toggle_pause()
+            elif key_event.keycode == 'KEY_NEXTSONG':
+                if paused:
+                    speak("Shut Down")
+                    speak("Would you like to shut down?")
+                    speak("Press Skip for yes, Back for no")
+                    waiting = True
+                    while waiting:
+                        event = dev.read_one()
+                        if event and event.type == ecodes.EV_KEY and categorize(event).keystate == 1:
+                            key_event = categorize(event)
+                            if key_event.keycode == 'KEY_NEXTSONG':
+                                speak("Shutting Down")
+                                subprocess.run(["sudo", "shutdown", "now"])
+                                waiting = False
+                            elif key_event.keycode == 'KEY_PREVIOUSSONG':
+                                speak("Cancel.")
+                                waiting = False
+                else:
+                    next_song()
+            elif key_event.keycode == 'KEY_PREVIOUSSONG':
+                prev_song()
+
+    # Check if song finished
+    if not pygame.mixer.music.get_busy() and not paused:
+        sleep(0.5)  # brief debounce
+        next_song()
