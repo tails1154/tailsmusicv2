@@ -178,7 +178,7 @@ def wifiSetup():
            selected = (selected + 1) % len(options)
            speak(options[selected])
            sleep(1)
-          elif key == 'KEY_CDPLAY' or key == 'KEY_CDPAUSE':
+          elif key == 'KEY_PLAYCD' or key == 'KEY_PAUSECD':
            selected = (selected - 1) % len(options)
            sleep(1)
           elif key == 'KEY_NEXTSONG':
