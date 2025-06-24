@@ -148,8 +148,8 @@ def wifiSetup():
       pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
       speak("Enter your wifi password.")
       speak("For an easier setup, Connect TailsMusic to Your monitor and type")
-      speak("n... m... t... u... i... with a keyboard")
-      speak("and press enter.")
+      speak("n... m... t... u... i... with a keyboard and press enter.")
+      speak("Enter your wifi password") # we "need" to say it twice because people get bored and forget what they were doing lol
       options = [
     "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
     "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
