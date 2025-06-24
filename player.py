@@ -360,7 +360,7 @@ def manage_playlist(name):
                     elif key == 'KEY_NEXTSONG':
                         choice = options[selected]
                         if choice == "Back":
-                            return
+                          break
                         elif choice == "Delete":
                             speak("Confirm delete")
                             while True:
@@ -377,7 +377,11 @@ def manage_playlist(name):
                                             speak("Cancel")
                                             break
                         elif choice == "Play":
+                              #print(songs)
+                              #print(songs[1])
                               for song in songs:
+                               print(song)
+                               #speak("Playlist done")
                                pygame.mixer.music.load(song)
                                pygame.mixer.music.play()
                                while pygame.mixer.music.get_busy():
@@ -388,10 +392,10 @@ def manage_playlist(name):
                                   key = key_event.keycode
                                   if key == 'KEY_NEXTSONG':
                                    pygame.mixer.music.stop()
-                                   break
+                                   #break
 
-                               speak("Playlist done")
-                               return
+                              speak("Playlist done")
+                              return
             except Exception as e:
                 print(f"Manage playlist error: {e}")
 
