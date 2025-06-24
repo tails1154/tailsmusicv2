@@ -236,14 +236,14 @@ def run_script_menu():
                     else:
                         script_path = py_files[selected]
                         speak(f"Running {options[selected]}")
-                        try:
+                        if True:
                             subprocess.run(["cp", "apps/" + options[selected], "app.py"])
                             import app as appModule
                             app = appModule.APP(dev)
                             app.start()
                             speak("Script finished")
-                        except Exception as e:
-                            speak(f"Error running script: {str(e)}")
+                        #except Exception as e:
+                        #    speak(f"Error running script: {str(e)}")
                         return
 
 def shutdown_menu():

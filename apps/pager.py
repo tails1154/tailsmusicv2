@@ -142,7 +142,7 @@ class PagerClient:
 class APP:
  def __init__(self, device):
   self.device = device
- def start():
+ def start(self):
      api = tools.API(self.device)
      # Configure your client
      client = PagerClient(
