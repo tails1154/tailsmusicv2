@@ -136,7 +136,7 @@ class PagerClient:
 
 
 # ===== Example Usage =====
-if __name__ == "__main__":
+def start():
     # Configure your client
     client = PagerClient(
         server_url="http://192.168.0.107:3000",  # Replace with your Node.js server URL

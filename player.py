@@ -237,7 +237,9 @@ def run_script_menu():
                         script_path = py_files[selected]
                         speak(f"Running {options[selected]}")
                         try:
-                            subprocess.run(['python3', script_path])
+                            subprocess.run(["cp", "apps/" + options[selected], "app.py"])
+                            import app
+                             app.start()
                             speak("Script finished")
                         except Exception as e:
                             speak(f"Error running script: {str(e)}")
@@ -245,7 +247,7 @@ def run_script_menu():
 
 def shutdown_menu():
     options = ["Playlists", "Random Song", "Manual TTS", "Rescan Songs", 
-               "Connect to WiFi", "Get IP", "Run Script", "Shut Down", "Back"]
+               "Connect to WiFi", "Get IP", "Open App", "Shut Down", "Back"]
     selected = 0
     speak(options[selected])
     while True:
@@ -291,7 +293,7 @@ def shutdown_menu():
                               wifiSetup()
                         elif choice == "Get IP":
                               speak("Your IP is: " + wifi.get_ip())
-                        elif choice == "Run Script":
+                        elif choice == "Open App":
                               run_script_menu()
                               return
                         break
