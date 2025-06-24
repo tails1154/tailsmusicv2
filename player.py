@@ -180,6 +180,7 @@ def wifiSetup():
            sleep(1)
           elif key == 'KEY_PLAYCD' or key == 'KEY_PAUSECD':
            selected = (selected - 1) % len(options)
+           speak(options[selected])
            sleep(1)
           elif key == 'KEY_NEXTSONG':
            choice = options[selected]
@@ -195,6 +196,8 @@ def wifiSetup():
              speak("Error connecting: " + str(e))
             pygame.mixer.music.stop()
             speak("Your IP is " + str(wifi.get_ip()))
+           else:
+            wifiPass += options[selected]
 def shutdown_menu():
     options = ["Playlists", "Random Song", "Manual TTS", "Rescan Songs", "Connect to WiFi", "Get IP", "Shut Down", "Back"]
     selected = 0
