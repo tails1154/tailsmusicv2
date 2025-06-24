@@ -97,6 +97,7 @@ def toggle_pause():
     else:
         pygame.mixer.music.pause()
     paused = not paused
+    
 def manual_tts():
  options = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "space", "Done"]
  selected = 0
@@ -121,6 +122,7 @@ def manual_tts():
       break
      else:
       toSpeak += choice
+      
 def wifiSetup():
  speak("Loading wifi networks")
  pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
@@ -200,8 +202,50 @@ def wifiSetup():
             break
            else:
             wifiPass += options[selected]
+
+def run_script_menu():
+    # Get all .py files in apps/ directory
+    py_files = []
+    apps_dir = os.path.join(os.path.dirname(__file__), 'apps')
+    if os.path.exists(apps_dir):
+        py_files = [os.path.join(root, f) 
+                   for root, _, files in os.walk(apps_dir) 
+                   for f in files if f.endswith('.py')]
+    
+    if not py_files:
+        speak("No scripts found in apps directory")
+        return
+    
+    options = [os.path.basename(f) for f in py_files] + ["Back"]
+    selected = 0
+    speak(options[selected])
+    
+    while True:
+        event = dev.read_one()
+        if event and event.type == ecodes.EV_KEY:
+            key_event = categorize(event)
+            if key_event.keystate == 1:
+                key = key_event.keycode
+                if key == 'KEY_PREVIOUSSONG':
+                    selected = (selected + 1) % len(options)
+                    speak(options[selected])
+                    sleep(1)
+                elif key == 'KEY_NEXTSONG':
+                    if options[selected] == "Back":
+                        return
+                    else:
+                        script_path = py_files[selected]
+                        speak(f"Running {options[selected]}")
+                        try:
+                            subprocess.run(['python3', script_path])
+                            speak("Script finished")
+                        except Exception as e:
+                            speak(f"Error running script: {str(e)}")
+                        return
+
 def shutdown_menu():
-    options = ["Playlists", "Random Song", "Manual TTS", "Rescan Songs", "Connect to WiFi", "Get IP", "Shut Down", "Back"]
+    options = ["Playlists", "Random Song", "Manual TTS", "Rescan Songs", 
+               "Connect to WiFi", "Get IP", "Run Script", "Shut Down", "Back"]
     selected = 0
     speak(options[selected])
     while True:
@@ -247,9 +291,10 @@ def shutdown_menu():
                               wifiSetup()
                         elif choice == "Get IP":
                               speak("Your IP is: " + wifi.get_ip())
+                        elif choice == "Run Script":
+                              run_script_menu()
+                              return
                         break
-    #        except Exception as e:
-     #           print(f"Shutdown menu error: {e}")
 
 def playlist_menu():
     def list_playlists():
@@ -417,8 +462,6 @@ while True:
                         next_song()
                 elif key == 'KEY_PREVIOUSSONG':
                     prev_song()
-        #except Exception as e:
-        #    print(f"Main loop error: {e}")
     if not pygame.mixer.music.get_busy() and not paused:
         sleep(0.5)
         next_song()
