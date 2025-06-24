@@ -194,6 +194,7 @@ def wifiSetup():
             except Exception as e:
              pygame.mixer.music.stop()
              speak("Error connecting: " + str(e))
+             break
             pygame.mixer.music.stop()
             speak("Your IP is " + str(wifi.get_ip()))
             break
