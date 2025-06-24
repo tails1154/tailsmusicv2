@@ -199,7 +199,7 @@ def shutdown_menu():
     while True:
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
-            try:
+            if True:
                 key_event = categorize(event)
                 if key_event.keystate == 1:
                     key = key_event.keycode
@@ -240,8 +240,8 @@ def shutdown_menu():
                         elif choice == "Get IP":
                               speak("Your IP is: " + wifi.get_ip())
                         break
-            except Exception as e:
-                print(f"Shutdown menu error: {e}")
+    #        except Exception as e:
+     #           print(f"Shutdown menu error: {e}")
 
 def playlist_menu():
     def list_playlists():
