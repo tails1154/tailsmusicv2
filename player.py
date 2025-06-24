@@ -1,3 +1,4 @@
+#!/bin/python3
 print("TailsMusic preinit")
 print("Loading Modules")
 print("(0/8) os")
@@ -121,7 +122,7 @@ def manual_tts():
      else:
       toSpeak += choice
 def wifiSetup():
- say("Loading wifi networks")
+ speak("Loading wifi networks")
  pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
  pygame.mixer.music.play()
  networks = wifi.scan_wifi()
