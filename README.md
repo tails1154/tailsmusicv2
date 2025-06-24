@@ -1,3 +1,11 @@
+# TailsMusicv2
+better than v1, that's for sure!
+
+ai "enhanced" instructions below
+
+
+
+
 # **TailsMusic v2 Setup Guide**  
 *A headless MP3 player for Raspberry Pi with Bluetooth headphone control*  
 
@@ -130,3 +138,61 @@ Your **TailsMusic** should now:
 ✅ Auto-connect to Bluetooth headphones.  
 ✅ Respond to media buttons.  
 ✅ Announce actions via eSpeak.  
+
+
+
+# TailsMusic Control Guide
+
+## Main Controls
+| Button          | Action                          |
+|-----------------|---------------------------------|
+| **Play/Pause**  | Toggle playback pause           |
+| **Next Track**  | Skip to next song               |
+| **Previous**    | Go to previous song             |
+| **Next (Hold)** | Open shutdown menu when paused  |
+
+## Shutdown Menu
+*Navigate with Previous/Next, select with Next button*
+
+| Option           | Functionality                              |
+|------------------|-------------------------------------------|
+| Playlists        | Enter playlist management                 |
+| Random Song      | Play a random track                       |
+| Manual TTS       | Type custom text-to-speech message        |
+| Rescan Songs     | Reload music library                      |
+| Connect to WiFi  | Configure WiFi connection                 |
+| Get IP           | Announce current IP address               |
+| Shut Down        | Power off the system                      |
+| Back             | Return to playback                        |
+
+## Playlist Management
+### Main Playlist Menu
+- **Create**: Make a new playlist
+- **[Playlist Name]**: Manage existing playlist
+- **Back**: Return to shutdown menu
+
+### Playlist Actions
+| Option | Functionality                              |
+|--------|-------------------------------------------|
+| Play   | Play all songs in playlist                |
+| Delete | Remove playlist (requires confirmation)   |
+| Back   | Return to playlist list                   |
+
+### Creating Playlists
+1. Select **Add song**
+2. Browse songs with **Previous/Next**
+3. Press **Next** to add song
+4. Choose **Finish** to save playlist
+
+## WiFi Setup
+1. Select network with **Previous/Next**
+2. Enter password using character selector:
+   - Navigate characters with **Previous/Next**
+   - Select with **Next**
+   - **space**: Add space
+   - **Done**: Confirm password
+
+## Manual TTS
+1. Select letters with **Previous/Next**
+2. Press **Next** to add character
+3. Choose **Done** to speak message
