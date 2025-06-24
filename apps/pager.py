@@ -124,7 +124,7 @@ class PagerClient:
             print("Offline — can't fetch messages.")
         return []
 
-    def run(self):
+    def run(self, api):
         """Main loop: Poll for messages and sync offline cache."""
         print(f"Pager client started (ID: {self.client_id}). Listening for messages...")
         while True:
@@ -132,22 +132,28 @@ class PagerClient:
             messages = self.check_messages()
             for msg in messages:
                tools.speak(f"[{msg['sender']}] {msg['message']}")
+            if api.isRightPressed():
+             return
             time.sleep(self.poll_interval)
 
 
 # ===== Example Usage =====
-def start():
-    # Configure your client
-    client = PagerClient(
-        server_url="http://192.168.0.107:3000",  # Replace with your Node.js server URL
-        client_id="RPi-1",                       # Unique ID for this device
-        recipient_id="RPi-2",                    # Who to listen for
-        poll_interval=5                          # Check every 5 seconds
-    )
-    tools.speak("Sending Page")
-    # Send a test message
-    client.send_message("Hello from the RPi!")
-    tools.speak("Waiting for page in background")
-    # Start listening for messages
-    thread = threading.Thread(target=client.run)
-    thread.start()
+
+class APP:
+ def __init__(self, device):
+  self.device = device
+ def start():
+     api = tools.API(self.device)
+     # Configure your client
+     client = PagerClient(
+         server_url="http://192.168.0.107:3000",  # Replace with your Node.js server URL
+         client_id="RPi-1",                       # Unique ID for this device
+         recipient_id="RPi-2",                    # Who to listen for
+         poll_interval=5                          # Check every 5 seconds
+     )
+     tools.speak("Sending Page")
+     # Send a test message
+     client.send_message("Hello from the RPi!")
+     tools.speak("Waiting for page in background")
+     # Start listening for messages
+     client.run(api)

@@ -238,7 +238,8 @@ def run_script_menu():
                         speak(f"Running {options[selected]}")
                         try:
                             subprocess.run(["cp", "apps/" + options[selected], "app.py"])
-                            import app
+                            import app as appModule
+                            app = appModule.APP(dev)
                             app.start()
                             speak("Script finished")
                         except Exception as e:
