@@ -3,7 +3,7 @@ import sqlite3
 import time
 from typing import List, Dict, Optional
 import threading
-
+import tools
 
 class PagerClient:
     def __init__(
@@ -131,7 +131,7 @@ class PagerClient:
             self._sync_offline_messages()
             messages = self.check_messages()
             for msg in messages:
-                print(f"[{msg['sender']}] {msg['message']}")
+               tools.speak(f"[{msg['sender']}] {msg['message']}")
             time.sleep(self.poll_interval)
 
 
@@ -144,10 +144,10 @@ def start():
         recipient_id="RPi-2",                    # Who to listen for
         poll_interval=5                          # Check every 5 seconds
     )
-    
+    tools.speak("Sending Page")
     # Send a test message
     client.send_message("Hello from the RPi!")
-    
+    tools.speak("Waiting for page in background")
     # Start listening for messages
     thread = threading.Thread(target=client.run)
     thread.start()
