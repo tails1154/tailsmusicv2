@@ -1,29 +1,28 @@
 import subprocess
-
 def scan_wifi():
-    if True:
-        result = subprocess.run(
-            ["nmcli", "-t", "-f", "SSID,SIGNAL", "device", "wifi", "list"],
-            check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        output = result.stdout.decode().strip().split('\n')
-        networks = []
-        seen = set()
-        for line in output:
-            if line:
-                ssid, signal = line.split(":", 1)
-                if ssid and ssid not in seen:
-                    seen.add(ssid)
+    result = subprocess.run(
+        ["nmcli", "-t", "-f", "SSID,SIGNAL", "--escape", "no", "--fields", "SSID,SIGNAL", "device", "wifi", "list"],
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    output = result.stdout.decode().strip().split('\n')
+    networks = []
+    seen = set()
+    for line in output:
+        if line:
+            parts = line.split(":")
+            ssid = ":".join(parts[:-1])  # Join everything except last part for SSID
+            signal = parts[-1]
+            if ssid and ssid not in seen:
+                seen.add(ssid)
+                try:
                     networks.append((ssid, int(signal)))
-        # Sort by signal strength (descending)
-        networks.sort(key=lambda x: -x[1])
-        return networks
-#    except subprocess.CalledProcessError as e:
- #       print("Failed to scan Wi-Fi networks.")
-  #      print(e.stderr.decode())
-   #     return []
+                except ValueError:
+                    continue
+    networks.sort(key=lambda x: -x[1])
+    return networks
+
 
 def connect_wifi(ssid, password):
     if True:
