@@ -196,6 +196,7 @@ def wifiSetup():
              speak("Error connecting: " + str(e))
             pygame.mixer.music.stop()
             speak("Your IP is " + str(wifi.get_ip()))
+            break
            else:
             wifiPass += options[selected]
 def shutdown_menu():
