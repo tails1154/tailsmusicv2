@@ -299,6 +299,7 @@ def run_script_menu():
     speak(options[selected])
     
     while True:
+        global daemonRunning
         if daemonRunning: cmdq.process_Command()
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
