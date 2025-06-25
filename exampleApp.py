@@ -1,5 +1,4 @@
-#"""This is a example app"""
-# Do keep in mind that when the app starts the "Starting <file>.py" speech is most likely still playing.
+"""This is a example app that you can use as a template without needing to credit me."""
 
 
 class APP: # Always make a app class

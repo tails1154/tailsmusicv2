@@ -19,7 +19,7 @@ class API:
      #subprocess.run(["espeak", text], check=True)
    # except Exception as e:
     # print("Exception: " + str(e))
-  threading.Thread(target=run_tts, daemon=True).start()
+#  threading.Thread(target=run_tts, daemon=True).start()
  def isRightPressed(self):
   """Checks if right is pressed. if so, return true. if not, return false."""
   event = self.device.read_one()

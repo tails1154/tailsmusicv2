@@ -1,24 +1,27 @@
 var indexSectionsWithContent =
 {
-  0: "_aist",
+  0: "_aeist",
   1: "a",
-  2: "_is",
-  3: "t"
+  2: "e",
+  3: "_is",
+  4: "t"
 };
 
 var indexSectionNames =
 {
   0: "all",
   1: "classes",
-  2: "functions",
-  3: "pages"
+  2: "namespaces",
+  3: "functions",
+  4: "pages"
 };
 
 var indexSectionLabels =
 {
   0: "All",
   1: "Classes",
-  2: "Functions",
-  3: "Pages"
+  2: "Namespaces",
+  3: "Functions",
+  4: "Pages"
 };
 
