@@ -27,6 +27,7 @@ print("TailsMusic Loading...")
 #print("All Modules Loaded!")
 print("Finding SIMOLIO")
 def find_simolio():
+    """This finds the bluetooth input device for button presses."""
     for path in list_devices():
         dev = InputDevice(path)
         if "SIMOLIO" in dev.name:
@@ -49,6 +50,7 @@ os.makedirs(PLAYLIST_DIR, exist_ok=True)
 print("Starting Voice")
 tts_lock = threading.Lock()
 def speak(text):
+    """This function speaks text to the user"""
     print(f"TTS: {text}")
     def run_tts():
         with tts_lock:
@@ -77,6 +79,7 @@ pygame.mixer.music.load(playlist[index])
 pygame.mixer.music.play()
 
 def next_song():
+    """This function goes to the next song in the main playlist (the one that gets created when the script starts)"""
     global index
     index += 1
     if index >= len(playlist):
@@ -86,12 +89,14 @@ def next_song():
     pygame.mixer.music.play()
 
 def prev_song():
+    """This function goes the the prev song in the main playlist"""
     global index
     index = (index - 1) % len(playlist)
     pygame.mixer.music.load(playlist[index])
     pygame.mixer.music.play()
 
 def toggle_pause():
+    """This function pauses and unpauses the song in the main playlist"""
     global paused
     if paused:
         pygame.mixer.music.unpause()
@@ -100,6 +105,7 @@ def toggle_pause():
     paused = not paused
     
 def manual_tts():
+ """I randomly wanted to make this function to where you could input text with your headphone buttons and tts would play it"""
  options = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "space", "Done"]
  selected = 0
  speak(options[selected])
@@ -125,6 +131,7 @@ def manual_tts():
       toSpeak += choice
       
 def wifiSetup():
+ """This function handles the wifi setup function."""
  speak("Loading wifi networks")
  pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
  pygame.mixer.music.play()
@@ -206,6 +213,7 @@ def wifiSetup():
       break
 
 def run_script_menu():
+    """This function is the apps launcher"""
     # Get all .py files in apps/ directory
     py_files = []
     apps_dir = os.path.join(os.path.dirname(__file__), 'apps')
@@ -249,6 +257,7 @@ def run_script_menu():
                         return
 
 def shutdown_menu():
+    """Despite the name, this is NOT the shutdown menu. That is in this function in a option. The reason for this function name is because early in development before I made menus that does stuff. This function used to just ask if you wanted to shutdown."""
     options = ["Playlists", "Random Song", "Manual text to speech", "Rescan Songs", 
                "Connect to WiFi", "Get local IP", "Open App", "Shut Down", "Back"]
     selected = 0
@@ -302,6 +311,7 @@ def shutdown_menu():
                         break
 
 def playlist_menu():
+    """This function handles the list of playlists and the Create button"""
     def list_playlists():
         return [f for f in os.listdir(PLAYLIST_DIR) if f.endswith('.json')]
 
@@ -335,6 +345,7 @@ def playlist_menu():
 
 playlist_counter = max((int(f.removeprefix("playlist").removesuffix(".json")) for f in os.listdir("/home/pi/mp3player/playlists/") if f.startswith("playlist") and f.endswith(".json")), default=-1) + 1
 def create_playlist():
+    """This function is the playlist menu that is for adding songs to a playlist and finishing the playlist."""
     global playlist_counter
     songs = []
     #song_files = [f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
@@ -391,6 +402,7 @@ def create_playlist():
                 print(f"Create playlist error: {e}")
 
 def manage_playlist(name):
+    """This function is for playing, deleting, and going back when selecting a playlist from the playlist menu."""
     with open(f"{PLAYLIST_DIR}/{name}") as f:
         songs = json.load(f)
     options = ["Play", "Delete", "Back"]
@@ -449,7 +461,7 @@ def manage_playlist(name):
             except Exception as e:
                 print(f"Manage playlist error: {e}")
 
-dev = InputDevice(INPUT_DEVICE)
+dev = InputDevice(INPUT_DEVICE) # Note to self: Why is this so late in the code lol
 print(f"Listening on {INPUT_DEVICE}...")
 while True:
     event = dev.read_one()
