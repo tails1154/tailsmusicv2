@@ -322,7 +322,7 @@ def shutdown_menu():
                                 exit(0)
                             except Exception as e:
                                 speak("Error updating: " + str(e))
-                        pauseSfx.play()
+                        pausesfx.play()
                         break
 
 def playlist_menu():
