@@ -1,26 +1,27 @@
 #!/bin/python3
 print("TailsMusic preinit")
 print("Loading Modules")
-print("(0/8) os")
+print("(0/9) os")
 import os
-print("(1/8) pygame")
+print("(1/9) pygame")
 import pygame
-print("(2/8) evdev")
+print("(2/9) evdev")
 from evdev import InputDevice, categorize, ecodes, list_devices
-print("(3/8) time")
+print("(3/9) time")
 from time import sleep
 import time
-print("(4/8) threading")
+print("(4/9) threading")
 import threading
-print("(5/8) subprocess")
+print("(5/9) subprocess")
 import subprocess
-print("(6/8) json")
+print("(6/9) json")
 import json
-print("(7/8) random")
+print("(7/9) random")
 import random
-print("(8/8) wifi.py")
+print("(8/9) wifi.py")
 import wifi
-
+print("(9/9) shutil")
+import shutil
 
 print("TailsMusic Loading...")
 #print("Modules Loaded!")
@@ -66,6 +67,11 @@ print("Loading Music Files")
 playlist = sorted(
     [os.path.join(MUSIC_DIR, f) for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
 )
+print("Removing __pycache__")
+try:
+ shutil.rmtree("__pycache__")
+except Exception as e:
+ print("Exception Deleteing __pycache__:" + str(e))
 if not playlist:
     speak("No songs found.")
     exit()
