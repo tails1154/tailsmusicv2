@@ -2,3 +2,4 @@ songs/*
 playlists/*
 __pycache__/
 app.py
+offline_messages.db
