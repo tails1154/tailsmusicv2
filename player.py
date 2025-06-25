@@ -54,6 +54,7 @@ class CommandQueue:
         """Process any pending commands in the queue (call this in main loop)"""
         #print("process_Command() called")
         while not self.queue.empty():
+            print("Queue not empty")
             cmd = self.queue.get_nowait()
             print("cmd: " + cmd)
             try:
@@ -336,7 +337,7 @@ def run_script_menu():
 def shutdown_menu():
     """Despite the name, this is NOT the shutdown menu. That is in this function in a option. The reason for this function name is because early in development before I made menus that does stuff. This function used to just ask if you wanted to shutdown."""
     options = ["Playlists", "Random Song", "Update TailsMusic", "Manual text to speech", "Re scan Songs", 
-               "Connect to WiFi", "Get local IP", "Open App", "Shut Down", "Back"]
+               "Connect to WiFi", "Get local IP", "Shut Down", "Open App", "Back"]
     selected = 0
     speak(options[selected])
     while True:
