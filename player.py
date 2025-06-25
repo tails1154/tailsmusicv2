@@ -49,7 +49,7 @@ class CommandQueue:
         
     def process_Command(self):
         """Process any pending commands in the queue (call this in main loop)"""
-        print("process_Command()" called)
+        print("process_Command() called")
         while not self.queue.empty():
             cmd = self.queue.get_nowait()
             try:
