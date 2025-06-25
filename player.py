@@ -27,7 +27,7 @@ import shutil
 print(f"(10/{totalModules}) queue")
 import queue
 print("TailsMusic Loading...")
-global daemonRunning
+#global daemonRunning
 daemonRunning = False
 # ================== NEW COMMAND QUEUE SYSTEM ==================
 class CommandQueue:
