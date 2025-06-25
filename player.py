@@ -252,6 +252,7 @@ def run_script_menu():
                             import app as appModule
                             app = appModule.APP(dev)
                             app.start()
+                            os.remove("app.py")
                             speak("Script finished")
                         #except Exception as e:
                         #    speak(f"Error running script: {str(e)}")
