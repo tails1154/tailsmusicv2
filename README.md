@@ -85,7 +85,7 @@ sudo apt install -y pulseaudio pulseaudio-module-bluetooth espeak-ng evtest pyth
    - Select your headphones from the list.  
    - Press buttons (Play/Pause, Next, etc.) and note the `(KEY_XXX)` codes (e.g., `KEY_PLAYCD`, `KEY_NEXTSONG`).  
 
-2. Update `player.py`:  
+2. Update `player.py` and `tools.py`:  
    - Replace all `KEY_CDPLAY`/`KEY_CDPAUSE` with your noted codes.  
 
 ---
@@ -142,18 +142,20 @@ Your **TailsMusic** should now:
 | **Next Track**  | Skip to next song               |
 | **Previous**    | Go to previous song             |
 | **Next (Hold)** | Open shutdown menu when paused  |
+| **Previous**    | Tell you the date/time when paused |
 
 ## Shutdown Menu
-*Navigate with Previous/Next, select with Next button*
+*Navigate with Previous/Play, select with Next button*
 
 | Option           | Functionality                              |
 |------------------|-------------------------------------------|
 | Playlists        | Enter playlist management                 |
 | Random Song      | Play a random track                       |
-| Manual TTS       | Type custom text-to-speech message        |
+| Manual Text to speech       | Type custom text-to-speech message        |
 | Rescan Songs     | Reload music library                      |
 | Connect to WiFi  | Configure WiFi connection                 |
 | Get IP           | Announce current IP address               |
+| Open App         | Display a list of apps in apps/ and lets you select one to run |
 | Shut Down        | Power off the system                      |
 | Back             | Return to playback                        |
 

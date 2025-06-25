@@ -285,12 +285,16 @@ def shutdown_menu():
                         selected = (selected + 1) % len(options)
                         speak(options[selected])
                         #sleep(1)
+                    elif key == 'KEY_PLAYCD' or key == 'KEY_PAUSECD':
+                                   selected = (selected - 1) % len(options)
+                                   speak(options[selected])
                     elif key == 'KEY_NEXTSONG':
                         choice = options[selected]
                         if choice == "Shut Down":
                             speak("Shutting down")
                             subprocess.run(["sudo", "shutdown", "now"])
                         elif choice == "Back":
+                            pausesfx.play()
                             return
                         elif choice == "Playlists":
                             playlist_menu()
@@ -483,6 +487,19 @@ def manage_playlist(name):
                               return
             except Exception as e:
                 print(f"Manage playlist error: {e}")
+def date_time():
+    """This function speaks the date and time in a 12 hour format"""
+    try:
+        cmd = ["bash", "-c", 'date "+%A %B %e %r %Y"']
+        fullcmd = ""
+        for item in cmd:
+                fullcmd += " " + item
+        print(fullcmd)
+        datetime = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        print(datetime.stderr)
+        speak("The date and time is: " + datetime.stdout)
+    except Exception as e:
+        speak("Error getting date and time: " + str(e))
 
 dev = InputDevice(INPUT_DEVICE) # Note to self: Why is this so late in the code lol
 print(f"Listening on {INPUT_DEVICE}...")
@@ -501,7 +518,11 @@ while True:
                     else:
                         next_song()
                 elif key == 'KEY_PREVIOUSSONG':
+                   if not paused:
                     prev_song()
+                   else:
+                       date_time()
     if not pygame.mixer.music.get_busy() and not paused:
         sleep(0.5)
         next_song()
+#Wed 25 Jun 04:21:16 2025
