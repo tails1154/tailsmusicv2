@@ -149,7 +149,7 @@ class APP:
          server_url="http://192.168.0.107:3000",  # Replace with your Node.js server URL
          client_id="RPi-1",                       # Unique ID for this device
          recipient_id="RPi-2",                    # Who to listen for
-         poll_interval=5                          # Check every 5 seconds
+         poll_interval=0                          # Check every 5 seconds
      )
      api.speak("Sending Page")
      # Send a test message

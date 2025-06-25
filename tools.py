@@ -31,3 +31,13 @@ class API:
       return True
    # else:
   return False
+ def isLeftPressed(self):
+     """Checks if left is pressed. If so, return True. if not, return False"""
+     event = self.device.read_one()
+     if event and event.tpye == ecodes.EV_KEY:
+         key_event = categorize(event)
+         if key_event.keystate == 1:
+             key = key_event.keycode
+             if key == "KEY_PREVIOUSSONG":
+                 return True
+    return False
