@@ -1,0 +1,87 @@
+\hypertarget{classapp_1_1PagerClient}{}\doxysection{app.\+Pager\+Client Class Reference}
+\label{classapp_1_1PagerClient}\index{app.PagerClient@{app.PagerClient}}
+\doxysubsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{classapp_1_1PagerClient_a127f5a15ac8a205965b45116477e4a4e}{\+\_\+\+\_\+init\+\_\+\+\_\+}} (self, str server\+\_\+url, str client\+\_\+id, str recipient\+\_\+id=\char`\"{}default\char`\"{}, str offline\+\_\+db=\char`\"{}offline\+\_\+messages.\+db\char`\"{}, int poll\+\_\+interval=5)
+\item 
+def \mbox{\hyperlink{classapp_1_1PagerClient_a468bdd758d48e110d385f68a43215190}{send\+\_\+message}} (self, str message, Optional\mbox{[}str\mbox{]} recipient=None)
+\item 
+List\mbox{[}Dict\mbox{]} \mbox{\hyperlink{classapp_1_1PagerClient_aec6631a23598695cca097b6ece78b606}{check\+\_\+messages}} (self)
+\item 
+def \mbox{\hyperlink{classapp_1_1PagerClient_a76fce71c72c31d6b8680b9e2e737978b}{run}} (self, api)
+\end{DoxyCompactItemize}
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\Hypertarget{classapp_1_1PagerClient_ae99c063ea89424845f3a5707214c5b64}\label{classapp_1_1PagerClient_ae99c063ea89424845f3a5707214c5b64}} 
+{\bfseries server\+\_\+url}
+\item 
+\mbox{\Hypertarget{classapp_1_1PagerClient_a5cb8ff5a9c44ca2d693a113910428c43}\label{classapp_1_1PagerClient_a5cb8ff5a9c44ca2d693a113910428c43}} 
+{\bfseries client\+\_\+id}
+\item 
+\mbox{\Hypertarget{classapp_1_1PagerClient_a0b916b677bf8cd471dfb34855ce4d9e8}\label{classapp_1_1PagerClient_a0b916b677bf8cd471dfb34855ce4d9e8}} 
+{\bfseries recipient\+\_\+id}
+\item 
+\mbox{\Hypertarget{classapp_1_1PagerClient_a3b90353258e9d4973f606e2792722641}\label{classapp_1_1PagerClient_a3b90353258e9d4973f606e2792722641}} 
+{\bfseries offline\+\_\+db}
+\item 
+\mbox{\Hypertarget{classapp_1_1PagerClient_aa8f0cca7951c8c7e959765c0036d8b1e}\label{classapp_1_1PagerClient_aa8f0cca7951c8c7e959765c0036d8b1e}} 
+{\bfseries poll\+\_\+interval}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classapp_1_1PagerClient_a127f5a15ac8a205965b45116477e4a4e}\label{classapp_1_1PagerClient_a127f5a15ac8a205965b45116477e4a4e}} 
+\index{app.PagerClient@{app.PagerClient}!\_\_init\_\_@{\_\_init\_\_}}
+\index{\_\_init\_\_@{\_\_init\_\_}!app.PagerClient@{app.PagerClient}}
+\doxysubsubsection{\texorpdfstring{\_\_init\_\_()}{\_\_init\_\_()}}
+{\footnotesize\ttfamily def app.\+Pager\+Client.\+\_\+\+\_\+init\+\_\+\+\_\+ (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{str}]{server\+\_\+url,  }\item[{str}]{client\+\_\+id,  }\item[{str }]{recipient\+\_\+id = {\ttfamily \char`\"{}default\char`\"{}},  }\item[{str }]{offline\+\_\+db = {\ttfamily \char`\"{}offline\+\_\+messages.db\char`\"{}},  }\item[{int }]{poll\+\_\+interval = {\ttfamily 5} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Initialize the pager client.
+
+Args:
+    server_url (str): URL of your Node.js server (e.g., "http://10.0.0.1:3000").
+    client_id (str): Unique ID for this device (e.g., "RPi-1").
+    recipient_id (str): Who to listen for (e.g., "RPi-2").
+    offline_db (str): SQLite file for offline storage.
+    poll_interval (int): How often to check for new messages (seconds).
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Member Function Documentation}
+\mbox{\Hypertarget{classapp_1_1PagerClient_aec6631a23598695cca097b6ece78b606}\label{classapp_1_1PagerClient_aec6631a23598695cca097b6ece78b606}} 
+\index{app.PagerClient@{app.PagerClient}!check\_messages@{check\_messages}}
+\index{check\_messages@{check\_messages}!app.PagerClient@{app.PagerClient}}
+\doxysubsubsection{\texorpdfstring{check\_messages()}{check\_messages()}}
+{\footnotesize\ttfamily  List\mbox{[}Dict\mbox{]} app.\+Pager\+Client.\+check\+\_\+messages (\begin{DoxyParamCaption}\item[{}]{self }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Fetch new messages from the server (or return empty list if offline).
+
+Returns:
+    List[Dict]: [{"sender": str, "message": str, "timestamp": str}, ...]
+\end{DoxyVerb}
+ \mbox{\Hypertarget{classapp_1_1PagerClient_a76fce71c72c31d6b8680b9e2e737978b}\label{classapp_1_1PagerClient_a76fce71c72c31d6b8680b9e2e737978b}} 
+\index{app.PagerClient@{app.PagerClient}!run@{run}}
+\index{run@{run}!app.PagerClient@{app.PagerClient}}
+\doxysubsubsection{\texorpdfstring{run()}{run()}}
+{\footnotesize\ttfamily def app.\+Pager\+Client.\+run (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{}]{api }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Main loop: Poll for messages and sync offline cache.\end{DoxyVerb}
+ \mbox{\Hypertarget{classapp_1_1PagerClient_a468bdd758d48e110d385f68a43215190}\label{classapp_1_1PagerClient_a468bdd758d48e110d385f68a43215190}} 
+\index{app.PagerClient@{app.PagerClient}!send\_message@{send\_message}}
+\index{send\_message@{send\_message}!app.PagerClient@{app.PagerClient}}
+\doxysubsubsection{\texorpdfstring{send\_message()}{send\_message()}}
+{\footnotesize\ttfamily def app.\+Pager\+Client.\+send\+\_\+message (\begin{DoxyParamCaption}\item[{}]{self,  }\item[{str}]{message,  }\item[{Optional\mbox{[}str\mbox{]} }]{recipient = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Send a message to the server (or cache offline if no internet).
+
+Args:
+    message (str): The message to send.
+    recipient (str, optional): Override default recipient.
+\end{DoxyVerb}
+ 
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+app.\+py\end{DoxyCompactItemize}

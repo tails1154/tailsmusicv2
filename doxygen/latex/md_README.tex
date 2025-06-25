@@ -1,0 +1,271 @@
+better than v1, that\textquotesingle{}s for sure!
+
+ai \char`\"{}enhanced\char`\"{} instructions below\hypertarget{md_README_autotoc_md1}{}\doxysection{$<$strong$>$\+Tails\+Music v2 Setup Guide$<$/strong$>$}\label{md_README_autotoc_md1}
+{\itshape A headless MP3 player for Raspberry Pi with Bluetooth headphone control} ~\newline
+\hypertarget{md_README_autotoc_md2}{}\doxysubsubsection{$<$strong$>$\+Prerequisites$<$/strong$>$}\label{md_README_autotoc_md2}
+
+\begin{DoxyItemize}
+\item Raspberry Pi OS (Debian-\/based) ~\newline
+
+\item Bluetooth headphones (tested with SIMOLIO) ~\newline
+
+\item Basic terminal knowledge ~\newline
+
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md4}{}\doxysubsection{$<$strong$>$1. Install the Project$<$/strong$>$}\label{md_README_autotoc_md4}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cd /home/pi}
+\DoxyCodeLine{git clone https://github.com/tails1154/tailsmusicv2 mp3player}
+\DoxyCodeLine{cd mp3player}
+
+\end{DoxyCode}
+
+
+$\ast$(Optional\+: Symlink instead of renaming)$\ast$ ~\newline
+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{ln -\/s /home/pi/tailsmusicv2 /home/pi/mp3player}
+
+\end{DoxyCode}
+
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md6}{}\doxysubsection{$<$strong$>$2. Pair Bluetooth Headphones$<$/strong$>$}\label{md_README_autotoc_md6}
+
+\begin{DoxyEnumerate}
+\item Find your headphones’ MAC address\+: ~\newline
+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{sudo bluetoothctl scan le}
+
+\end{DoxyCode}
+
+\begin{DoxyItemize}
+\item Note the MAC address (e.\+g., {\ttfamily AA\+:\+BB\+:\+CC\+:\+DD\+:\+EE\+:FF}). ~\newline
+
+\end{DoxyItemize}
+\item Pair and trust the device\+: ~\newline
+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{sudo bluetoothctl pair AA:BB:CC:DD:EE:FF}
+\DoxyCodeLine{sudo bluetoothctl trust AA:BB:CC:DD:EE:FF}
+
+\end{DoxyCode}
+
+\end{DoxyEnumerate}
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md8}{}\doxysubsection{$<$strong$>$3. Install Dependencies$<$/strong$>$}\label{md_README_autotoc_md8}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{sudo apt update}
+\DoxyCodeLine{sudo apt install -\/y pulseaudio pulseaudio-\/module-\/bluetooth espeak-\/ng evtest python3-\/evdev}
+
+\end{DoxyCode}
+
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md10}{}\doxysubsection{$<$strong$>$4. Configure Pulse\+Audio$<$/strong$>$}\label{md_README_autotoc_md10}
+
+\begin{DoxyEnumerate}
+\item Restart Pulse\+Audio\+: ~\newline
+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{pulseaudio -\/-\/kill \&\& pulseaudio -\/-\/start}
+
+\end{DoxyCode}
+
+\item Find your Bluetooth sink\+: ~\newline
+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{pactl list short sinks}
+
+\end{DoxyCode}
+
+\begin{DoxyItemize}
+\item Note the {\ttfamily bluez\+\_\+sink.\+XX\+\_\+\+XX\+\_\+\+XX\+\_\+\+XX\+\_\+\+XX\+\_\+\+XX} address. ~\newline
+
+\end{DoxyItemize}
+\item Update {\ttfamily bashrc} in the repo\+: ~\newline
+
+\begin{DoxyItemize}
+\item Replace all {\ttfamily bluez\+\_\+sink.\+XX\+\_\+\+XX\+\_\+\+XX\+\_\+\+XX\+\_\+\+XX\+\_\+\+XX} references with your sink. ~\newline
+
+\item Update the {\ttfamily bluetoothctl connect} command with your headphones’ MAC. ~\newline
+
+\end{DoxyItemize}
+\item Apply the new {\ttfamily bashrc}\+: ~\newline
+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cp \string~/.bashrc \string~/.bashrc.bak  \# Backup}
+\DoxyCodeLine{cp bashrc \string~/.bashrc          \# Overwrite}
+
+\end{DoxyCode}
+
+\end{DoxyEnumerate}
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md12}{}\doxysubsection{$<$strong$>$5. Configure Button Controls$<$/strong$>$}\label{md_README_autotoc_md12}
+
+\begin{DoxyEnumerate}
+\item Identify your headphone buttons\+: ~\newline
+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{sudo evtest}
+
+\end{DoxyCode}
+
+\begin{DoxyItemize}
+\item Select your headphones from the list. ~\newline
+
+\item Press buttons (Play/\+Pause, Next, etc.) and note the {\ttfamily (KEY\+\_\+\+XXX)} codes (e.\+g., {\ttfamily KEY\+\_\+\+PLAYCD}, {\ttfamily KEY\+\_\+\+NEXTSONG}). ~\newline
+
+\end{DoxyItemize}
+\item Update {\ttfamily player.\+py}\+: ~\newline
+
+\begin{DoxyItemize}
+\item Replace all {\ttfamily KEY\+\_\+\+CDPLAY}/{\ttfamily KEY\+\_\+\+CDPAUSE} with your noted codes. ~\newline
+
+\end{DoxyItemize}
+\end{DoxyEnumerate}
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md14}{}\doxysubsection{$<$strong$>$6. Add Music and Playlists$<$/strong$>$}\label{md_README_autotoc_md14}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{mkdir -\/p /home/pi/mp3player/songs}
+\DoxyCodeLine{mkdir -\/p /home/pi/mp3player/playlists}
+
+\end{DoxyCode}
+
+\begin{DoxyItemize}
+\item Place MP3 files in {\ttfamily songs/}. ~\newline
+
+\item Playlists are auto-\/generated or manually created via the script. ~\newline
+
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md16}{}\doxysubsection{$<$strong$>$7. Reboot$<$/strong$>$}\label{md_README_autotoc_md16}
+Your system should auto start tailsmusic when you log in (after a short delay)
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md18}{}\doxysubsection{$<$strong$>$\+Troubleshooting$<$/strong$>$}\label{md_README_autotoc_md18}
+
+\begin{DoxyItemize}
+\item {\bfseries{Bluetooth not connecting?}} ~\newline
+ Run {\ttfamily bluetoothctl} and ensure the device is paired/trusted\+: ~\newline
+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{connect AA:BB:CC:DD:EE:FF}
+
+\end{DoxyCode}
+
+\item {\bfseries{No sound?}} ~\newline
+ Check Pulse\+Audio sinks\+: ~\newline
+ 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{pacmd list-\/sinks | grep -\/e 'name:' -\/e 'index'}
+
+\end{DoxyCode}
+
+\item {\bfseries{Buttons not working?}} ~\newline
+ Double-\/check {\ttfamily evtest} codes and update {\ttfamily player.\+py}. ~\newline
+
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+\hypertarget{md_README_autotoc_md20}{}\doxysubsubsection{$<$strong$>$\+Done!$<$/strong$>$}\label{md_README_autotoc_md20}
+Your {\bfseries{Tails\+Music}} should now\+: ~\newline
+ ✅ Auto-\/connect to Bluetooth headphones. ~\newline
+ ✅ Respond to media buttons. ~\newline
+ ✅ Announce actions via e\+Speak. ~\newline
+\hypertarget{md_README_autotoc_md21}{}\doxysection{Tails\+Music Control Guide}\label{md_README_autotoc_md21}
+\hypertarget{md_README_autotoc_md22}{}\doxysubsection{Main Controls}\label{md_README_autotoc_md22}
+\tabulinesep=1mm
+\begin{longtabu}spread 0pt [c]{*{2}{|X[-1]}|}
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Button   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Action    }\\\cline{1-2}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Button   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Action    }\\\cline{1-2}
+\endhead
+{\bfseries{Play/\+Pause}}   &Toggle playback pause    \\\cline{1-2}
+{\bfseries{Next Track}}   &Skip to next song    \\\cline{1-2}
+{\bfseries{Previous}}   &Go to previous song    \\\cline{1-2}
+{\bfseries{Next (Hold)}}   &Open shutdown menu when paused   \\\cline{1-2}
+\end{longtabu}
+\hypertarget{md_README_autotoc_md23}{}\doxysubsection{Shutdown Menu}\label{md_README_autotoc_md23}
+{\itshape Navigate with Previous/\+Next, select with Next button}
+
+\tabulinesep=1mm
+\begin{longtabu}spread 0pt [c]{*{2}{|X[-1]}|}
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Option   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Functionality    }\\\cline{1-2}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Option   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Functionality    }\\\cline{1-2}
+\endhead
+Playlists   &Enter playlist management    \\\cline{1-2}
+Random Song   &Play a random track    \\\cline{1-2}
+Manual TTS   &Type custom text-\/to-\/speech message    \\\cline{1-2}
+Rescan Songs   &Reload music library    \\\cline{1-2}
+Connect to Wi\+Fi   &Configure Wi\+Fi connection    \\\cline{1-2}
+Get IP   &Announce current IP address    \\\cline{1-2}
+Shut Down   &Power off the system    \\\cline{1-2}
+Back   &Return to playback   \\\cline{1-2}
+\end{longtabu}
+\hypertarget{md_README_autotoc_md24}{}\doxysubsection{Playlist Management}\label{md_README_autotoc_md24}
+\hypertarget{md_README_autotoc_md25}{}\doxysubsubsection{Main Playlist Menu}\label{md_README_autotoc_md25}
+
+\begin{DoxyItemize}
+\item {\bfseries{Create}}\+: Make a new playlist
+\item {\bfseries{\mbox{[}Playlist Name\mbox{]}}}\+: Manage existing playlist
+\item {\bfseries{Back}}\+: Return to shutdown menu
+\end{DoxyItemize}\hypertarget{md_README_autotoc_md26}{}\doxysubsubsection{Playlist Actions}\label{md_README_autotoc_md26}
+\tabulinesep=1mm
+\begin{longtabu}spread 0pt [c]{*{2}{|X[-1]}|}
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Option   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Functionality    }\\\cline{1-2}
+\endfirsthead
+\hline
+\endfoot
+\hline
+\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Option   }&\PBS\centering \cellcolor{\tableheadbgcolor}\textbf{ Functionality    }\\\cline{1-2}
+\endhead
+Play   &Play all songs in playlist    \\\cline{1-2}
+Delete   &Remove playlist (requires confirmation)    \\\cline{1-2}
+Back   &Return to playlist list   \\\cline{1-2}
+\end{longtabu}
+\hypertarget{md_README_autotoc_md27}{}\doxysubsubsection{Creating Playlists}\label{md_README_autotoc_md27}
+
+\begin{DoxyEnumerate}
+\item Select {\bfseries{Add song}}
+\item Browse songs with {\bfseries{Previous/\+Next}}
+\item Press {\bfseries{Next}} to add song
+\item Choose {\bfseries{Finish}} to save playlist
+\end{DoxyEnumerate}\hypertarget{md_README_autotoc_md28}{}\doxysubsection{Wi\+Fi Setup}\label{md_README_autotoc_md28}
+
+\begin{DoxyEnumerate}
+\item Select network with {\bfseries{Previous/\+Next}}
+\item Enter password using character selector\+:
+\begin{DoxyItemize}
+\item Navigate characters with {\bfseries{Previous/\+Next}}
+\item Select with {\bfseries{Next}}
+\item {\bfseries{space}}\+: Add space
+\item {\bfseries{Done}}\+: Confirm password
+\end{DoxyItemize}
+\end{DoxyEnumerate}\hypertarget{md_README_autotoc_md29}{}\doxysubsection{Manual TTS}\label{md_README_autotoc_md29}
+
+\begin{DoxyEnumerate}
+\item Select letters with {\bfseries{Previous/\+Next}}
+\item Press {\bfseries{Next}} to add character
+\item Choose {\bfseries{Done}} to speak message 
+\end{DoxyEnumerate}
