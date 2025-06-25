@@ -101,7 +101,10 @@ mkdir -p /home/pi/mp3player/playlists
 ---
 
 ## **7. Reboot**  
+
+
 Your system should auto start tailsmusic when you log in (after a short delay)
+
 ---
 
 ## **Troubleshooting**  
