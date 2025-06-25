@@ -149,7 +149,7 @@ class APP:
  def __init__(self, device, queue):
   self.device = device
   self.queue = queue
-  f = open("test.txt").write(self.queue)
+  open("test.txt", "wt").write(str(self.queue))
  def checkDaemon(self):
   return True # We are a daemon
  def start(self):
