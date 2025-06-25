@@ -73,7 +73,6 @@ sudo apt install -y pulseaudio pulseaudio-module-bluetooth espeak-ng evtest pyth
    ```bash
    cp ~/.bashrc ~/.bashrc.bak  # Backup
    cp bashrc ~/.bashrc          # Overwrite
-   source ~/.bashrc
    ```
 
 ---
