@@ -27,6 +27,8 @@ import shutil
 print(f"(10/{totalModules}) queue")
 import queue
 print("TailsMusic Loading...")
+global daemonRunning
+daemonRunning = False
 # ================== NEW COMMAND QUEUE SYSTEM ==================
 class CommandQueue:
     def __init__(self):
@@ -319,6 +321,7 @@ def run_script_menu():
                             if app.checkDaemon():
                              speak("App is a daemon. Running in background")
                              thread = threading.Thread(target=app.start, daemon=True)
+                             daemonRunning = True
                             else:
                              app.start()
                              os.remove("app.py")
