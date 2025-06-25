@@ -312,6 +312,8 @@ def shutdown_menu():
                               return
                         elif choice == "Update TailsMusic":
                             speak("Updating TailsMusic")
+                            pygame.mixer.music.load("sfx/modem.mp3")
+                            pygame.mixer.music.play(-1)
                             try:
                                 subprocess.run(["git", "pull"], check=True)
                                 speak("Reloading TailsMusic")
