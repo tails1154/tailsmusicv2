@@ -12,12 +12,13 @@ class API:
  def speak(self, text):
   """Speaks text to the user"""
   print(f"TTS: {text}")
-  def run_tts():
-   with tts_lock:
-    try:
-     subprocess.run(["espeak", text], check=True)
-    except Exception as e:
-     print("Exception: " + str(e))
+  subprocess.run(["espeak-ng", text], check=True)
+#  def run_tts():
+ #  with tts_lock:
+  #  try:
+     #subprocess.run(["espeak", text], check=True)
+   # except Exception as e:
+    # print("Exception: " + str(e))
   threading.Thread(target=run_tts, daemon=True).start()
  def isRightPressed(self):
   """Checks if right is pressed. if so, return true. if not, return false."""
