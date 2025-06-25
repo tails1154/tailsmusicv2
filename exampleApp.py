@@ -8,6 +8,9 @@ class APP: # Always make a app class
         self.dev = dev # This ensures you always have access to the headphone device.
         # Now, we need to make the tools api class.
         self.api = tools.API(self.dev) # Here is where we make the api. Note the self.dev is our device
+    def checkDaemon(self):
+     """TailsMusic Now requires that you have a checkDaemon() function that either returns True or False. If it is True, then the app will run in the background. if it is False, then run interactively"""
+     return False # False because we are not a daemon
     def start(self):
         """ The start function is where you put your app code after creating your apis"""
         self.api.speak("Heya!") # The api.speak function speaks text to the user.

@@ -4,8 +4,6 @@ from evdev import InputDevice, categorize, ecodes, list_devices
 tts_lock = threading.Lock()
 
 
-
-
 class API:
  def __init__(self, device):
   self.device = device

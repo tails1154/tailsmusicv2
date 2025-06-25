@@ -47,8 +47,12 @@ MUSIC_DIR = '/home/pi/mp3player/songs'
 PLAYLIST_DIR = '/home/pi/mp3player/playlists'
 INPUT_DEVICE = device_path
 os.makedirs(PLAYLIST_DIR, exist_ok=True)
-
-print("Starting Voice")
+try:
+ print("Remvoing stale app.py")
+ os.remove("app.py")
+ print("Starting Voice")
+except Exception as e:
+ print("Error removing app.py: " + str(e))
 tts_lock = threading.Lock()
 def speak(text):
     """This function speaks text to the user"""
@@ -261,9 +265,13 @@ def run_script_menu():
                             subprocess.run(["cp", "apps/" + options[selected], "app.py"])
                             import app as appModule
                             app = appModule.APP(dev)
-                            app.start()
-                            os.remove("app.py")
-                            speak("Script finished")
+                            if app.checkDaemon():
+                             speak("App is a daemon. Running in background")
+                             thread = threading.Thread(target=app.start, daemon=True)
+                            else:
+                             app.start()
+                             os.remove("app.py")
+                             speak("Script finished")
                         #except Exception as e:
                         #    speak(f"Error running script: {str(e)}")
                         return

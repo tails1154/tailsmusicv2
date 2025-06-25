@@ -4,7 +4,10 @@ import time
 from typing import List, Dict, Optional
 import threading
 import tools
+import subprocess
 
+def speak(text):
+ subprocess.run(["espeak-ng", text], check=True, shell=True)
 class PagerClient:
     def __init__(
         self,
@@ -131,7 +134,7 @@ class PagerClient:
             self._sync_offline_messages()
             messages = self.check_messages()
             for msg in messages:
-               api.speak(f"[{msg['sender']}] {msg['message']}")
+               speak(f"[{msg['sender']}] {msg['message']}")
             if api.isRightPressed():
              return
             time.sleep(self.poll_interval)
@@ -142,6 +145,8 @@ class PagerClient:
 class APP:
  def __init__(self, device):
   self.device = device
+ def checkDaemon(self):
+  return True # We are a daemon
  def start(self):
      api = tools.API(self.device)
      # Configure your client
@@ -151,9 +156,10 @@ class APP:
          recipient_id="RPi-2",                    # Who to listen for
          poll_interval=0                          # Check every 5 seconds
      )
-     api.speak("Sending Page")
+     speak("Sending Page")
      # Send a test message
      client.send_message("Hello from the RPi!")
-     api.speak("Waiting for page in background")
-     # Start listening for messages
+     speak("Waiting for page in background")
      client.run(api)
+     # Start listening for messages
+#     thread = threading.Thread(target=client.run, args=(api), daemon=True)
