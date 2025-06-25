@@ -53,7 +53,7 @@ def speak(text):
     def run_tts():
         with tts_lock:
             try:
-                subprocess.run(["espeak-ng", "-s", "50", text], check=True)
+                subprocess.run(["espeak-ng", "-s", "130", text], check=True)
             except Exception as e:
                 print(f"TTS subprocess error: {e}")
     threading.Thread(target=run_tts, daemon=True).start()
