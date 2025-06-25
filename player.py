@@ -29,6 +29,7 @@ import queue
 print("TailsMusic Loading...")
 #global daemonRunning
 daemonRunning = False
+global daemonRunning
 # ================== NEW COMMAND QUEUE SYSTEM ==================
 class CommandQueue:
     def __init__(self):
@@ -385,6 +386,7 @@ def shutdown_menu():
                         elif choice == "Get IP":
                               speak("Your Local IP is: " + wifi.get_ip())
                         elif choice == "Open App":
+                              #global daemonRuning # nice spelling btw
                               run_script_menu()
                               return
                         elif choice == "Update TailsMusic":
