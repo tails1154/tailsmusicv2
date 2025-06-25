@@ -260,7 +260,7 @@ def run_script_menu():
 
 def shutdown_menu():
     """Despite the name, this is NOT the shutdown menu. That is in this function in a option. The reason for this function name is because early in development before I made menus that does stuff. This function used to just ask if you wanted to shutdown."""
-    options = ["Playlists", "Random Song", "Manual text to speech", "Re scan Songs", 
+    options = ["Playlists", "Random Song", "Update TailsMusic", "Manual text to speech", "Re scan Songs", 
                "Connect to WiFi", "Get local IP", "Open App", "Shut Down", "Back"]
     selected = 0
     speak(options[selected])
@@ -310,6 +310,14 @@ def shutdown_menu():
                         elif choice == "Open App":
                               run_script_menu()
                               return
+                        elif choice == "Update TailsMusic":
+                            speak("Updating TailsMusic")
+                            try:
+                                subprocess.run(["git", "pull"], check=True)
+                                speak("Reloading TailsMusic")
+                                sys.exit(0)
+                            except Exception as e:
+                                speak("Error updating: " + str(e))
                         break
 
 def playlist_menu():
