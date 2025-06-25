@@ -188,11 +188,11 @@ def wifiSetup():
           if key == 'KEY_PREVIOUSSONG':
            selected = (selected + 1) % len(options)
            speak(options[selected])
-           sleep(1)
+           #sleep(1)
           elif key == 'KEY_PLAYCD' or key == 'KEY_PAUSECD':
            selected = (selected - 1) % len(options)
            speak(options[selected])
-           sleep(1)
+           #sleep(1)
           elif key == 'KEY_NEXTSONG':
            choice = options[selected]
            if choice == "space":
@@ -240,7 +240,7 @@ def run_script_menu():
                 if key == 'KEY_PREVIOUSSONG':
                     selected = (selected + 1) % len(options)
                     speak(options[selected])
-                    sleep(1)
+                    #sleep(1)
                 elif key == 'KEY_NEXTSONG':
                     if options[selected] == "Back":
                         return
@@ -273,7 +273,7 @@ def shutdown_menu():
                     if key == 'KEY_PREVIOUSSONG':
                         selected = (selected + 1) % len(options)
                         speak(options[selected])
-                        sleep(1)
+                        #sleep(1)
                     elif key == 'KEY_NEXTSONG':
                         choice = options[selected]
                         if choice == "Shut Down":
@@ -331,7 +331,7 @@ def playlist_menu():
                         if key == 'KEY_PREVIOUSSONG':
                             selected = (selected + 1) % len(options)
                             speak(options[selected])
-                            sleep(1)
+                            #sleep(1)
                         elif key == 'KEY_NEXTSONG':
                             choice = options[selected]
                             if choice == "Back":
@@ -367,7 +367,7 @@ def create_playlist():
                     if key == 'KEY_PREVIOUSSONG':
                         selected = (selected + 1) % len(options)
                         speak(options[selected])
-                        sleep(1)
+                        #sleep(1)
                     elif key == 'KEY_NEXTSONG':
                         if options[selected] == "Finish":
                             with open(f"{PLAYLIST_DIR}/playlist{playlist_counter}.json", 'w') as f:
@@ -388,11 +388,11 @@ def create_playlist():
                                             if k == 'KEY_PREVIOUSSONG':
                                                 song_selected = (song_selected + 1) % len(song_files)
                                                 speak(song_files[song_selected])
-                                                sleep(1)
+                                                #sleep(1)
                                             elif k == 'KEY_PLAYCD' or k == 'KEY_PAUSECD':
                                                 song_selected = (song_selected - 1) % len(song_files)
                                                 speak(song_files[song_selected])
-                                                sleep(1)
+                                                #sleep(1)
                                             elif k == 'KEY_NEXTSONG':
                                                 songs.append(os.path.join(MUSIC_DIR, song_files[song_selected]))
                                                 speak("Song added")
@@ -419,7 +419,7 @@ def manage_playlist(name):
                     if key == 'KEY_PREVIOUSSONG':
                         selected = (selected + 1) % len(options)
                         speak(options[selected])
-                        sleep(1)
+                        #sleep(1)
                     elif key == 'KEY_NEXTSONG':
                         choice = options[selected]
                         if choice == "Back":
