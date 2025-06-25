@@ -68,11 +68,11 @@ $(function() {
 <div class="contents">
 <div class="textblock"><p >better than v1, that's for sure!</p>
 <p >ai "enhanced" instructions below</p>
-<h1><a class="anchor" id="autotoc_md1"></a>
+<h1><a class="anchor" id="autotoc_md2"></a>
 &lt;strong&gt;TailsMusic v2 Setup Guide&lt;/strong&gt;</h1>
 <p ><em>A headless MP3 player for Raspberry Pi with Bluetooth headphone control</em> <br  />
 </p>
-<h3><a class="anchor" id="autotoc_md2"></a>
+<h3><a class="anchor" id="autotoc_md3"></a>
 &lt;strong&gt;Prerequisites&lt;/strong&gt;</h3>
 <ul>
 <li>Raspberry Pi OS (Debian-based) <br  />
@@ -83,7 +83,7 @@ $(function() {
 </li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md4"></a>
+<h2><a class="anchor" id="autotoc_md5"></a>
 &lt;strong&gt;1. Install the Project&lt;/strong&gt;</h2>
 <div class="fragment"><div class="line">cd /home/pi</div>
 <div class="line">git clone https://github.com/tails1154/tailsmusicv2 mp3player</div>
@@ -91,7 +91,7 @@ $(function() {
 </div><!-- fragment --><p >*(Optional: Symlink instead of renaming)* <br  />
  </p><div class="fragment"><div class="line">ln -s /home/pi/tailsmusicv2 /home/pi/mp3player</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md6"></a>
+<h2><a class="anchor" id="autotoc_md7"></a>
 &lt;strong&gt;2. Pair Bluetooth Headphones&lt;/strong&gt;</h2>
 <ol type="1">
 <li>Find your headphones’ MAC address: <br  />
@@ -107,12 +107,12 @@ $(function() {
 </div><!-- fragment --></li>
 </ol>
 <hr  />
-<h2><a class="anchor" id="autotoc_md8"></a>
+<h2><a class="anchor" id="autotoc_md9"></a>
 &lt;strong&gt;3. Install Dependencies&lt;/strong&gt;</h2>
 <div class="fragment"><div class="line">sudo apt update</div>
 <div class="line">sudo apt install -y pulseaudio pulseaudio-module-bluetooth espeak-ng evtest python3-evdev</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md10"></a>
+<h2><a class="anchor" id="autotoc_md11"></a>
 &lt;strong&gt;4. Configure PulseAudio&lt;/strong&gt;</h2>
 <ol type="1">
 <li>Restart PulseAudio: <br  />
@@ -139,7 +139,7 @@ $(function() {
 </div><!-- fragment --></li>
 </ol>
 <hr  />
-<h2><a class="anchor" id="autotoc_md12"></a>
+<h2><a class="anchor" id="autotoc_md13"></a>
 &lt;strong&gt;5. Configure Button Controls&lt;/strong&gt;</h2>
 <ol type="1">
 <li>Identify your headphone buttons: <br  />
@@ -159,7 +159,7 @@ $(function() {
 </li>
 </ol>
 <hr  />
-<h2><a class="anchor" id="autotoc_md14"></a>
+<h2><a class="anchor" id="autotoc_md15"></a>
 &lt;strong&gt;6. Add Music and Playlists&lt;/strong&gt;</h2>
 <div class="fragment"><div class="line">mkdir -p /home/pi/mp3player/songs</div>
 <div class="line">mkdir -p /home/pi/mp3player/playlists</div>
@@ -170,11 +170,11 @@ $(function() {
 </li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md16"></a>
+<h2><a class="anchor" id="autotoc_md17"></a>
 &lt;strong&gt;7. Reboot&lt;/strong&gt;</h2>
 <p >Your system should auto start tailsmusic when you log in (after a short delay)</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md18"></a>
+<h2><a class="anchor" id="autotoc_md19"></a>
 &lt;strong&gt;Troubleshooting&lt;/strong&gt;</h2>
 <ul>
 <li><b>Bluetooth not connecting?</b> <br  />
@@ -190,16 +190,16 @@ $(function() {
 </li>
 </ul>
 <hr  />
-<h3><a class="anchor" id="autotoc_md20"></a>
+<h3><a class="anchor" id="autotoc_md21"></a>
 &lt;strong&gt;Done!&lt;/strong&gt;</h3>
 <p >Your <b>TailsMusic</b> should now: <br  />
  ✅ Auto-connect to Bluetooth headphones. <br  />
  ✅ Respond to media buttons. <br  />
  ✅ Announce actions via eSpeak. <br  />
 </p>
-<h1><a class="anchor" id="autotoc_md21"></a>
+<h1><a class="anchor" id="autotoc_md22"></a>
 TailsMusic Control Guide</h1>
-<h2><a class="anchor" id="autotoc_md22"></a>
+<h2><a class="anchor" id="autotoc_md23"></a>
 Main Controls</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -213,7 +213,7 @@ Main Controls</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone"><b>Next (Hold)</b>   </td><td class="markdownTableBodyNone">Open shutdown menu when paused   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md23"></a>
+<h2><a class="anchor" id="autotoc_md24"></a>
 Shutdown Menu</h2>
 <p ><em>Navigate with Previous/Next, select with Next button</em></p>
 <table class="markdownTable">
@@ -236,16 +236,16 @@ Shutdown Menu</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Back   </td><td class="markdownTableBodyNone">Return to playback   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md24"></a>
+<h2><a class="anchor" id="autotoc_md25"></a>
 Playlist Management</h2>
-<h3><a class="anchor" id="autotoc_md25"></a>
+<h3><a class="anchor" id="autotoc_md26"></a>
 Main Playlist Menu</h3>
 <ul>
 <li><b>Create</b>: Make a new playlist</li>
 <li><b>[Playlist Name]</b>: Manage existing playlist</li>
 <li><b>Back</b>: Return to shutdown menu</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md26"></a>
+<h3><a class="anchor" id="autotoc_md27"></a>
 Playlist Actions</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
@@ -257,7 +257,7 @@ Playlist Actions</h3>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Back   </td><td class="markdownTableBodyNone">Return to playlist list   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md27"></a>
+<h3><a class="anchor" id="autotoc_md28"></a>
 Creating Playlists</h3>
 <ol type="1">
 <li>Select <b>Add song</b></li>
@@ -265,7 +265,7 @@ Creating Playlists</h3>
 <li>Press <b>Next</b> to add song</li>
 <li>Choose <b>Finish</b> to save playlist</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md28"></a>
+<h2><a class="anchor" id="autotoc_md29"></a>
 WiFi Setup</h2>
 <ol type="1">
 <li>Select network with <b>Previous/Next</b></li>
@@ -277,7 +277,7 @@ WiFi Setup</h2>
 </ul>
 </li>
 </ol>
-<h2><a class="anchor" id="autotoc_md29"></a>
+<h2><a class="anchor" id="autotoc_md30"></a>
 Manual TTS</h2>
 <ol type="1">
 <li>Select letters with <b>Previous/Next</b></li>
