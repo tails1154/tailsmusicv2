@@ -10,6 +10,7 @@ class API:
  def __init__(self, device):
   self.device = device
  def speak(self, text):
+  """Speaks text to the user"""
   print(f"TTS: {text}")
   def run_tts():
    with tts_lock:
@@ -19,6 +20,7 @@ class API:
      print("Exception: " + str(e))
   threading.Thread(target=run_tts, daemon=True).start()
  def isRightPressed(self):
+  """Checks if right is pressed. if so, return true. if not, return false."""
   event = self.device.read_one()
   if event and event.type == ecodes.EV_KEY:
    key_event = categorize(event)
