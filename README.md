@@ -100,18 +100,8 @@ mkdir -p /home/pi/mp3player/playlists
 
 ---
 
-## **7. Run TailsMusic**  
-```bash
-python3 /home/pi/mp3player/player.py
-```
-
-*(Optional: Auto-start on boot with `systemd`)*  
-```bash
-sudo cp /home/pi/mp3player/tailsmusic.service /etc/systemd/system/
-sudo systemctl enable tailsmusic.service
-sudo systemctl start tailsmusic.service
-```
-
+## **7. Reboot**  
+Your system should auto start tailsmusic when you log in (after a short delay)
 ---
 
 ## **Troubleshooting**  
