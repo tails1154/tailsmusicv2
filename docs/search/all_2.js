@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['check_5fmessages_0',['check_messages',['../classapp_1_1PagerClient.html#aec6631a23598695cca097b6ece78b606',1,'app::PagerClient']]]
+  ['isrightpressed_0',['isRightPressed',['../classtools_1_1API.html#a56d504dc163f3ccfdc6dcd9f02f20848',1,'tools::API']]]
 ];
