@@ -101,6 +101,8 @@ def toggle_pause():
     """This function pauses and unpauses the song in the main playlist"""
     global paused
     if paused:
+        pausesfx.play()
+        time.sleep(pausesfx.get_length())
         pygame.mixer.music.unpause()
     else:
         pausesfx.play()
