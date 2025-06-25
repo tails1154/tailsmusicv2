@@ -1,5 +1,5 @@
 #!/bin/bash
-
+rm -rf app.py
 rm -rf docs/*
 doxygen
 cp -r docs/html/* docs
