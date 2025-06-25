@@ -72,6 +72,7 @@ print("Loading Audio Driver")
 pygame.mixer.init()
 print("Loading Sounds...")
 dialup = pygame.mixer.Sound("/home/pi/mp3player/sfx/dialup.mp3")
+print("Welcome to TailsMusic!")
 pygame.mixer.music.load(playlist[index])
 pygame.mixer.music.play()
 
@@ -248,8 +249,8 @@ def run_script_menu():
                         return
 
 def shutdown_menu():
-    options = ["Playlists", "Random Song", "Manual TTS", "Rescan Songs", 
-               "Connect to WiFi", "Get IP", "Open App", "Shut Down", "Back"]
+    options = ["Playlists", "Random Song", "Manual text to speech", "Rescan Songs", 
+               "Connect to WiFi", "Get local IP", "Open App", "Shut Down", "Back"]
     selected = 0
     speak(options[selected])
     while True:
@@ -294,7 +295,7 @@ def shutdown_menu():
                         elif choice == "Connect to WiFi":
                               wifiSetup()
                         elif choice == "Get IP":
-                              speak("Your IP is: " + wifi.get_ip())
+                              speak("Your Local IP is: " + wifi.get_ip())
                         elif choice == "Open App":
                               run_script_menu()
                               return
