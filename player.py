@@ -52,13 +52,14 @@ tts_lock = threading.Lock()
 def speak(text):
     """This function speaks text to the user"""
     print(f"TTS: {text}")
-    def run_tts():
-        with tts_lock:
-            try:
-                subprocess.run(["espeak-ng", "-s", "130", text], check=True)
-            except Exception as e:
-                print(f"TTS subprocess error: {e}")
-    threading.Thread(target=run_tts, daemon=True).start()
+    subprocess.run(["espeak-ng", "-s", "130", text], check=True)
+  #  def run_tts():
+  #      with tts_lock:
+   #         try:
+    #            subprocess.run(["espeak-ng", "-s", "130", text], check=True)
+     #       except Exception as e:
+ #               print(f"TTS subprocess error: {e}")
+#    threading.Thread(target=run_tts, daemon=True).start()
 
 
 print("Loading Music Files")
@@ -258,7 +259,7 @@ def run_script_menu():
 
 def shutdown_menu():
     """Despite the name, this is NOT the shutdown menu. That is in this function in a option. The reason for this function name is because early in development before I made menus that does stuff. This function used to just ask if you wanted to shutdown."""
-    options = ["Playlists", "Random Song", "Manual text to speech", "Rescan Songs", 
+    options = ["Playlists", "Random Song", "Manual text to speech", "Re scan Songs", 
                "Connect to WiFi", "Get local IP", "Open App", "Shut Down", "Back"]
     selected = 0
     speak(options[selected])
@@ -298,7 +299,7 @@ def shutdown_menu():
                                            break
                         elif choice == "Manual TTS":
                               manual_tts()
-                        elif choice == "Rescan Songs":
+                        elif choice == "Re scan Songs":
                               speak("Rescanning")
                               exit(0)
                         elif choice == "Connect to WiFi":
