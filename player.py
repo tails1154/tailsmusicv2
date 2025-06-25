@@ -74,6 +74,7 @@ paused = False
 print("Loading Audio Driver")
 pygame.mixer.init()
 print("Loading Sounds...")
+pausesfx = pygame.mixer.Sound("/home/pi/mp3player/sfx/pause.mp3")
 dialup = pygame.mixer.Sound("/home/pi/mp3player/sfx/dialup.mp3")
 print("Welcome to TailsMusic!")
 pygame.mixer.music.load(playlist[index])
@@ -102,6 +103,7 @@ def toggle_pause():
     if paused:
         pygame.mixer.music.unpause()
     else:
+        pausesfx.play()
         pygame.mixer.music.pause()
     paused = not paused
     
