@@ -315,7 +315,7 @@ def shutdown_menu():
                             try:
                                 subprocess.run(["git", "pull"], check=True)
                                 speak("Reloading TailsMusic")
-                                sys.exit(0)
+                                exit(0)
                             except Exception as e:
                                 speak("Error updating: " + str(e))
                         break
