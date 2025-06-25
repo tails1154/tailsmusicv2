@@ -314,7 +314,7 @@ def run_script_menu():
                         if True:
                             subprocess.run(["cp", "apps/" + options[selected], "app.py"])
                             import app as appModule
-                            app = appModule.APP(dev, cmdq.getQueue())
+                            app = appModule.APP(dev)
                             if app.checkDaemon():
                              speak("App is a daemon. Running in background")
                              thread = threading.Thread(target=app.start, daemon=True)

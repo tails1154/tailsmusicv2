@@ -6,8 +6,11 @@ import threading
 import tools
 import subprocess
 
-def speak(text):
- subprocess.run(["espeak-ng", text], check=True, shell=True)
+class speaker:
+ def __init__(self, queue):
+  self.queue = queue
+ def speak(self, text):
+  queue.put("espeak-ng " + text)
 class PagerClient:
     def __init__(
         self,
@@ -134,7 +137,7 @@ class PagerClient:
             self._sync_offline_messages()
             messages = self.check_messages()
             for msg in messages:
-               speak(f"[{msg['sender']}] {msg['message']}")
+               speakerA.speak(f"[{msg['sender']}] {msg['message']}")
             if api.isRightPressed():
              return
             time.sleep(self.poll_interval)
@@ -143,8 +146,9 @@ class PagerClient:
 # ===== Example Usage =====
 
 class APP:
- def __init__(self, device):
+ def __init__(self, device, queue):
   self.device = device
+  self.queue = queue
  def checkDaemon(self):
   return True # We are a daemon
  def start(self):
@@ -156,10 +160,11 @@ class APP:
          recipient_id="RPi-2",                    # Who to listen for
          poll_interval=0                          # Check every 5 seconds
      )
-     speak("Sending Page")
+     speakerA = speaker(self.queue)
+     speakerA.speak("Sending Page")
      # Send a test message
      client.send_message("Hello from the RPi!")
-     speak("Waiting for page in background")
-     client.run(api)
+     speakerA.speak("Waiting for page in background")
+     client.run(api, self)
      # Start listening for messages
 #     thread = threading.Thread(target=client.run, args=(api), daemon=True)

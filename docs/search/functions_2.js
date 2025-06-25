@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['speak_0',['speak',['../classtools_1_1API.html#ac7a998d6638b8dfc897a205db61780cb',1,'tools::API']]],
-  ['start_1',['start',['../classexampleApp_1_1APP.html#a67493c42c64236371d8f667732c9e00f',1,'exampleApp::APP']]]
+  ['isleftpressed_0',['isLeftPressed',['../classtools_1_1API.html#a0d3d7da4ac67d527c5b06ee6a76e326c',1,'tools::API']]],
+  ['isrightpressed_1',['isRightPressed',['../classtools_1_1API.html#a56d504dc163f3ccfdc6dcd9f02f20848',1,'tools::API']]]
 ];
