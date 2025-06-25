@@ -202,6 +202,7 @@ def wifiSetup():
             break
            else:
             wifiPass += options[selected]
+      break
 
 def run_script_menu():
     # Get all .py files in apps/ directory
