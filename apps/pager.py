@@ -10,7 +10,7 @@ class speaker:
  def __init__(self, queue):
   self.queue = queue
  def speak(self, text):
-  self.queue.put_command("espeak-ng " + text)
+  self.queue.put_command(f'espeak-ng "{text}"')
 class PagerClient:
     def __init__(
         self,
@@ -166,6 +166,6 @@ class APP:
      # Send a test message
      client.send_message("Hello from the RPi!")
      speakerA.speak("Waiting for page in background")
-     client.run(api, self)
+     client.run(api)
      # Start listening for messages
 #     thread = threading.Thread(target=client.run, args=(api), daemon=True)
