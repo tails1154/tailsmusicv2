@@ -33,10 +33,15 @@ daemonRunning = False
 # ================== MULTIPROCESSING-ENABLED COMMAND QUEUE SYSTEM ==================
 import subprocess
 import threading
+print("multiprocessing")
 import multiprocessing
+print("queue")
 import queue
+import("sys")
 import sys
+print("what is typing")
 from typing import Optional, Dict, Any
+print("nice")
 class CommandQueue:
     def __init__(self, maxsize: int = 100, verbose: bool = True, 
                  enable_multiprocessing: bool = False):
@@ -456,7 +461,8 @@ def run_script_menu():
                             app = appModule.APP(dev, cmdq)
                             if app.checkDaemon():
                              speak("App is a daemon. Running in background")
-                             thread = threading.Thread(target=app.start, daemon=True)
+                             thread = multiprocessing.Process(target=app.start)
+                             thread.start()
                              daemonRunning = True
                             else:
                              app.start()
