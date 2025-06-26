@@ -748,8 +748,8 @@ while True:
                 if key in [config['okbutton'], config['okbutton2']]:
                     toggle_pause()
                 elif key == config['skipbutton']:
-                    panel.play()
                     if paused:
+                        panel.play()
                         shutdown_menu()
                     else:
                         next_song()
