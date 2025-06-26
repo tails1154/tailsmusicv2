@@ -280,9 +280,11 @@ index = 0
 paused = False
 print("Loading Audio Driver")
 pygame.mixer.init()
-print("Loading Sounds...")
+print("Loading sfx...")
 pausesfx = pygame.mixer.Sound("/home/pi/mp3player/sfx/pause.mp3")
 dialup = pygame.mixer.Sound("/home/pi/mp3player/sfx/dialup.mp3")
+panel = pygame.mixer.Sound("/home/pi/mp3player/sfx/panel.mp3")
+click = pygame.mixer.Sound("/home/pi/mp3player/sfx/click.mp3")
 print("Welcome to TailsMusic!")
 pygame.mixer.music.load(playlist[index])
 pygame.mixer.music.play()
@@ -332,9 +334,13 @@ def manual_tts():
     if key == config['backbutton']:
      selected = (selected + 1) % len(options)
      speak(options[selected])
+    elif key == config['okbutton'] or key == config['okbutton2']:
+     selected = (selected - 1) % len(options)
+     speak(options[selected])
     elif key == config['skipbutton']:
      choice = options[selected]
-     speak(choice)
+     click.play()
+#     speak(choice)
      if choice == "space":
       toSpeak += " "
      elif choice == "Done":
@@ -368,6 +374,7 @@ def wifiSetup():
       selected = (selected + 1) % len(options)
       speak(options[selected])
      elif key == config['skipbutton']:
+      click.play()
       wifiName = options[selected]
       pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
       speak("Enter your wifi password.")
@@ -408,6 +415,7 @@ def wifiSetup():
            speak(options[selected])
            #sleep(1)
           elif key == config['skipbutton']:
+           click.play()
            choice = options[selected]
            if choice == "space":
             wifiPass += ""
@@ -458,6 +466,7 @@ def run_script_menu():
                     speak(options[selected])
                     #sleep(1)
                 elif key == config['skipbutton']:
+                    click.play()
                     if options[selected] == "Back":
                         return
                     else:
@@ -502,6 +511,7 @@ def shutdown_menu():
                                    selected = (selected - 1) % len(options)
                                    speak(options[selected])
                     elif key == config['skipbutton']:
+                        click.play()
                         choice = options[selected]
                         if choice == "Shut Down":
                             speak("Shutting down")
@@ -574,6 +584,7 @@ def playlist_menu():
                             speak(options[selected])
                             #sleep(1)
                         elif key == config['skipbutton']:
+                            click.play()
                             choice = options[selected]
                             if choice == "Back":
                                 return
@@ -611,6 +622,7 @@ def create_playlist():
                         speak(options[selected])
                         #sleep(1)
                     elif key == config['skipbutton']:
+                        click.play()
                         if options[selected] == "Finish":
                             with open(f"{PLAYLIST_DIR}/playlist{playlist_counter}.json", 'w') as f:
                                 json.dump(songs, f)
@@ -637,6 +649,7 @@ def create_playlist():
                                                 speak(song_files[song_selected])
                                                 #sleep(1)
                                             elif k == config['skipbutton']:
+                                                click.play()
                                                 songs.append(os.path.join(MUSIC_DIR, song_files[song_selected]))
                                                 speak("Song added")
                                                 break
@@ -665,6 +678,7 @@ def manage_playlist(name):
                         speak(options[selected])
                         #sleep(1)
                     elif key == config['skipbutton']:
+                        click.play()
                         choice = options[selected]
                         if choice == "Back":
                           break
@@ -678,6 +692,7 @@ def manage_playlist(name):
                                     if k_event.keystate == 1:
                                         k = k_event.keycode
                                         if k == config['skipbutton']:
+                                            click.play()
                                             os.remove(f"{PLAYLIST_DIR}/{name}")
                                             speak("Deleted")
                                             return
@@ -733,6 +748,7 @@ while True:
                 if key in [config['okbutton'], config['okbutton2']]:
                     toggle_pause()
                 elif key == config['skipbutton']:
+                    panel.play()
                     if paused:
                         shutdown_menu()
                     else:
