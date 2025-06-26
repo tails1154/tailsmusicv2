@@ -3,3 +3,4 @@ playlists/*
 __pycache__/
 app.py
 offline_messages.db
+apps/maggiepositive.py
