@@ -30,49 +30,6 @@ print("TailsMusic Loading...")
 global daemonRunning
 daemonRunning = False
 #global daemonRunning
-# ================== NEW COMMAND QUEUE SYSTEM ==================
-class CommandQueue:
-    def __init__(self):
-        self.queue = queue.Queue()
-        self.running = True
-    def getQueue(self):
-     return self.queue
-    def start_command_listener(self):
-        """Start a background thread that listens for console commands"""
-        def listener():
-            while self.running:
-                try:
-                    cmd = input(">>> " if sys.stdin.isatty() else "")
-                    if cmd.strip():
-                        self.queue.put(cmd)
-                except (EOFError, KeyboardInterrupt):
-                    break
-                    
-        threading.Thread(target=listener, daemon=True).start()
-        
-    def process_Command(self):
-        """Process any pending commands in the queue (call this in main loop)"""
-        #print("process_Command() called")
-        while not self.queue.empty():
-            print("Queue not empty")
-            cmd = self.queue.get_nowait()
-            print("cmd: " + cmd)
-            try:
-                print(f"Executing: {cmd}")
-                result = subprocess.run(cmd, shell=True, 
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     text=True)
-                if result.stdout: print(result.stdout)
-                if result.stderr: print(result.stderr, file=sys.stderr)
-            except Exception as e:
-                print(f"Command error: {e}")
-
-# Initialize command queue system
-#command_queue = CommandQueue()
-#command_queue.start_command_listener()
-# ================== END COMMAND QUEUE SYSTEM ==================
-cmdq = CommandQueue()
 
 
 #print("Modules Loaded!")
