@@ -535,7 +535,7 @@ def shutdown_menu():
                                       if key == config['skipbutton']:
                                            pygame.mixer.music.stop()
                                            break
-                        elif choice == "Manual TTS":
+                        elif choice == "Manual text to speech":
                               manual_tts()
                         elif choice == "Re scan Songs":
                               speak("Rescanning")
