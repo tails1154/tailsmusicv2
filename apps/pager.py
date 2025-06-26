@@ -130,12 +130,13 @@ class PagerClient:
             print("Offline — can't fetch messages.")
         return []
 
-    def run(self, api):
+    def run(self, api, q):
         """Main loop: Poll for messages and sync offline cache."""
         print(f"Pager client started (ID: {self.client_id}). Listening for messages...")
         while True:
             self._sync_offline_messages()
             messages = self.check_messages()
+            speakerA = speaker(q)
             for msg in messages:
                speakerA.speak(f"[{msg['sender']}] {msg['message']}")
             if api.isRightPressed():
@@ -166,6 +167,6 @@ class APP:
      # Send a test message
      client.send_message("Hello from the RPi!")
      speakerA.speak("Waiting for page in background")
-     client.run(api)
+     client.run(api, self.queue)
      # Start listening for messages
 #     thread = threading.Thread(target=client.run, args=(api), daemon=True)
