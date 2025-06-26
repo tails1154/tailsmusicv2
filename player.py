@@ -37,7 +37,7 @@ print("multiprocessing")
 import multiprocessing
 print("queue")
 import queue
-import("sys")
+print("sys")
 import sys
 print("what is typing")
 from typing import Optional, Dict, Any
