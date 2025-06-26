@@ -151,13 +151,23 @@ $(function() {
 </li>
 </ul>
 </li>
-<li>Update <code>player.py</code> and <code>tools.py</code>: <br  />
+<li>Update <code>config.json</code>: <br  />
 <ul>
-<li>Replace all <code>KEY_CDPLAY</code>/<code>KEY_CDPAUSE</code> with your noted codes. <br  />
-</li>
+<li>Replace the codes with the ones you noted down.</li>
+<li>Replace the "evtestname" field with the name of the device you selected in evtest. (example name below)</li>
 </ul>
 </li>
 </ol>
+<p >Example name: </p><div class="fragment"><div class="line">$ evtest</div>
+<div class="line">No device specified, trying to scan all of /dev/input/event*</div>
+<div class="line">Available devices:</div>
+<div class="line">/dev/input/event0:  Dell KB216 Wired Keyboard</div>
+<div class="line">/dev/input/event1:  etc</div>
+<div class="line">/dev/input/event2:  vc4-hdmi</div>
+<div class="line">/dev/input/event5:  SIMOLIO (AVRCP)</div>
+<div class="line">                         ^</div>
+<div class="line">             |  This is our bluetooth headphones. Yours will be different.</div>
+</div><!-- fragment --><p >The config file checks if that json text is INCLUDED in the device name, so instead of putting <code>SIMOLIO (AVRCP)</code>, I put just <code>SIMOLIO</code></p>
 <hr  />
 <h2><a class="anchor" id="autotoc_md15"></a>
 &lt;strong&gt;6. Add Music and Playlists&lt;/strong&gt;</h2>
@@ -186,7 +196,7 @@ $(function() {
  <div class="fragment"><div class="line">pacmd list-sinks | grep -e &#39;name:&#39; -e &#39;index&#39;</div>
 </div><!-- fragment --></li>
 <li><b>Buttons not working?</b> <br  />
- Double-check <code>evtest</code> codes and update <code>player.py</code>. <br  />
+ Double-check <code>evtest</code> codes and update <code>config.json</code>. <br  />
 </li>
 </ul>
 <hr  />

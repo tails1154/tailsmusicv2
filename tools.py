@@ -1,8 +1,13 @@
 import subprocess
 import threading
 from evdev import InputDevice, categorize, ecodes, list_devices
+import json
 tts_lock = threading.Lock()
+print("[tools.py] Reading config.json")
+with open('config.json', 'r') as file:
+ config = json.load(file)
 
+print("[tools.py] Loaded config.json!")
 
 class API:
  def __init__(self, device):
@@ -25,17 +30,27 @@ class API:
    key_event = categorize(event)
    if key_event.keystate == 1:
     key = key_event.keycode
-    if key == "KEY_NEXTSONG":
+    if key == config['skipbutton']:
       return True
    # else:
   return False
  def isLeftPressed(self):
      """Checks if left is pressed. If so, return True. if not, return False"""
      event = self.device.read_one()
-     if event and event.tpye == ecodes.EV_KEY:
+     if event and event.type == ecodes.EV_KEY:
          key_event = categorize(event)
          if key_event.keystate == 1:
              key = key_event.keycode
-             if key == "KEY_PREVIOUSSONG":
+             if key == config['backbutton']:
                  return True
      return False
+ def isPlayPausePressed(self):
+    """Checks if the play/pause button is pressed. if so, return True. if not, return False."""
+    event = self.device.read_one()
+    if event and event.type == ecodes.EV_KEY:
+     key_event = categorize(event)
+     if key_event.keystate == 1:
+      key = key_event.keycode
+      if key == config['okbutton'] or key == config['okbutton2']:
+       return True
+    return False
