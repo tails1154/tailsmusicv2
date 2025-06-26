@@ -10,7 +10,7 @@ class speaker:
  def __init__(self, queue):
   self.queue = queue
  def speak(self, text):
-  queue.put("espeak-ng " + text)
+  self.queue.put("espeak-ng " + text)
 class PagerClient:
     def __init__(
         self,
