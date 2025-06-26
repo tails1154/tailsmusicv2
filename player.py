@@ -204,7 +204,8 @@ class CommandQueue:
         self.stop()
 
 cmdq = CommandQueue(20, True, True)
-
+cmdq.start_command_listener()
+cmdq.start_remote_processor()
 print("Modules Loaded!")
 #print("All Modules Loaded!")
 print("TailsMusic Loading...")
