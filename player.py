@@ -129,7 +129,7 @@ class CommandQueue:
             except Exception as e:
                 print(f"Command input error: {e}")
 
-    def process_commands(self, timeout: float = 0.01) -> None:
+    def process_Command(self, timeout: float = 0.01) -> None:
         """
         Process pending commands in the queue (in current process).
         

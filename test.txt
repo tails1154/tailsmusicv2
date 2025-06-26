@@ -1,1 +1,1 @@
-<queue.Queue object at 0xb6772930>
+<__main__.CommandQueue object at 0xa741bb30>
