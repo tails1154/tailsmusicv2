@@ -524,7 +524,7 @@ def shutdown_menu():
                               exit(0)
                         elif choice == "Connect to WiFi":
                               wifiSetup()
-                        elif choice == "Get IP":
+                        elif choice == "Get local IP":
                               speak("Your Local IP is: " + wifi.get_ip())
                         elif choice == "Open App":
                               #global daemonRuning # nice spelling btw
