@@ -2,7 +2,7 @@
 
 
 class APP: # Always make a app class
-    def __init__(self, dev): # If the app is a daemon, then also add a queue paramater so you can run commands on the main thread.
+    def __init__(self, dev, queue): # If the app is a daemon, then also add a queue paramater so you can run commands on the main thread.
         """The __init__ function should have a dev paramater that gets autofilled. Here you should import your modules"""
         import tools # The tools library (should work) has some useful tools for making some basic ui elements for TailsMusic.
         self.dev = dev # This ensures you always have access to the headphone device.
