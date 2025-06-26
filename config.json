@@ -1,0 +1,6 @@
+{
+	"okbutton": "KEY_PLAYCD",
+	"okbutton2": "KEY_PAUSECD",
+	"backbutton": "KEY_PREVIOUSSONG",
+	"skipbutton": "KEY_NEXTSONG"
+}

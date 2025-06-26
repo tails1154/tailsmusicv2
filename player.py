@@ -42,6 +42,13 @@ import sys
 print("what is typing")
 from typing import Optional, Dict, Any
 print("nice")
+print("Loading config.json")
+with open('config.json', 'r') as file:
+ config = json.load(file)
+print(f"okbutton: {config['okbutton']}")
+print(f"okbutton2: {config['okbutton2']}")
+print(f"skipbutton: {config['skipbutton']}")
+print(f"backbutton: {config['backbutton']}")
 class CommandQueue:
     def __init__(self, maxsize: int = 100, verbose: bool = True, 
                  enable_multiprocessing: bool = False):
@@ -321,10 +328,10 @@ def manual_tts():
    key_event = categorize(event)
    if key_event.keystate == 1:
     key = key_event.keycode
-    if key == 'KEY_PREVIOUSSONG':
+    if key == config['backbutton']:
      selected = (selected + 1) % len(options)
      speak(options[selected])
-    elif key == 'KEY_NEXTSONG':
+    elif key == config['skipbutton']:
      choice = options[selected]
      speak(choice)
      if choice == "space":
@@ -356,10 +363,10 @@ def wifiSetup():
     key_event = categorize(event)
     if key_event.keystate == 1:
      key = key_event.keycode
-     if key == 'KEY_PREVIOUSSONG':
+     if key == config['backbutton']:
       selected = (selected + 1) % len(options)
       speak(options[selected])
-     elif key == 'KEY_NEXTSONG':
+     elif key == config['skipbutton']:
       wifiName = options[selected]
       pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
       speak("Enter your wifi password.")
@@ -391,15 +398,15 @@ def wifiSetup():
          if key_event.keystate == 1:
           key = key_event.keycode
           print(key)
-          if key == 'KEY_PREVIOUSSONG':
+          if key == config['backbutton']:
            selected = (selected + 1) % len(options)
            speak(options[selected])
            #sleep(1)
-          elif key == 'KEY_PLAYCD' or key == 'KEY_PAUSECD':
+          elif key == config['okbutton'] or key == config['okbutton2']:
            selected = (selected - 1) % len(options)
            speak(options[selected])
            #sleep(1)
-          elif key == 'KEY_NEXTSONG':
+          elif key == config['skipbutton']:
            choice = options[selected]
            if choice == "space":
             wifiPass += ""
@@ -445,11 +452,11 @@ def run_script_menu():
             key_event = categorize(event)
             if key_event.keystate == 1:
                 key = key_event.keycode
-                if key == 'KEY_PREVIOUSSONG':
+                if key == config['backbutton']:
                     selected = (selected + 1) % len(options)
                     speak(options[selected])
                     #sleep(1)
-                elif key == 'KEY_NEXTSONG':
+                elif key == config['skipbutton']:
                     if options[selected] == "Back":
                         return
                     else:
@@ -486,14 +493,14 @@ def shutdown_menu():
                 key_event = categorize(event)
                 if key_event.keystate == 1:
                     key = key_event.keycode
-                    if key == 'KEY_PREVIOUSSONG':
+                    if key == config['backbutton']:
                         selected = (selected + 1) % len(options)
                         speak(options[selected])
                         #sleep(1)
-                    elif key == 'KEY_PLAYCD' or key == 'KEY_PAUSECD':
+                    elif key == config['okbutton'] or key == config['okbutton2']:
                                    selected = (selected - 1) % len(options)
                                    speak(options[selected])
-                    elif key == 'KEY_NEXTSONG':
+                    elif key == config['skipbutton']:
                         choice = options[selected]
                         if choice == "Shut Down":
                             speak("Shutting down")
@@ -514,7 +521,7 @@ def shutdown_menu():
                                   key_event = categorize(event)
                                   if key_event.keystate == 1:
                                       key = key_event.keycode
-                                      if key == 'KEY_NEXTSONG':
+                                      if key == config['skipbutton']:
                                            pygame.mixer.music.stop()
                                            break
                         elif choice == "Manual TTS":
@@ -561,11 +568,11 @@ def playlist_menu():
                     key_event = categorize(event)
                     if key_event.keystate == 1:
                         key = key_event.keycode
-                        if key == 'KEY_PREVIOUSSONG':
+                        if key == config['backbutton']:
                             selected = (selected + 1) % len(options)
                             speak(options[selected])
                             #sleep(1)
-                        elif key == 'KEY_NEXTSONG':
+                        elif key == config['skipbutton']:
                             choice = options[selected]
                             if choice == "Back":
                                 return
@@ -598,11 +605,11 @@ def create_playlist():
                 if key_event.keystate == 1:
                     key = key_event.keycode
                     print(key)
-                    if key == 'KEY_PREVIOUSSONG':
+                    if key == config['backbutton']:
                         selected = (selected + 1) % len(options)
                         speak(options[selected])
                         #sleep(1)
-                    elif key == 'KEY_NEXTSONG':
+                    elif key == config['skipbutton']:
                         if options[selected] == "Finish":
                             with open(f"{PLAYLIST_DIR}/playlist{playlist_counter}.json", 'w') as f:
                                 json.dump(songs, f)
@@ -620,15 +627,15 @@ def create_playlist():
                                         k_event = categorize(evt)
                                         if k_event.keystate == 1:
                                             k = k_event.keycode
-                                            if k == 'KEY_PREVIOUSSONG':
+                                            if k == config['backbutton']:
                                                 song_selected = (song_selected + 1) % len(song_files)
                                                 speak(song_files[song_selected])
                                                 #sleep(1)
-                                            elif k == 'KEY_PLAYCD' or k == 'KEY_PAUSECD':
+                                            elif k == config['okbutton'] or k == config['okbutton2']:
                                                 song_selected = (song_selected - 1) % len(song_files)
                                                 speak(song_files[song_selected])
                                                 #sleep(1)
-                                            elif k == 'KEY_NEXTSONG':
+                                            elif k == config['skipbutton']:
                                                 songs.append(os.path.join(MUSIC_DIR, song_files[song_selected]))
                                                 speak("Song added")
                                                 break
@@ -652,11 +659,11 @@ def manage_playlist(name):
                 key_event = categorize(event)
                 if key_event.keystate == 1:
                     key = key_event.keycode
-                    if key == 'KEY_PREVIOUSSONG':
+                    if key == config['backbutton']:
                         selected = (selected + 1) % len(options)
                         speak(options[selected])
                         #sleep(1)
-                    elif key == 'KEY_NEXTSONG':
+                    elif key == config['skipbutton']:
                         choice = options[selected]
                         if choice == "Back":
                           break
@@ -669,11 +676,11 @@ def manage_playlist(name):
                                     k_event = categorize(evt)
                                     if k_event.keystate == 1:
                                         k = k_event.keycode
-                                        if k == 'KEY_NEXTSONG':
+                                        if k == config['skipbutton']:
                                             os.remove(f"{PLAYLIST_DIR}/{name}")
                                             speak("Deleted")
                                             return
-                                        elif k == 'KEY_PREVIOUSSONG':
+                                        elif k == config['backbutton']:
                                             speak("Cancel")
                                             break
                         elif choice == "Play":
@@ -690,7 +697,7 @@ def manage_playlist(name):
                                  key_event = categorize(event)
                                  if key_event.keystate == 1:
                                   key = key_event.keycode
-                                  if key == 'KEY_NEXTSONG':
+                                  if key == config['skipbutton']:
                                    pygame.mixer.music.stop()
                                    #break
 
@@ -722,14 +729,14 @@ while True:
             key_event = categorize(event)
             if key_event.keystate == 1:
                 key = key_event.keycode
-                if key in ['KEY_PLAYCD', 'KEY_PAUSECD']:
+                if key in [config['okbutton'], config['okbutton2']]:
                     toggle_pause()
-                elif key == 'KEY_NEXTSONG':
+                elif key == config['skipbutton']:
                     if paused:
                         shutdown_menu()
                     else:
                         next_song()
-                elif key == 'KEY_PREVIOUSSONG':
+                elif key == config['backbutton']:
                    if not paused:
                     prev_song()
                    else:
