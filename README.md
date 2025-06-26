@@ -85,8 +85,25 @@ sudo apt install -y pulseaudio pulseaudio-module-bluetooth espeak-ng evtest pyth
    - Select your headphones from the list.  
    - Press buttons (Play/Pause, Next, etc.) and note the `(KEY_XXX)` codes (e.g., `KEY_PLAYCD`, `KEY_NEXTSONG`).  
 
-2. Update `player.py` and `tools.py`:  
-   - Replace all `KEY_CDPLAY`/`KEY_CDPAUSE` with your noted codes.  
+2. Update `config.json`:  
+   - Replace the codes with the ones you noted down.
+   - Replace the "evtestname" field with the name of the device you selected in evtest. (example name below)
+
+Example name:
+```
+$ evtest
+No device specified, trying to scan all of /dev/input/event*
+Available devices:
+/dev/input/event0:	Dell KB216 Wired Keyboard
+/dev/input/event1:	etc
+/dev/input/event2:	vc4-hdmi
+/dev/input/event5:	SIMOLIO (AVRCP)
+                         ^
+			 |  This is our bluetooth headphones. Yours will be different.
+```
+
+The config file checks if that json text is INCLUDED in the device name, so instead of putting `SIMOLIO (AVRCP)`, I put just `SIMOLIO`
+
 
 ---
 
@@ -121,7 +138,7 @@ Your system should auto start tailsmusic when you log in (after a short delay)
   ```
 
 - **Buttons not working?**  
-  Double-check `evtest` codes and update `player.py`.  
+  Double-check `evtest` codes and update `config.json`.  
 
 ---
 

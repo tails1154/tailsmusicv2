@@ -49,6 +49,7 @@ print(f"okbutton: {config['okbutton']}")
 print(f"okbutton2: {config['okbutton2']}")
 print(f"skipbutton: {config['skipbutton']}")
 print(f"backbutton: {config['backbutton']}")
+print(f"evtestname: {config['evtestname']}")
 class CommandQueue:
     def __init__(self, maxsize: int = 100, verbose: bool = True, 
                  enable_multiprocessing: bool = False):
@@ -221,21 +222,21 @@ cmdq.start_remote_processor()
 print("Modules Loaded!")
 #print("All Modules Loaded!")
 print("TailsMusic Loading...")
-print("Finding SIMOLIO")
+print("Finding Headphones")
 def find_simolio():
     """This finds the bluetooth input device for button presses."""
     for path in list_devices():
         dev = InputDevice(path)
-        if "SIMOLIO" in dev.name:
+        if config['evtestname'] in dev.name:
             return path
     return None
 
 device_path = find_simolio()
 if device_path:
-    print("Using SIMOLIO device:", device_path)
+    print("Using Headphone device:", device_path)
     dev = InputDevice(device_path)
 else:
-    print("SIMOLIO Bluetooth media button device not found.")
+    print("Bluetooth media button device not found.")
     exit(1)
 
 MUSIC_DIR = '/home/pi/mp3player/songs'
