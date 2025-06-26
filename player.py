@@ -30,10 +30,184 @@ print("TailsMusic Loading...")
 global daemonRunning
 daemonRunning = False
 #global daemonRunning
+# ================== MULTIPROCESSING-ENABLED COMMAND QUEUE SYSTEM ==================
+import subprocess
+import threading
+import multiprocessing
+import queue
+import sys
+from typing import Optional, Dict, Any
+class CommandQueue:
+    def __init__(self, maxsize: int = 100, verbose: bool = True, 
+                 enable_multiprocessing: bool = False):
+        """
+        Initialize the command queue system with multiprocessing support.
+        
+        Args:
+            maxsize: Maximum number of queued commands
+            verbose: Whether to print execution details
+            enable_multiprocessing: Enable inter-process communication
+        """
+        self.enable_multiprocessing = enable_multiprocessing
+        
+        if enable_multiprocessing:
+            # Create a multiprocessing manager for cross-process communication
+            self.manager = multiprocessing.Manager()
+            self.queue = self.manager.Queue(maxsize=maxsize)
+            self.lock = self.manager.Lock()
+        else:
+            self.queue = queue.Queue(maxsize=maxsize)
+            self.lock = threading.Lock()
+            
+        self.running = False
+        self.verbose = verbose
+        self.listener_thread: Optional[threading.Thread] = None
+        self.process: Optional[multiprocessing.Process] = None
+        
+    def start_command_listener(self) -> None:
+        """Start the background command listener thread."""
+        if self.running:
+            return
+            
+        self.running = True
+        self.listener_thread = threading.Thread(
+            target=self._command_listener,
+            daemon=True,
+            name="CommandListener"
+        )
+        self.listener_thread.start()
+        
+        if self.verbose:
+            print("Command queue listener started")
 
+    def start_remote_processor(self) -> None:
+        """Start a separate process to handle command execution."""
+        if not self.enable_multiprocessing:
+            raise RuntimeError("Multiprocessing not enabled in constructor")
+            
+        self.process = multiprocessing.Process(
+            target=self._remote_command_processor,
+            daemon=True
+        )
+        self.process.start()
+        
+        if self.verbose:
+            print("Remote command processor started")
 
-#print("Modules Loaded!")
+    def _remote_command_processor(self) -> None:
+        """Process commands in a separate process."""
+        while True:
+            try:
+                cmd = self.queue.get(timeout=1)
+                self._execute_command(cmd)
+            except queue.Empty:
+                if not self.running:
+                    break
+            except Exception as e:
+                print(f"Remote processor error: {e}")
+
+    def stop(self) -> None:
+        """Stop all components of the command queue."""
+        with self.lock:
+            self.running = False
+            if self.listener_thread:
+                self.listener_thread.join(timeout=1.0)
+            if self.process:
+                self.process.join(timeout=1.0)
+            if self.enable_multiprocessing:
+                self.manager.shutdown()
+
+    def _command_listener(self) -> None:
+        """Background thread that listens for console input."""
+        while self.running:
+            try:
+                cmd = input(">>> " if sys.stdin.isatty() else "").strip()
+                if cmd:
+                    self.put_command(cmd)
+            except (EOFError, KeyboardInterrupt):
+                break
+            except Exception as e:
+                print(f"Command input error: {e}")
+
+    def process_commands(self, timeout: float = 0.01) -> None:
+        """
+        Process pending commands in the queue (in current process).
+        
+        Args:
+            timeout: Maximum time to wait for a command (seconds)
+        """
+        while True:
+            try:
+                cmd = self.queue.get_nowait() if timeout == 0 else self.queue.get(timeout=timeout)
+                self._execute_command(cmd)
+                self.queue.task_done()
+            except queue.Empty:
+                break
+            except Exception as e:
+                print(f"Command processing error: {e}")
+
+    def _execute_command(self, cmd: str) -> None:
+        """Execute a single command with proper error handling."""
+        if self.verbose:
+            print(f"[CMD] Executing: {cmd}")
+            
+        try:
+            result = subprocess.run(
+                cmd,
+                shell=True,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                timeout=30  # Prevent hanging commands
+            )
+            
+            if self.verbose:
+                if result.stdout:
+                    print(f"[CMD] Output:\n{result.stdout}")
+                if result.stderr:
+                    print(f"[CMD] Errors:\n{result.stderr}", file=sys.stderr)
+                    
+        except subprocess.TimeoutExpired:
+            print(f"[CMD] Timeout: Command took too long: {cmd}")
+        except subprocess.CalledProcessError as e:
+            print(f"[CMD] Failed (exit {e.returncode}): {cmd}\n{e.stderr}")
+        except Exception as e:
+            print(f"[CMD] Unexpected error: {e}")
+
+    def put_command(self, cmd: str, block: bool = True, 
+                    timeout: Optional[float] = None) -> bool:
+        """
+        Safely add a command to the queue from external sources.
+        
+        Returns:
+            bool: True if command was successfully queued
+        """
+        try:
+            with self.lock:
+                self.queue.put(cmd, block=block, timeout=timeout)
+            return True
+        except queue.Full:
+            if self.verbose:
+                print(f"[CMD] Queue full, could not add command: {cmd}")
+            return False
+
+    def __enter__(self):
+        """Context manager entry point."""
+        self.start_command_listener()
+        if self.enable_multiprocessing:
+            self.start_remote_processor()
+        return self
+        
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit point."""
+        self.stop()
+
+cmdq = CommandQueue(20, True, True)
+
+print("Modules Loaded!")
 #print("All Modules Loaded!")
+print("TailsMusic Loading...")
 print("Finding SIMOLIO")
 def find_simolio():
     """This finds the bluetooth input device for button presses."""
@@ -278,7 +452,7 @@ def run_script_menu():
                         if True:
                             subprocess.run(["cp", "apps/" + options[selected], "app.py"])
                             import app as appModule
-                            app = appModule.APP(dev, cmdq.getQueue())
+                            app = appModule.APP(dev, cmdq)
                             if app.checkDaemon():
                              speak("App is a daemon. Running in background")
                              thread = threading.Thread(target=app.start, daemon=True)
@@ -557,3 +731,33 @@ while True:
         sleep(0.5)
         next_song()
 #Wed 25 Jun 04:21:16 2025
+# Initialize command queue system
+#command_queue = CommandQueue()
+#c#ommand_queue.start_com# ================== END COMMAND QUEUE SYSTEM ==================
+# Initialize command queue system (example usage)
+#if __name__ == "__main__":
+ #   # For multiprocessing demo
+  #  with CommandQueue(enable_multiprocessing=True, verbose=True) as cmd_queue:
+   #     # Add commands from main process
+    #    cmd_queue.put_command("echo 'Hello from main process'")
+     #   
+        # Simulate adding commands from another proces#s
+ #       def remote_worker(queue):
+#            queue.put("echo 'Hello from remote process'")
+      #      queue.put("python --version")
+            
+#        remote = multiprocessing.Process(
+ #           target=remote_worker,
+  #          args=(cmd_queue.queue,)
+   #     )
+    #    remote.start()
+     #   remote.join()
+        
+     #   try:
+    #        while True:
+  #              # Main process can still add commands
+   #             cmd_queue.put_command("date")
+#                time.sleep(2)
+#        except KeyboardInterrupt:
+ #           print("\nShutting down...")
+# ================== END ENHANCED COMMAND QUEUE SYSTEM ==================
