@@ -15,7 +15,7 @@ class APP:
 		self.device = self.dev # Why am I doing this to myself :(
 		api = tools.API(self.device)
 		# Configure your client
-		client = PagerClient(
+		client = pager.PagerClient(
 		 server_url="http://192.168.0.107:3000",  # Replace with your Node.js server UR
 		 client_id="RPi-1",                       # Unique ID for this device
 		 recipient_id="webui",                    # Who to listen for
