@@ -31,6 +31,7 @@ class API:
    if key_event.keystate == 1:
     key = key_event.keycode
     if key == config['skipbutton']:
+      print("isRightPressed True")
       return True
    # else:
   return False
@@ -42,6 +43,7 @@ class API:
          if key_event.keystate == 1:
              key = key_event.keycode
              if key == config['backbutton']:
+                 print("isLeftPressed true")
                  return True
      return False
  def isPlayPausePressed(self):
@@ -52,5 +54,6 @@ class API:
      if key_event.keystate == 1:
       key = key_event.keycode
       if key == config['okbutton'] or key == config['okbutton2']:
+       print("isPlayPausedPressed True")
        return True
     return False
