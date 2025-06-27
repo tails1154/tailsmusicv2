@@ -44,7 +44,7 @@ class APP:
 		    if api.checkPlayPause(event):
 		        index = (index - 1) % len(options)
 		        api.speak(options[index])
-		    if api.checkRightPressed(event):
+		    if api.checkRight(event):
 		        selection = options[index]
 		        click.play()
 		        if selection == "space":
