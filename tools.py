@@ -23,6 +23,33 @@ class API:
    # except Exception as e:
     # print("Exception: " + str(e))
 #  threading.Thread(target=run_tts, daemon=True).start()
+ def checkRight(self, configentry):
+  """Checks if right button is pressed from a config file entry. if so, return True. if not, return False"""
+  if configentry == config['skipbutton']:
+   return True
+  else:
+   return False
+ def checkLeft(self, configentry):
+ """Checks if the left button is pressed from a config file entry. if so, return True. if not, return False"""
+ if configentry == config['backbutton']:
+  return True
+ else:
+  return False
+ def checkPlayPause(self, configentry):
+ """Checks if the play/pause button is pressed from a config file entry. if so, return True. if not, return False"""
+ if configentry == config['playbutton'] or configentry == config['playbutton2']:
+  return True
+ else:
+  return False
+ def getButtonEvent(self):
+ """Gets a event from evtest module. If there is none, returns False. otherwise, return the key value which you can then use with checkPlayPause, checkLeft, checkRight, etc (note to self: wdym etc)"""
+ event = self.device.read_one()
+ if event and event.type == ecodes.EV_KEY:
+  key_event = categorize(event)
+  if key_event.keystate == 1:
+   key = key_event.keycode
+   return key
+ return False
  def isRightPressed(self):
   print("isRightPressed() called")
   """Checks if right is pressed. if so, return true. if not, return false."""
