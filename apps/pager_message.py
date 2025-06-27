@@ -38,13 +38,13 @@ class APP:
 		api.speak(options[index])
 		while True:
 		    event = api.getEvent()
-		    if api.isLeftPressed():
+		    if api.checkLeft(event):
 		        index = (index + 1) % len(options)
 		        api.speak(options[index])
-		    if api.isPlayPausePressed():
+		    if api.checkPlayPause(event):
 		        index = (index - 1) % len(options)
 		        api.speak(options[index])
-		    if api.isRightPressed():
+		    if api.checkRightPressed(event):
 		        selection = options[index]
 		        click.play()
 		        if selection == "space":
