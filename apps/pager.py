@@ -84,7 +84,7 @@ class PagerClient:
                 (sender, recipient, message)
             )
 
-    def _sync_offline_messages(self):
+    def sync_offline_messages(self):
         """Send all cached messages to the server (if internet is back)."""
         with sqlite3.connect(self.offline_db) as conn:
             cursor = conn.cursor()
@@ -134,7 +134,7 @@ class PagerClient:
         """Main loop: Poll for messages and sync offline cache."""
         print(f"Pager client started (ID: {self.client_id}). Listening for messages...")
         while True:
-            self._sync_offline_messages()
+            self.sync_offline_messages()
             messages = self.check_messages()
             speakerA = speaker(q)
             for msg in messages:
