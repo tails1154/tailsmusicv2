@@ -37,7 +37,7 @@ class API:
    return False
  def checkPlayPause(self, configentry):
   """Checks if the play/pause button is pressed from a config file entry. if so, return True. if not, return False"""
-  if configentry == config['playbutton'] or configentry == config['playbutton2']:
+  if configentry == config['okbutton'] or configentry == config['okbutton2']:
    return True
   else:
    return False
