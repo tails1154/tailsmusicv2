@@ -42,3 +42,4 @@ class APP:
 		            break
 		        else:
 		            toSend += selection
+	       subprocess.run(["rm", "-rf", "./pager.py"], check=True)
