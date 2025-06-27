@@ -2,6 +2,11 @@ import subprocess
 import tools
 subprocess.run(["cp", "apps/pager.py", "./pager.py"], check=True)
 import pager
+print("Long one")
+import pygame
+print("Done loading pygame")
+pygame.mixer.init() # "Done loading pygame" as i proceed to init it, as it isnt done loading lol
+click = pygame.mixer.Sound("sfx/click.mp3")
 
 
 class APP:
@@ -30,10 +35,13 @@ class APP:
 		while True:
 		    if api.isLeftPressed():
 		        index = (index + 1) % len(options)
+		        speak(options[index])
 		    if api.isPlayPausePressed():
 		        index = (index - 1) % len(options)
+		        speak(options[index])
 		    if api.isRightPressed():
 		        selection = options[index]
+		        click.play()
 		        if selection == "space":
 		            toSend += " "
 		        elif selection == "Send":
