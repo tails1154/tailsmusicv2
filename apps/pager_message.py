@@ -1,12 +1,12 @@
 import subprocess
 import tools
+subprocess.run(["cp", "apps/pager.py", "./pager.py"], check=True)
+import pager
 
 
 class APP:
 	def __init__(self, dev, q=None):
 		self.dev = dev
-		subprocess.run(["cp", "apps/pager.py", "./pager.py"], check=True)
-		import pager
 	def checkDaemon(self):
 	        return False
 	def start(self):
