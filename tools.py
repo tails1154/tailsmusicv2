@@ -51,7 +51,7 @@ class API:
    return key
  return False
  def isRightPressed(self):
-  print("isRightPressed() called")
+ # print("isRightPressed() called")
   """Checks if right is pressed. if so, return true. if not, return false."""
   event = self.device.read_one()
   if event and event.type == ecodes.EV_KEY:
@@ -59,31 +59,31 @@ class API:
    if key_event.keystate == 1:
     key = key_event.keycode
     if key == config['skipbutton']:
-      print("isRightPressed True")
+#      print("isRightPressed True")
       return True
    # else:
   return False
  def isLeftPressed(self):
      """Checks if left is pressed. If so, return True. if not, return False"""
-     print("isLeftPressed() called")
+  #   print("isLeftPressed() called")
      event = self.device.read_one()
      if event and event.type == ecodes.EV_KEY:
          key_event = categorize(event)
          if key_event.keystate == 1:
              key = key_event.keycode
              if key == config['backbutton']:
-                 print("isLeftPressed true")
+   #              print("isLeftPressed true")
                  return True
      return False
  def isPlayPausePressed(self):
     """Checks if the play/pause button is pressed. if so, return True. if not, return False."""
-    print("isPlayPausePressed() called")
+   # print("isPlayPausePressed() called")
     event = self.device.read_one()
     if event and event.type == ecodes.EV_KEY:
      key_event = categorize(event)
      if key_event.keystate == 1:
       key = key_event.keycode
       if key == config['okbutton'] or key == config['okbutton2']:
-       print("isPlayPausedPressed True")
+    #   print("isPlayPausedPressed True")
        return True
     return False

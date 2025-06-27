@@ -37,6 +37,7 @@ class APP:
 		api.speak("Enter a message to send with your page")
 		api.speak(options[index])
 		while True:
+		    event = api.getEvent()
 		    if api.isLeftPressed():
 		        index = (index + 1) % len(options)
 		        api.speak(options[index])
