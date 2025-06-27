@@ -37,5 +37,5 @@ class APP:
 		            client.send_message(toSend, "all")
 		            tools.speak("Sent Message! (May be cached for sending on next startup.)")
 		            break
-		        else
+		        else:
 		            toSend += selection
