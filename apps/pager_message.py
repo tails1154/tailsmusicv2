@@ -12,6 +12,7 @@ class APP:
 	def start(self):
 		api = tools.API(self.dev)
 		api.speak("Loading...")
+		self.device = self.dev # Why am I doing this to myself :(
 		api = tools.API(self.device)
 		# Configure your client
 		client = PagerClient(
