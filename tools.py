@@ -24,6 +24,7 @@ class API:
     # print("Exception: " + str(e))
 #  threading.Thread(target=run_tts, daemon=True).start()
  def isRightPressed(self):
+  print("isRightPressed() called")
   """Checks if right is pressed. if so, return true. if not, return false."""
   event = self.device.read_one()
   if event and event.type == ecodes.EV_KEY:
@@ -37,6 +38,7 @@ class API:
   return False
  def isLeftPressed(self):
      """Checks if left is pressed. If so, return True. if not, return False"""
+     print("isLeftPressed() called")
      event = self.device.read_one()
      if event and event.type == ecodes.EV_KEY:
          key_event = categorize(event)
@@ -48,6 +50,7 @@ class API:
      return False
  def isPlayPausePressed(self):
     """Checks if the play/pause button is pressed. if so, return True. if not, return False."""
+    print("isPlayPausePressed() called")
     event = self.device.read_one()
     if event and event.type == ecodes.EV_KEY:
      key_event = categorize(event)
