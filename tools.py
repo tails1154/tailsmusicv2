@@ -41,7 +41,7 @@ class API:
    return True
   else:
    return False
- def getButtonEvent(self):
+ def getEvent(self):
   """Gets a event from evtest module. If there is none, returns False. otherwise, return the key value which you can then use with checkPlayPause, checkLeft, checkRight, etc (note to self: wdym etc)"""
   event = self.device.read_one()
   if event and event.type == ecodes.EV_KEY:

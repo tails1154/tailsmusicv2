@@ -88,8 +88,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a223675331151573690ac6d24a645f934"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae750373c3ed54c1b2b556b8ee8144e26"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtools_1_1API.html#ae750373c3ed54c1b2b556b8ee8144e26">checkPlayPause</a> (self, configentry)</td></tr>
 <tr class="separator:ae750373c3ed54c1b2b556b8ee8144e26"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad23ac38fc5955513f490ac16827ded09"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtools_1_1API.html#ad23ac38fc5955513f490ac16827ded09">getButtonEvent</a> (self)</td></tr>
-<tr class="separator:ad23ac38fc5955513f490ac16827ded09"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0efd37342d89e3cc8f26da961cdc69a6"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtools_1_1API.html#a0efd37342d89e3cc8f26da961cdc69a6">getEvent</a> (self)</td></tr>
+<tr class="separator:a0efd37342d89e3cc8f26da961cdc69a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a56d504dc163f3ccfdc6dcd9f02f20848"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtools_1_1API.html#a56d504dc163f3ccfdc6dcd9f02f20848">isRightPressed</a> (self)</td></tr>
 <tr class="separator:a56d504dc163f3ccfdc6dcd9f02f20848"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0d3d7da4ac67d527c5b06ee6a76e326c"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="classtools_1_1API.html#a0d3d7da4ac67d527c5b06ee6a76e326c">isLeftPressed</a> (self)</td></tr>
@@ -171,7 +171,7 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-
+<pre class="fragment">Checks if the left button is pressed from a config file entry. if so, return True. if not, return False</pre> 
 <p class="definition">Definition at line <a class="el" href="tools_8py_source.html#l00032">32</a> of file <a class="el" href="tools_8py_source.html">tools.py</a>.</p>
 
 </div>
@@ -201,7 +201,7 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Checks if the left button is pressed from a config file entry. if so, return True. if not, return False</pre> 
+<pre class="fragment">Checks if the play/pause button is pressed from a config file entry. if so, return True. if not, return False</pre> 
 <p class="definition">Definition at line <a class="el" href="tools_8py_source.html#l00038">38</a> of file <a class="el" href="tools_8py_source.html">tools.py</a>.</p>
 
 </div>
@@ -236,14 +236,14 @@ Static Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="ad23ac38fc5955513f490ac16827ded09" name="ad23ac38fc5955513f490ac16827ded09"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad23ac38fc5955513f490ac16827ded09">&#9670;&nbsp;</a></span>getButtonEvent()</h2>
+<a id="a0efd37342d89e3cc8f26da961cdc69a6" name="a0efd37342d89e3cc8f26da961cdc69a6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0efd37342d89e3cc8f26da961cdc69a6">&#9670;&nbsp;</a></span>getEvent()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">def tools.API.getButtonEvent </td>
+          <td class="memname">def tools.API.getEvent </td>
           <td>(</td>
           <td class="paramtype">&#160;</td>
           <td class="paramname"><em>self</em></td><td>)</td>
@@ -251,7 +251,7 @@ Static Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Checks if the play/pause button is pressed from a config file entry. if so, return True. if not, return False</pre> 
+<pre class="fragment">Gets a event from evtest module. If there is none, returns False. otherwise, return the key value which you can then use with checkPlayPause, checkLeft, checkRight, etc (note to self: wdym etc)</pre> 
 <p class="definition">Definition at line <a class="el" href="tools_8py_source.html#l00044">44</a> of file <a class="el" href="tools_8py_source.html">tools.py</a>.</p>
 
 </div>
@@ -382,8 +382,8 @@ Static Public Attributes</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-<pre class="fragment">Gets a event from evtest module. If there is none, returns False. otherwise, return the key value which you can then use with checkPlayPause, checkLeft, checkRight, etc (note to self: wdym etc)</pre><pre class="fragment">Checks if right is pressed. if so, return true. if not, return false.</pre> 
-<p class="definition">Definition at line <a class="el" href="tools_8py_source.html#l00046">46</a> of file <a class="el" href="tools_8py_source.html">tools.py</a>.</p>
+<pre class="fragment">Checks if right is pressed. if so, return true. if not, return false.</pre> 
+<p class="definition">Definition at line <a class="el" href="tools_8py_source.html#l00056">56</a> of file <a class="el" href="tools_8py_source.html">tools.py</a>.</p>
 
 </div>
 </div>
@@ -407,7 +407,7 @@ Static Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tools_8py_source.html#l00050">50</a> of file <a class="el" href="tools_8py_source.html">tools.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tools_8py_source.html#l00060">60</a> of file <a class="el" href="tools_8py_source.html">tools.py</a>.</p>
 
 </div>
 </div>
@@ -431,7 +431,7 @@ Static Public Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="tools_8py_source.html#l00048">48</a> of file <a class="el" href="tools_8py_source.html">tools.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="tools_8py_source.html#l00058">58</a> of file <a class="el" href="tools_8py_source.html">tools.py</a>.</p>
 
 </div>
 </div>
