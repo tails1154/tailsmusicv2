@@ -25,7 +25,7 @@ class APP:
 		options = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "space", "Send"]
 		index = 0
 		toSend = ""
-		tools.speak(options[index])
+		api.speak(options[index])
 		while True:
 		    if tools.isLeftPressed():
 		        index = (index + 1) % len(options)
@@ -36,9 +36,9 @@ class APP:
 		        if selection == "space":
 		            toSend += " "
 		        elif selection == "Send":
-		            tools.speak("Sending Message...")
+		            api.speak("Sending Message...")
 		            client.send_message(toSend, "all")
-		            tools.speak("Sent Message! (May be cached for sending on next startup.)")
+		            api.speak("Sent Message! (May be cached for sending on next startup.)")
 		            break
 		        else:
 		            toSend += selection
