@@ -9,6 +9,10 @@ pygame.mixer.init() # "Done loading pygame" as i proceed to init it, as it isnt 
 click = pygame.mixer.Sound("sfx/click.mp3")
 
 
+def speak(text):
+    api.speak(text) # I can't anymore lol
+
+
 class APP:
 	def __init__(self, dev, q=None):
 		self.dev = dev
@@ -35,10 +39,10 @@ class APP:
 		while True:
 		    if api.isLeftPressed():
 		        index = (index + 1) % len(options)
-		        speak(options[index])
+		        api.speak(options[index])
 		    if api.isPlayPausePressed():
 		        index = (index - 1) % len(options)
-		        speak(options[index])
+		        api.speak(options[index])
 		    if api.isRightPressed():
 		        selection = options[index]
 		        click.play()
