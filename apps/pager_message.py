@@ -7,6 +7,8 @@ class APP:
 		self.dev = dev
 		subprocess.run(["cp", "apps/pager.py", "./pager.py"], check=True)
 		import pager
+	def checkDaemon(self):
+	        return False
 	def start(self):
 		api = tools.API(self.dev)
 		api.speak("Loading...")
