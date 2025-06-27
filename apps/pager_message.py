@@ -25,13 +25,14 @@ class APP:
 		options = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "space", "Send"]
 		index = 0
 		toSend = ""
+		api.speak("Enter a message to send with your page")
 		api.speak(options[index])
 		while True:
-		    if tools.isLeftPressed():
+		    if api.isLeftPressed():
 		        index = (index + 1) % len(options)
-		    if tools.isPlayPausePressed():
+		    if api.isPlayPausePressed():
 		        index = (index - 1) % len(options)
-		    if tools.isRightPressed():
+		    if api.isRightPressed():
 		        selection = options[index]
 		        if selection == "space":
 		            toSend += " "
