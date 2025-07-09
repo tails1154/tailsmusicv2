@@ -76,7 +76,7 @@ class CommandQueue:
         self.verbose = verbose
         self.listener_thread: Optional[threading.Thread] = None
         self.process: Optional[multiprocessing.Process] = None
-        
+
     def start_command_listener(self) -> None:
         """Start the background command listener thread."""
         if self.running:
@@ -722,9 +722,6 @@ def manage_playlist(name):
                                 playlist_index += 1
                             speak("Playlist done")
                             return
-
-                              speak("Playlist done")
-                              return
             except Exception as e:
                 print(f"Manage playlist error: {e}")
 def date_time():
