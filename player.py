@@ -700,22 +700,28 @@ def manage_playlist(name):
                                             speak("Cancel")
                                             break
                         elif choice == "Play":
-                              #print(songs)
-                              #print(songs[1])
-                              for song in songs:
-                               print(song)
-                               #speak("Playlist done")
-                               pygame.mixer.music.load(song)
-                               pygame.mixer.music.play()
-                               while pygame.mixer.music.get_busy():
-                                event = dev.read_one()
-                                if event and event.type == ecodes.EV_KEY:
-                                 key_event = categorize(event)
-                                 if key_event.keystate == 1:
-                                  key = key_event.keycode
-                                  if key == config['skipbutton']:
-                                   pygame.mixer.music.stop()
-                                   #break
+                            playlist_index = 0
+                            while playlist_index < len(songs):
+                                song = songs[playlist_index]
+                                print(song)
+                                pygame.mixer.music.load(song)
+                                pygame.mixer.music.play()
+                                while pygame.mixer.music.get_busy():
+                                    event = dev.read_one()
+                                    if event and event.type == ecodes.EV_KEY:
+                                        key_event = categorize(event)
+                                        if key_event.keystate == 1:
+                                            key = key_event.keycode
+                                            if key == config['skipbutton']:
+                                                pygame.mixer.music.stop()
+                                                break
+                                            elif key == config['backbutton']:
+                                                pygame.mixer.music.stop()
+                                                playlist_index = max(playlist_index - 2, -1)
+                                                break
+                                playlist_index += 1
+                            speak("Playlist done")
+                            return
 
                               speak("Playlist done")
                               return
