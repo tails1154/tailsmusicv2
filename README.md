@@ -150,60 +150,75 @@ Your **TailsMusic** should now:
 
 
 
+
 # TailsMusic Control Guide
 
 ## Main Controls
-| Button          | Action                          |
-|-----------------|---------------------------------|
-| **Play/Pause**  | Toggle playback pause           |
-| **Next Track**  | Skip to next song               |
-| **Previous**    | Go to previous song             |
-| **Next (Hold)** | Open shutdown menu when paused  |
-| **Previous**    | Tell you the date/time when paused |
 
-## Shutdown Menu
-*Navigate with Previous/Play, select with Next button*
+| Button                | Action                                                                                           |
+|-----------------------|--------------------------------------------------------------------------------------------------|
+| **OK / OK2**          | Play/Pause toggle                                                                                |
+| **Skip**              | Next track                                                                                       |
+| **Back**              | Previous track                                                                                   |
+| **Skip (when paused)**| Open shutdown menu                                                                               |
+| **Back (when paused)**| Speak current date and time                                                                      |
 
-| Option           | Functionality                              |
-|------------------|-------------------------------------------|
-| Playlists        | Enter playlist management                 |
-| Random Song      | Play a random track                       |
-| Manual Text to speech       | Type custom text-to-speech message        |
-| Rescan Songs     | Reload music library                      |
-| Connect to WiFi  | Configure WiFi connection                 |
-| Get IP           | Announce current IP address               |
-| Open App         | Display a list of apps in apps/ and lets you select one to run |
-| Shut Down        | Power off the system                      |
-| Back             | Return to playback                        |
+- **Button names** (“okbutton”, “okbutton2”, “skipbutton”, “backbutton”) are mapped in your `config.json` and may correspond to your headphone/media controls.
+
+## Shutdown Menu  
+*Navigating: Use Back/Skip to move, OK/OK2 to select.*
+
+| Option                 | Functionality                                                                                    |
+|------------------------|-------------------------------------------------------------------------------------------------|
+| Playlists              | Enter playlist management                                                                       |
+| Random Song            | Play a random track                                                                             |
+| Update TailsMusic      | Pull latest code updates and reload the app                                                     |
+| Manual Text to Speech  | Compose a custom TTS message using the buttons                                                  |
+| Rescan Songs           | Reload the music library                                                                        |
+| Connect to WiFi        | Configure WiFi connection (choose network, enter password with button navigation)               |
+| Get local IP           | Announce current local IP address                                                               |
+| Open App               | List and launch `.py` apps from the `apps/` directory                                           |
+| Shut Down              | Power off the system                                                                            |
+| Back                   | Return to playback                                                                              |
 
 ## Playlist Management
+
 ### Main Playlist Menu
 - **Create**: Make a new playlist
-- **[Playlist Name]**: Manage existing playlist
+- **[Playlist Name]**: Manage an existing playlist
 - **Back**: Return to shutdown menu
 
 ### Playlist Actions
-| Option | Functionality                              |
-|--------|-------------------------------------------|
-| Play   | Play all songs in playlist                |
-| Delete | Remove playlist (requires confirmation)   |
-| Back   | Return to playlist list                   |
+
+| Option  | Functionality                                                                                       |
+|---------|----------------------------------------------------------------------------------------------------|
+| Play    | Play all songs in playlist. Use Skip/Back to go to next/previous song in playlist.                 |
+| Delete  | Remove playlist (requires confirmation via Skip/Back)                                              |
+| Back    | Return to playlist list                                                                            |
+
+#### While Playing a Playlist
+- **Skip**: Next song in playlist
+- **Back**: Previous song in playlist
 
 ### Creating Playlists
 1. Select **Add song**
-2. Browse songs with **Previous/Next**
-3. Press **Next** to add song
-4. Choose **Finish** to save playlist
+2. Browse songs with **Back/OK/OK2** (OK/OK2 moves up, Back moves down)
+3. Press **Skip** to add song to playlist
+4. Choose **Finish** (via Skip) to save playlist
 
 ## WiFi Setup
-1. Select network with **Previous/Next**
-2. Enter password using character selector:
-   - Navigate characters with **Previous/Next**
-   - Select with **Next**
-   - **space**: Add space
-   - **Done**: Confirm password
+1. Select network with **Back/OK/OK2** buttons
+2. Press **Skip** to choose
+3. Enter password using character selector:
+    - Navigate characters with **Back/OK/OK2**
+    - Select character with **Skip**
+    - **space**: Add space
+    - **Done**: Confirm and connect
 
-## Manual TTS
-1. Select letters with **Previous/Next**
-2. Press **Next** to add character
-3. Choose **Done** to speak message
+---
+
+**Notes:**
+- Button assignments can be customized in `config.json`.
+- Long presses are not used; actions change depending on whether playback is paused or active.
+- All menus, playlists, and WiFi setup are accessible/controllable via the defined buttons; no keyboard or mouse is required.
+
