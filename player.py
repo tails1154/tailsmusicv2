@@ -472,7 +472,6 @@ def run_script_menu():
                     if options[selected] == "Back":
                         return
                     else:
-                        script_path = py_files[selected]
                         speak(f"Running {options[selected]}")
                         if True:
                             subprocess.run(["cp", "apps/" + options[selected], "app.py"])
@@ -570,7 +569,7 @@ def playlist_menu():
 
     while True:
         if daemonRunning: cmdq.process_Command()
-        options = ["Create"] + list_playlists() + ["Back"]
+        options = ["Create", *list_playlists(), "Back"]
         selected = 0
         speak(options[selected])
         waiting = True
