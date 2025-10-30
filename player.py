@@ -64,9 +64,9 @@ class CommandQueue:
         self.enable_multiprocessing = enable_multiprocessing
         
         if enable_multiprocessing:
-            # Create a multiprocessing manager for cross-process communication
+            # line 67
             self.manager = multiprocessing.Manager()
-            self.queue = self.manager.Queue(maxsize=maxsize)
+            self.queue = self.manager.Queue(maxsize=maxsize) #line 69, nice
             self.lock = self.manager.Lock()
         else:
             self.queue = queue.Queue(maxsize=maxsize)
@@ -132,6 +132,7 @@ class CommandQueue:
 
     def _command_listener(self) -> None:
         """Background thread that listens for console input."""
+        # note to self: what is the point of this??
         while self.running:
             try:
                 cmd = input(">>> " if sys.stdin.isatty() else "").strip()
@@ -253,6 +254,7 @@ except Exception as e:
 tts_lock = threading.Lock()
 def speak(text):
     """This function speaks text to the user"""
+    #TODO: Make this run in the background, but might be better to make a new function
     print(f"TTS: {text}")
     subprocess.run(["espeak-ng", "-s", "130", text], check=True)
   #  def run_tts():
@@ -492,7 +494,7 @@ def run_script_menu():
 def shutdown_menu():
     """Despite the name, this is NOT the shutdown menu. That is in this function in a option. The reason for this function name is because early in development before I made menus that does stuff. This function used to just ask if you wanted to shutdown."""
     options = ["Playlists", "Random Song", "Update TailsMusic", "Manual text to speech", "Re scan Songs", 
-               "Connect to WiFi", "Get local IP", "Shut Down", "Open App", "Back"]
+               "Connect to WiFi", "Get local IP", "Open App", "Shut Down", "Back"] # IS THERE ENOUGH OPTIONS???
     selected = 0
     speak(options[selected])
     while True:
@@ -607,7 +609,7 @@ def create_playlist():
     speak(f"Creating playlist {playlist_counter}")
     selected = 0
     while True:
-        if daemonRunning: cmdq.process_Command()
+        if daemonRunning: cmdq.process_Command() # yes i love apps on a mp3 player
         options = ["Add song", "Finish"]
         #speak(options[selected])
         event = dev.read_one()

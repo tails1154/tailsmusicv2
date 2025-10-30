@@ -66,13 +66,18 @@ $(function() {
   <div class="headertitle"><div class="title">TailsMusicv2 </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p >better than v1, that's for sure!</p>
+<div class="textblock"><p >better than v1, that's for sure! mp3 player but uses bluetooth and headphone buttons to control</p>
 <p >ai "enhanced" instructions below</p>
 <h1><a class="anchor" id="autotoc_md4"></a>
+TODO</h1>
+<ul>
+<li>make it so you can interrupt the tts in some places</li>
+</ul>
+<h1><a class="anchor" id="autotoc_md5"></a>
 &lt;strong&gt;TailsMusic v2 Setup Guide&lt;/strong&gt;</h1>
 <p ><em>A headless MP3 player for Raspberry Pi with Bluetooth headphone control</em> <br  />
 </p>
-<h3><a class="anchor" id="autotoc_md5"></a>
+<h3><a class="anchor" id="autotoc_md6"></a>
 &lt;strong&gt;Prerequisites&lt;/strong&gt;</h3>
 <ul>
 <li>Raspberry Pi OS (Debian-based) <br  />
@@ -83,15 +88,16 @@ $(function() {
 </li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md7"></a>
+<h2><a class="anchor" id="autotoc_md8"></a>
 &lt;strong&gt;1. Install the Project&lt;/strong&gt;</h2>
 <div class="fragment"><div class="line">cd /home/pi</div>
 <div class="line">git clone https://github.com/tails1154/tailsmusicv2 mp3player</div>
 <div class="line">cd mp3player</div>
-</div><!-- fragment --><p >*(Optional: Symlink instead of renaming)* <br  />
+</div><!-- fragment --><p> *(Note: If you arn't going to contibute, then you probably want to add &ndash;depth 1 to the end to not download the entire commit history)*</p>
+<p >*(Optional: Symlink instead of renaming)* <br  />
  </p><div class="fragment"><div class="line">ln -s /home/pi/tailsmusicv2 /home/pi/mp3player</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md9"></a>
+<h2><a class="anchor" id="autotoc_md10"></a>
 &lt;strong&gt;2. Pair Bluetooth Headphones&lt;/strong&gt;</h2>
 <ol type="1">
 <li>Find your headphones’ MAC address: <br  />
@@ -107,12 +113,12 @@ $(function() {
 </div><!-- fragment --></li>
 </ol>
 <hr  />
-<h2><a class="anchor" id="autotoc_md11"></a>
+<h2><a class="anchor" id="autotoc_md12"></a>
 &lt;strong&gt;3. Install Dependencies&lt;/strong&gt;</h2>
 <div class="fragment"><div class="line">sudo apt update</div>
 <div class="line">sudo apt install -y pulseaudio pulseaudio-module-bluetooth espeak-ng evtest python3-evdev</div>
 </div><!-- fragment --><hr  />
-<h2><a class="anchor" id="autotoc_md13"></a>
+<h2><a class="anchor" id="autotoc_md14"></a>
 &lt;strong&gt;4. Configure PulseAudio&lt;/strong&gt;</h2>
 <ol type="1">
 <li>Restart PulseAudio: <br  />
@@ -139,7 +145,7 @@ $(function() {
 </div><!-- fragment --></li>
 </ol>
 <hr  />
-<h2><a class="anchor" id="autotoc_md15"></a>
+<h2><a class="anchor" id="autotoc_md16"></a>
 &lt;strong&gt;5. Configure Button Controls&lt;/strong&gt;</h2>
 <ol type="1">
 <li>Identify your headphone buttons: <br  />
@@ -169,7 +175,7 @@ $(function() {
 <div class="line">             |  This is our bluetooth headphones. Yours will be different.</div>
 </div><!-- fragment --><p >The config file checks if that json text is INCLUDED in the device name, so instead of putting <code>SIMOLIO (AVRCP)</code>, I put just <code>SIMOLIO</code></p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md17"></a>
+<h2><a class="anchor" id="autotoc_md18"></a>
 &lt;strong&gt;6. Add Music and Playlists&lt;/strong&gt;</h2>
 <div class="fragment"><div class="line">mkdir -p /home/pi/mp3player/songs</div>
 <div class="line">mkdir -p /home/pi/mp3player/playlists</div>
@@ -180,11 +186,11 @@ $(function() {
 </li>
 </ul>
 <hr  />
-<h2><a class="anchor" id="autotoc_md19"></a>
+<h2><a class="anchor" id="autotoc_md20"></a>
 &lt;strong&gt;7. Reboot&lt;/strong&gt;</h2>
 <p >Your system should auto start tailsmusic when you log in (after a short delay)</p>
 <hr  />
-<h2><a class="anchor" id="autotoc_md21"></a>
+<h2><a class="anchor" id="autotoc_md22"></a>
 &lt;strong&gt;Troubleshooting&lt;/strong&gt;</h2>
 <ul>
 <li><b>Bluetooth not connecting?</b> <br  />
@@ -200,34 +206,37 @@ $(function() {
 </li>
 </ul>
 <hr  />
-<h3><a class="anchor" id="autotoc_md23"></a>
+<h3><a class="anchor" id="autotoc_md24"></a>
 &lt;strong&gt;Done!&lt;/strong&gt;</h3>
 <p >Your <b>TailsMusic</b> should now: <br  />
  ✅ Auto-connect to Bluetooth headphones. <br  />
  ✅ Respond to media buttons. <br  />
  ✅ Announce actions via eSpeak. <br  />
 </p>
-<h1><a class="anchor" id="autotoc_md24"></a>
+<h1><a class="anchor" id="autotoc_md25"></a>
 TailsMusic Control Guide</h1>
-<h2><a class="anchor" id="autotoc_md25"></a>
+<h2><a class="anchor" id="autotoc_md26"></a>
 Main Controls</h2>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Button   </th><th class="markdownTableHeadNone">Action    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>Play/Pause</b>   </td><td class="markdownTableBodyNone">Toggle playback pause    </td></tr>
+<td class="markdownTableBodyNone"><b>OK / OK2</b>   </td><td class="markdownTableBodyNone">Play/Pause toggle    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>Next Track</b>   </td><td class="markdownTableBodyNone">Skip to next song    </td></tr>
+<td class="markdownTableBodyNone"><b>Skip</b>   </td><td class="markdownTableBodyNone">Next track    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>Previous</b>   </td><td class="markdownTableBodyNone">Go to previous song    </td></tr>
+<td class="markdownTableBodyNone"><b>Back</b>   </td><td class="markdownTableBodyNone">Previous track    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><b>Next (Hold)</b>   </td><td class="markdownTableBodyNone">Open shutdown menu when paused    </td></tr>
+<td class="markdownTableBodyNone"><b>Skip (when paused)</b>   </td><td class="markdownTableBodyNone">Open shutdown menu    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><b>Previous</b>   </td><td class="markdownTableBodyNone">Tell you the date/time when paused   </td></tr>
+<td class="markdownTableBodyNone"><b>Back (when paused)</b>   </td><td class="markdownTableBodyNone">Speak current date and time   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md26"></a>
+<ul>
+<li><b>Button names</b> (“okbutton”, “okbutton2”, “skipbutton”, “backbutton”) are mapped in your <code>config.json</code> and may correspond to your headphone/media controls.</li>
+</ul>
+<h2><a class="anchor" id="autotoc_md27"></a>
 Shutdown Menu</h2>
-<p ><em>Navigate with Previous/Play, select with Next button</em></p>
+<p ><em>Navigating: Use Back/Skip to move, OK/OK2 to select.</em></p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Functionality    </th></tr>
@@ -236,68 +245,76 @@ Shutdown Menu</h2>
 <tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Random Song   </td><td class="markdownTableBodyNone">Play a random track    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Manual Text to speech   </td><td class="markdownTableBodyNone">Type custom text-to-speech message    </td></tr>
+<td class="markdownTableBodyNone">Update TailsMusic   </td><td class="markdownTableBodyNone">Pull latest code updates and reload the app    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Rescan Songs   </td><td class="markdownTableBodyNone">Reload music library    </td></tr>
+<td class="markdownTableBodyNone">Manual Text to Speech   </td><td class="markdownTableBodyNone">Compose a custom TTS message using the buttons    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Connect to WiFi   </td><td class="markdownTableBodyNone">Configure WiFi connection    </td></tr>
+<td class="markdownTableBodyNone">Rescan Songs   </td><td class="markdownTableBodyNone">Reload the music library    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Get IP   </td><td class="markdownTableBodyNone">Announce current IP address    </td></tr>
+<td class="markdownTableBodyNone">Connect to WiFi   </td><td class="markdownTableBodyNone">Configure WiFi connection (choose network, enter password with button navigation)    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Open App   </td><td class="markdownTableBodyNone">Display a list of apps in apps/ and lets you select one to run    </td></tr>
+<td class="markdownTableBodyNone">Get local IP   </td><td class="markdownTableBodyNone">Announce current local IP address    </td></tr>
 <tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone">Open App   </td><td class="markdownTableBodyNone">List and launch <code>.py</code> apps from the <code>apps/</code> directory    </td></tr>
+<tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Shut Down   </td><td class="markdownTableBodyNone">Power off the system    </td></tr>
-<tr class="markdownTableRowOdd">
+<tr class="markdownTableRowEven">
 <td class="markdownTableBodyNone">Back   </td><td class="markdownTableBodyNone">Return to playback   </td></tr>
 </table>
-<h2><a class="anchor" id="autotoc_md27"></a>
+<h2><a class="anchor" id="autotoc_md28"></a>
 Playlist Management</h2>
-<h3><a class="anchor" id="autotoc_md28"></a>
+<h3><a class="anchor" id="autotoc_md29"></a>
 Main Playlist Menu</h3>
 <ul>
 <li><b>Create</b>: Make a new playlist</li>
-<li><b>[Playlist Name]</b>: Manage existing playlist</li>
+<li><b>[Playlist Name]</b>: Manage an existing playlist</li>
 <li><b>Back</b>: Return to shutdown menu</li>
 </ul>
-<h3><a class="anchor" id="autotoc_md29"></a>
+<h3><a class="anchor" id="autotoc_md30"></a>
 Playlist Actions</h3>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Option   </th><th class="markdownTableHeadNone">Functionality    </th></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone">Play   </td><td class="markdownTableBodyNone">Play all songs in playlist    </td></tr>
+<td class="markdownTableBodyNone">Play   </td><td class="markdownTableBodyNone">Play all songs in playlist. Use Skip/Back to go to next/previous song in playlist.    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Delete   </td><td class="markdownTableBodyNone">Remove playlist (requires confirmation)    </td></tr>
+<td class="markdownTableBodyNone">Delete   </td><td class="markdownTableBodyNone">Remove playlist (requires confirmation via Skip/Back)    </td></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone">Back   </td><td class="markdownTableBodyNone">Return to playlist list   </td></tr>
 </table>
-<h3><a class="anchor" id="autotoc_md30"></a>
+<h4><a class="anchor" id="autotoc_md31"></a>
+While Playing a Playlist</h4>
+<ul>
+<li><b>Skip</b>: Next song in playlist</li>
+<li><b>Back</b>: Previous song in playlist</li>
+</ul>
+<h3><a class="anchor" id="autotoc_md32"></a>
 Creating Playlists</h3>
 <ol type="1">
 <li>Select <b>Add song</b></li>
-<li>Browse songs with <b>Previous/Next</b></li>
-<li>Press <b>Next</b> to add song</li>
-<li>Choose <b>Finish</b> to save playlist</li>
+<li>Browse songs with <b>Back/OK/OK2</b> (OK/OK2 moves up, Back moves down)</li>
+<li>Press <b>Skip</b> to add song to playlist</li>
+<li>Choose <b>Finish</b> (via Skip) to save playlist</li>
 </ol>
-<h2><a class="anchor" id="autotoc_md31"></a>
+<h2><a class="anchor" id="autotoc_md33"></a>
 WiFi Setup</h2>
 <ol type="1">
-<li>Select network with <b>Previous/Next</b></li>
+<li>Select network with <b>Back/OK/OK2</b> buttons</li>
+<li>Press <b>Skip</b> to choose</li>
 <li>Enter password using character selector:<ul>
-<li>Navigate characters with <b>Previous/Next</b></li>
-<li>Select with <b>Next</b></li>
+<li>Navigate characters with <b>Back/OK/OK2</b></li>
+<li>Select character with <b>Skip</b></li>
 <li><b>space</b>: Add space</li>
-<li><b>Done</b>: Confirm password</li>
+<li><b>Done</b>: Confirm and connect</li>
 </ul>
 </li>
 </ol>
-<h2><a class="anchor" id="autotoc_md32"></a>
-Manual TTS</h2>
-<ol type="1">
-<li>Select letters with <b>Previous/Next</b></li>
-<li>Press <b>Next</b> to add character</li>
-<li>Choose <b>Done</b> to speak message </li>
-</ol>
+<hr  />
+<p ><b>Notes:</b></p><ul>
+<li>Button assignments can be customized in <code>config.json</code>.</li>
+<li>Long presses are not used; actions change depending on whether playback is paused or active.</li>
+<li>All menus, playlists, and WiFi setup are accessible/controllable via the defined buttons; no keyboard or mouse is required. </li>
+</ul>
 </div></div><!-- contents -->
 </div><!-- PageDoc -->
 <!-- start footer part -->
