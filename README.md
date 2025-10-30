@@ -7,7 +7,7 @@ ai "enhanced" instructions below
 
 ## TODO
 
-- make it so you can interrupt the tts in some places
+- ~~make it so you can interrupt the tts in some places~~
 
 # **TailsMusic v2 Setup Guide**  
 *A headless MP3 player for Raspberry Pi with Bluetooth headphone control*  
