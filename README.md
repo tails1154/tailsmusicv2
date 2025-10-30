@@ -1,5 +1,6 @@
 # TailsMusicv2
 better than v1, that's for sure!
+mp3 player but uses bluetooth and headphone buttons to control
 
 ai "enhanced" instructions below
 
