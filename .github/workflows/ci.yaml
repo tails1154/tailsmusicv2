@@ -1,0 +1,16 @@
+# https://docs.github.com/en/actions/tutorials/build-and-test-code/python
+
+name: CI
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+    - uses: astral-sh/setup-uv@v7
+    - name: ruff
+      run: uvx ruff check --output-format=github
