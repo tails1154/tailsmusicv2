@@ -25,12 +25,6 @@ cd /home/pi
 git clone https://github.com/tails1154/tailsmusicv2 mp3player
 cd mp3player
 ```
-*(Note: If you arn't going to contibute, then you probably want to add --depth 1 to the end to not download the entire commit history)*
-
-*(Optional: Symlink instead of renaming)*  
-```bash
-ln -s /home/pi/tailsmusicv2 /home/pi/mp3player
-```
 
 ---
 
@@ -76,7 +70,7 @@ sudo apt install -y pulseaudio pulseaudio-module-bluetooth espeak-ng evtest pyth
 4. Apply the new `bashrc`:  
    ```bash
    cp ~/.bashrc ~/.bashrc.bak  # Backup
-   cp bashrc ~/.bashrc          # Overwrite
+   cp bashrc ~/.bashrc         # Overwrite
    ```
 
 ---
