@@ -256,6 +256,7 @@ def speak(text):
     """This function speaks text to the user"""
     #DONE: implemented in speak_allowinter() 
     print(f"TTS: {text}")
+    subprocess.run(["killall", "espeak-ng"], check=False)
     subprocess.run(["espeak-ng", "-s", "130", text], check=True)
   #  def run_tts():
   #      with tts_lock:
