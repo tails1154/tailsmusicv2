@@ -148,9 +148,9 @@ Your system should auto start tailsmusic when you log in (after a short delay)
 
 ### **Done!**  
 Your **TailsMusic** should now:  
-✅ Auto-connect to Bluetooth headphones.  
-✅ Respond to media buttons.  
-✅ Announce actions via eSpeak.  
+Auto-connect to Bluetooth headphones.  
+Respond to media buttons.  
+Announce actions via eSpeak.  
 
 
 
@@ -169,60 +169,8 @@ Your **TailsMusic** should now:
 
 - **Button names** (“okbutton”, “okbutton2”, “skipbutton”, “backbutton”) are mapped in your `config.json` and may correspond to your headphone/media controls.
 
-## Shutdown Menu  
-*Navigating: Use Back/Skip to move, OK/OK2 to select.*
-
-| Option                 | Functionality                                                                                    |
-|------------------------|-------------------------------------------------------------------------------------------------|
-| Playlists              | Enter playlist management                                                                       |
-| Random Song            | Play a random track                                                                             |
-| Update TailsMusic      | Pull latest code updates and reload the app                                                     |
-| Manual Text to Speech  | Compose a custom TTS message using the buttons                                                  |
-| Rescan Songs           | Reload the music library                                                                        |
-| Connect to WiFi        | Configure WiFi connection (choose network, enter password with button navigation)               |
-| Get local IP           | Announce current local IP address                                                               |
-| Open App               | List and launch `.py` apps from the `apps/` directory                                           |
-| Shut Down              | Power off the system                                                                            |
-| Back                   | Return to playback                                                                              |
-
-## Playlist Management
-
-### Main Playlist Menu
-- **Create**: Make a new playlist
-- **[Playlist Name]**: Manage an existing playlist
-- **Back**: Return to shutdown menu
-
-### Playlist Actions
-
-| Option  | Functionality                                                                                       |
-|---------|----------------------------------------------------------------------------------------------------|
-| Play    | Play all songs in playlist. Use Skip/Back to go to next/previous song in playlist.                 |
-| Delete  | Remove playlist (requires confirmation via Skip/Back)                                              |
-| Back    | Return to playlist list                                                                            |
-
-#### While Playing a Playlist
-- **Skip**: Next song in playlist
-- **Back**: Previous song in playlist
-
-### Creating Playlists
-1. Select **Add song**
-2. Browse songs with **Back/OK/OK2** (OK/OK2 moves up, Back moves down)
-3. Press **Skip** to add song to playlist
-4. Choose **Finish** (via Skip) to save playlist
-
-## WiFi Setup
-1. Select network with **Back/OK/OK2** buttons
-2. Press **Skip** to choose
-3. Enter password using character selector:
-    - Navigate characters with **Back/OK/OK2**
-    - Select character with **Skip**
-    - **space**: Add space
-    - **Done**: Confirm and connect
-
----
 
 **Notes:**
 - Button assignments can be customized in `config.json`.
 - Long presses are not used; actions change depending on whether playback is paused or active.
-- All menus, playlists, and WiFi setup are accessible/controllable via the defined buttons; no keyboard or mouse is required.
-
+- All menus, playlists, and WiFi setup are accessible/controllable via the defined buttons; no keyboard or mouse is required. (but setting up wifi is painful)
