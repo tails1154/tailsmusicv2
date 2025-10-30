@@ -254,7 +254,7 @@ except Exception as e:
 tts_lock = threading.Lock()
 def speak(text):
     """This function speaks text to the user"""
-    #TODO: Make this run in the background, but might be better to make a new function
+    #DONE: implemented in speak_allowinter() 
     print(f"TTS: {text}")
     subprocess.run(["espeak-ng", "-s", "130", text], check=True)
   #  def run_tts():
@@ -264,8 +264,10 @@ def speak(text):
      #       except Exception as e:
  #               print(f"TTS subprocess error: {e}")
 #    threading.Thread(target=run_tts, daemon=True).start()
-
-
+def speak_allowinter(text):
+    """Same as speak() but returns immedentally so the user can go quicker, also kills all espeak-ng processes to prevent text overlapping"""
+    subprocess.run(["killall", "espeak-ng"], check=False)
+    subprocess.Popen(["espeak-ng", "-s", "130", text]) # aparantly Popen opens in the background (oh god i spelled it wrong please delete me ajfkldasjflkasdjflkasdjflkasd)
 print("Loading Music Files")
 playlist = sorted(
     [os.path.join(MUSIC_DIR, f) for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
@@ -644,11 +646,11 @@ def create_playlist():
                                             k = k_event.keycode
                                             if k == config['backbutton']:
                                                 song_selected = (song_selected + 1) % len(song_files)
-                                                speak(song_files[song_selected])
+                                                speak_allowinter(song_files[song_selected])
                                                 #sleep(1)
                                             elif k == config['okbutton'] or k == config['okbutton2']:
                                                 song_selected = (song_selected - 1) % len(song_files)
-                                                speak(song_files[song_selected])
+                                                speak_allowinter(song_files[song_selected])
                                                 #sleep(1)
                                             elif k == config['skipbutton']:
                                                 click.play()
