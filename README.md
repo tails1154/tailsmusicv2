@@ -25,6 +25,7 @@ cd /home/pi
 git clone https://github.com/tails1154/tailsmusicv2 mp3player
 cd mp3player
 ```
+*(Note: If you arn't going to contibute, then you probably want to add --depth 1 to the end to not download the entire commit history)*
 
 *(Optional: Symlink instead of renaming)*  
 ```bash
