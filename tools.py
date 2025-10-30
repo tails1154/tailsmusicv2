@@ -1,6 +1,6 @@
 import subprocess
 import threading
-from evdev import InputDevice, categorize, ecodes, list_devices
+from evdev import categorize, ecodes
 import json
 tts_lock = threading.Lock()
 print("[tools.py] Reading config.json")
