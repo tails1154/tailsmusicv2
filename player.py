@@ -635,7 +635,7 @@ def create_playlist():
                             return
                         elif options[selected] == "Add song":
                             song_selected = 0
-                            speak(song_files[song_selected])
+                            speak_allowinter(song_files[song_selected])
                             while True:
                                 if daemonRunning: cmdq.process_Command()
                                 evt = dev.read_one()
