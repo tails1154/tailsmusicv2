@@ -1,0 +1,13 @@
+[tool.ruff.lint]
+select = [
+    'E', 'F',
+    'YTT', 'T10', 'ISC', 'G', 'PIE', 'RSE',
+    'PLC', 'PLE',
+    'RUF',
+]
+ignore = [
+    'E501', # line-too-long
+    'E402', # module-import-not-at-top-of-file
+    'E701', # multiple-statements-on-one-line-colon
+    'PLC0415', # import-outside-top-level
+]

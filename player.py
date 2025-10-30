@@ -9,7 +9,7 @@ print(f"(1/{totalModules}) pygame")
 import pygame
 print(f"(2/{totalModules}) evdev")
 from evdev import InputDevice, categorize, ecodes, list_devices
-print(f"(3/10) time")
+print("(3/10) time")
 from time import sleep
 import time
 print(f"(4/{totalModules}) threading")
@@ -31,16 +31,13 @@ global daemonRunning
 daemonRunning = False
 #global daemonRunning
 # ================== MULTIPROCESSING-ENABLED COMMAND QUEUE SYSTEM ==================
-import subprocess
-import threading
 print("multiprocessing")
 import multiprocessing
 print("queue")
-import queue
 print("sys")
 import sys
 print("what is typing")
-from typing import Optional, Dict, Any
+from typing import Optional
 print("nice")
 print("Loading config.json")
 with open('config.json', 'r') as file:
@@ -475,7 +472,6 @@ def run_script_menu():
                     if options[selected] == "Back":
                         return
                     else:
-                        script_path = py_files[selected]
                         speak(f"Running {options[selected]}")
                         if True:
                             subprocess.run(["cp", "apps/" + options[selected], "app.py"])
@@ -573,7 +569,7 @@ def playlist_menu():
 
     while True:
         if daemonRunning: cmdq.process_Command()
-        options = ["Create"] + list_playlists() + ["Back"]
+        options = ["Create", *list_playlists(), "Back"]
         selected = 0
         speak(options[selected])
         waiting = True
