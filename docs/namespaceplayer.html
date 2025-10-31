@@ -78,6 +78,8 @@ Classes</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ae6ea975d1451a6bfb753a09e1d017179"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceplayer.html#ae6ea975d1451a6bfb753a09e1d017179">menu_nav</a> (<a class="el" href="namespaceplayer.html#a845e9834f44e93e502243a3a4cf1af66">event</a>, selected, options)</td></tr>
+<tr class="separator:ae6ea975d1451a6bfb753a09e1d017179"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3a8452e9f36b909e0c3c34603a16de62"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceplayer.html#a3a8452e9f36b909e0c3c34603a16de62">find_simolio</a> ()</td></tr>
 <tr class="separator:a3a8452e9f36b909e0c3c34603a16de62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adcbff95de4d9b00df95c8a800dda2b27"><td class="memItemLeft" align="right" valign="top">def&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="namespaceplayer.html#adcbff95de4d9b00df95c8a800dda2b27">speak</a> (text)</td></tr>
@@ -175,7 +177,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00743">743</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00656">656</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -194,7 +196,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00579">579</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00537">537</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -213,7 +215,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <pre class="fragment">This finds the bluetooth input device for button presses.</pre> 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00224">224</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00243">243</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -233,7 +235,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00637">637</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00571">571</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -252,7 +254,45 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00316">316</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00329">329</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+
+</div>
+</div>
+<a id="ae6ea975d1451a6bfb753a09e1d017179" name="ae6ea975d1451a6bfb753a09e1d017179"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae6ea975d1451a6bfb753a09e1d017179">&#9670;&nbsp;</a></span>menu_nav()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">def player.menu_nav </td>
+          <td>(</td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>event</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>selected</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">&#160;</td>
+          <td class="paramname"><em>options</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<pre class="fragment">Handle menu navigation: back cycles BACK, skip cycles FORWARD, play/pause (okbutton/okbutton2) selects.
+Returns tuple (selected, selected_action) where selected_action is True if play/pause was pressed.
+</pre> 
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00050">50</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -270,8 +310,8 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">This function goes to the next song in the main playlist (the one that gets created when the script starts)</pre> 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00288">288</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00304">304</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -290,7 +330,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00543">543</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00512">512</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -308,8 +348,8 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">This function goes the the prev song in the main playlist</pre> 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00297">297</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00312">312</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -328,7 +368,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00425">425</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00415">415</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -348,7 +388,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00776">776</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00681">681</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -367,7 +407,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00475">475</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00454">454</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -386,7 +426,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00705">705</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00626">626</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -405,8 +445,8 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">This function speaks text to the user</pre> 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00252">252</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00271">271</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -425,8 +465,8 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">Same as speak() but returns immedentally so the user can go quicker, also kills all espeak-ng processes to prevent text overlapping</pre> 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00258">258</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00275">275</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -444,8 +484,8 @@ Variables</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<pre class="fragment">This function pauses and unpauses the song in the main playlist</pre> 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00304">304</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00318">318</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -464,7 +504,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00345">345</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00350">350</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -481,7 +521,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00283">283</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00299">299</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -497,7 +537,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00217">217</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00237">237</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -513,7 +553,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00044">44</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00042">42</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -545,7 +585,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00235">235</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00254">254</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -561,7 +601,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00232">232</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00251">251</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -577,7 +617,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00281">281</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00297">297</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -593,7 +633,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00787">787</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00692">692</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -609,7 +649,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00243">243</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00262">262</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -625,7 +665,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00275">275</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00291">291</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -641,7 +681,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00242">242</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00261">261</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -657,7 +697,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00791">791</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00696">696</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -673,7 +713,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00789">789</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00694">694</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -689,7 +729,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00240">240</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00259">259</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -705,7 +745,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00282">282</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00298">298</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -721,7 +761,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00276">276</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00292">292</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -737,7 +777,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00280">280</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00296">296</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -756,7 +796,7 @@ Variables</h2></td></tr>
 <div class="line"><span class="lineno">    2</span>    [os.path.join(MUSIC_DIR, f) <span class="keywordflow">for</span> f <span class="keywordflow">in</span> os.listdir(MUSIC_DIR) <span class="keywordflow">if</span> f.endswith(<span class="stringliteral">&#39;.mp3&#39;</span>)]</div>
 <div class="line"><span class="lineno">    3</span>)</div>
 </div><!-- fragment -->
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00264">264</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00280">280</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -772,7 +812,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00578">578</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00536">536</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -788,7 +828,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00241">241</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00260">260</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>
@@ -820,7 +860,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00251">251</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
+<p class="definition">Definition at line <a class="el" href="player_8py_source.html#l00270">270</a> of file <a class="el" href="player_8py_source.html">player.py</a>.</p>
 
 </div>
 </div>

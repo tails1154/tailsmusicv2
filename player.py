@@ -29,8 +29,6 @@ import queue
 print("TailsMusic Loading...")
 global daemonRunning
 daemonRunning = False
-#global daemonRunning
-# ================== MULTIPROCESSING-ENABLED COMMAND QUEUE SYSTEM ==================
 print("multiprocessing")
 import multiprocessing
 print("queue")
@@ -47,6 +45,27 @@ print(f"okbutton2: {config['okbutton2']}")
 print(f"skipbutton: {config['skipbutton']}")
 print(f"backbutton: {config['backbutton']}")
 print(f"evtestname: {config['evtestname']}")
+
+# --- Menu navigation helper ---
+def menu_nav(event, selected, options):
+    """
+    Handle menu navigation: back cycles BACK, skip cycles FORWARD, play/pause (okbutton/okbutton2) selects.
+    Returns tuple (selected, selected_action) where selected_action is True if play/pause was pressed.
+    """
+    key_event = categorize(event)
+    if key_event.keystate == 1:
+        key = key_event.keycode
+        if key == config['backbutton']:
+            selected = (selected - 1) % len(options)
+            speak(options[selected])
+        elif key == config['skipbutton']:
+            selected = (selected + 1) % len(options)
+            speak(options[selected])
+        elif key in [config['okbutton'], config['okbutton2']]:
+            return selected, True
+    return selected, False
+
+
 class CommandQueue:
     def __init__(self, maxsize: int = 100, verbose: bool = True, 
                  enable_multiprocessing: bool = False):
@@ -214,11 +233,11 @@ class CommandQueue:
         """Context manager exit point."""
         self.stop()
 
+
 cmdq = CommandQueue(20, True, True)
 cmdq.start_command_listener()
 cmdq.start_remote_processor()
 print("Modules Loaded!")
-#print("All Modules Loaded!")
 print("TailsMusic Loading...")
 print("Finding Headphones")
 def find_simolio():
@@ -243,20 +262,17 @@ INPUT_DEVICE = device_path
 os.makedirs(PLAYLIST_DIR, exist_ok=True)
 daemonRunning = False
 try:
- print("Remvoing stale app.py")
- os.remove("app.py")
- print("Starting Voice")
+    print("Remvoing stale app.py")
+    os.remove("app.py")
+    print("Starting Voice")
 except Exception as e:
- print("Error removing app.py: " + str(e))
+    print("Error removing app.py: " + str(e))
 tts_lock = threading.Lock()
 def speak(text):
-    """This function speaks text to the user"""
-    #DONE: implemented in speak_allowinter() 
     print(f"TTS: {text}")
     subprocess.run(["killall", "espeak-ng"], check=False)
     subprocess.run(["espeak-ng", "-s", "130", text], check=True)
 def speak_allowinter(text):
-    """Same as speak() but returns immedentally so the user can go quicker, also kills all espeak-ng processes to prevent text overlapping"""
     subprocess.run(["killall", "espeak-ng"], check=False)
     subprocess.Popen(["espeak-ng", "-s", "130", text])
 
@@ -266,9 +282,9 @@ playlist = sorted(
 )
 print("Removing __pycache__")
 try:
- shutil.rmtree("__pycache__")
+    shutil.rmtree("__pycache__")
 except Exception as e:
- print("Exception Deleteing __pycache__:" + str(e))
+    print("Exception Deleteing __pycache__:" + str(e))
 if not playlist:
     speak("No songs found.")
     exit()
@@ -286,7 +302,6 @@ pygame.mixer.music.load(playlist[index])
 pygame.mixer.music.play()
 
 def next_song():
-    """This function goes to the next song in the main playlist (the one that gets created when the script starts)"""
     global index
     index += 1
     if index >= len(playlist):
@@ -295,14 +310,12 @@ def next_song():
     pygame.mixer.music.play()
 
 def prev_song():
-    """This function goes the the prev song in the main playlist"""
     global index
     index = (index - 1) % len(playlist)
     pygame.mixer.music.load(playlist[index])
     pygame.mixer.music.play()
 
 def toggle_pause():
-    """This function pauses and unpauses the song in the main playlist"""
     global paused
     if paused:
         pausesfx.play()
@@ -312,7 +325,7 @@ def toggle_pause():
         pausesfx.play()
         pygame.mixer.music.pause()
     paused = not paused
-    
+
 def manual_tts():
     options = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "space", "Done"]
     selected = 0
@@ -322,25 +335,17 @@ def manual_tts():
         if daemonRunning: cmdq.process_Command()
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
-            key_event = categorize(event)
-            if key_event.keystate == 1:
-                key = key_event.keycode
-                if key == config['backbutton']:
-                    selected = (selected + 1) % len(options)
-                    speak(options[selected])
-                elif key == config['okbutton'] or key == config['okbutton2']:
-                    selected = (selected - 1) % len(options)
-                    speak(options[selected])
-                elif key == config['skipbutton']:
-                    choice = options[selected]
-                    click.play()
-                    if choice == "space":
-                        toSpeak += " "
-                    elif choice == "Done":
-                        speak(toSpeak)
-                        break
-                    else:
-                        toSpeak += choice
+            selected, action = menu_nav(event, selected, options)
+            if action:
+                choice = options[selected]
+                click.play()
+                if choice == "space":
+                    toSpeak += " "
+                elif choice == "Done":
+                    speak(toSpeak)
+                    break
+                else:
+                    toSpeak += choice
 
 def wifiSetup():
     speak("Loading wifi networks")
@@ -348,9 +353,7 @@ def wifiSetup():
     pygame.mixer.music.play()
     networks = wifi.scan_wifi()
     if networks:
-        options = []
-        for i, (ssid, signal) in enumerate(networks):
-            options.append(f"{ssid}")
+        options = [ssid for ssid, signal in networks]
         pygame.mixer.music.stop()
         selected = 0
         speak("Choose your wifi network")
@@ -359,68 +362,55 @@ def wifiSetup():
             if daemonRunning: cmdq.process_Command()
             event = dev.read_one()
             if event and event.type == ecodes.EV_KEY:
-                key_event = categorize(event)
-                if key_event.keystate == 1:
-                    key = key_event.keycode
-                    if key == config['backbutton']:
-                        selected = (selected + 1) % len(options)
-                        speak(options[selected])
-                    elif key == config['skipbutton']:
-                        click.play()
-                        wifiName = options[selected]
-                        pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
-                        speak("Enter your wifi password.")
-                        speak("For an easier setup, Connect TailsMusic to Your monitor and type")
-                        speak("n... m... t... u... i... with a keyboard and press enter.")
-                        speak("Enter your wifi password")
-                        options = [
-                            "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
-                            "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
-                            "u", "v", "w", "x", "y", "z",
-                            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-                            "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
-                            "U", "V", "W", "X", "Y", "Z",
-                            "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-                            "!", "@", "#", "$", "%", "^", "&", "*", "(", ")",
-                            "-", "_", "=", "+", "[", "{", "]", "}", "\\", "|",
-                            ";", ":", "'", "\"", ",", "<", ".", ">", "/", "?", "`", "~", "space", "Done"
-                        ]
-                        selected = 0
-                        wifiPass = ""
-                        speak(options[selected])
-                        while True:
-                            if daemonRunning: cmdq.process_Command()
-                            event = dev.read_one()
-                            if event and event.type == ecodes.EV_KEY:
-                                key_event = categorize(event)
-                                if key_event.keystate == 1:
-                                    key = key_event.keycode
-                                    if key == config['backbutton']:
-                                        selected = (selected + 1) % len(options)
-                                        speak(options[selected])
-                                    elif key == config['okbutton'] or key == config['okbutton2']:
-                                        selected = (selected - 1) % len(options)
-                                        speak(options[selected])
-                                    elif key == config['skipbutton']:
-                                        click.play()
-                                        choice = options[selected]
-                                        if choice == "space":
-                                            wifiPass += ""
-                                        elif choice == "Done":
-                                            speak("Connecting")
-                                            pygame.mixer.music.play()
-                                            try:
-                                                wifi.connect_wifi(wifiName, wifiPass)
-                                            except Exception as e:
-                                                pygame.mixer.music.stop()
-                                                speak("Error connecting: " + str(e))
-                                                break
-                                            pygame.mixer.music.stop()
-                                            speak("Your IP is " + str(wifi.get_ip()))
-                                            break
-                                        else:
-                                            wifiPass += options[selected]
-                        break
+                selected, action = menu_nav(event, selected, options)
+                if action:
+                    click.play()
+                    wifiName = options[selected]
+                    pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
+                    speak("Enter your wifi password.")
+                    speak("For an easier setup, Connect TailsMusic to Your monitor and type")
+                    speak("n... m... t... u... i... with a keyboard and press enter.")
+                    speak("Enter your wifi password")
+                    options = [
+                        "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+                        "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
+                        "u", "v", "w", "x", "y", "z",
+                        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+                        "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+                        "U", "V", "W", "X", "Y", "Z",
+                        "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+                        "!", "@", "#", "$", "%", "^", "&", "*", "(", ")",
+                        "-", "_", "=", "+", "[", "{", "]", "}", "\\", "|",
+                        ";", ":", "'", "\"", ",", "<", ".", ">", "/", "?", "`", "~", "space", "Done"
+                    ]
+                    selected = 0
+                    wifiPass = ""
+                    speak(options[selected])
+                    while True:
+                        if daemonRunning: cmdq.process_Command()
+                        event = dev.read_one()
+                        if event and event.type == ecodes.EV_KEY:
+                            selected, action = menu_nav(event, selected, options)
+                            if action:
+                                click.play()
+                                choice = options[selected]
+                                if choice == "space":
+                                    wifiPass += ""
+                                elif choice == "Done":
+                                    speak("Connecting")
+                                    pygame.mixer.music.play()
+                                    try:
+                                        wifi.connect_wifi(wifiName, wifiPass)
+                                    except Exception as e:
+                                        pygame.mixer.music.stop()
+                                        speak("Error connecting: " + str(e))
+                                        break
+                                    pygame.mixer.music.stop()
+                                    speak("Your IP is " + str(wifi.get_ip()))
+                                    break
+                                else:
+                                    wifiPass += options[selected]
+                    break
 
 def run_script_menu():
     py_files = []
@@ -429,48 +419,37 @@ def run_script_menu():
         py_files = [os.path.join(root, f) 
                    for root, _, files in os.walk(apps_dir) 
                    for f in files if f.endswith('.py')]
-    
     if not py_files:
         speak("No scripts found in apps directory")
         return
-    
     options = [os.path.basename(f) for f in py_files] + ["Back"]
     selected = 0
     speak(options[selected])
-    
     while True:
         global daemonRunning
         if daemonRunning: cmdq.process_Command()
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
-            key_event = categorize(event)
-            if key_event.keystate == 1:
-                key = key_event.keycode
-                if key == config['backbutton']:
-                    selected = (selected + 1) % len(options)
-                    speak(options[selected])
-                elif key == config['okbutton'] or key == config['okbutton2']:
-                    selected = (selected - 1) % len(options)
-                    speak(options[selected])
-                elif key == config['skipbutton']:
-                    click.play()
-                    if options[selected] == "Back":
-                        return
+            selected, action = menu_nav(event, selected, options)
+            if action:
+                click.play()
+                if options[selected] == "Back":
+                    return
+                else:
+                    speak(f"Running {options[selected]}")
+                    subprocess.run(["cp", "apps/" + options[selected], "app.py"])
+                    import app as appModule
+                    app = appModule.APP(dev, cmdq)
+                    if app.checkDaemon():
+                        speak("App is a daemon. Running in background")
+                        thread = multiprocessing.Process(target=app.start)
+                        thread.start()
+                        daemonRunning = True
                     else:
-                        speak(f"Running {options[selected]}")
-                        subprocess.run(["cp", "apps/" + options[selected], "app.py"])
-                        import app as appModule
-                        app = appModule.APP(dev, cmdq)
-                        if app.checkDaemon():
-                            speak("App is a daemon. Running in background")
-                            thread = multiprocessing.Process(target=app.start)
-                            thread.start()
-                            daemonRunning = True
-                        else:
-                            app.start()
-                            os.remove("app.py")
-                            speak("Script finished")
-                        return
+                        app.start()
+                        os.remove("app.py")
+                        speak("Script finished")
+                    return
 
 def shutdown_menu():
     options = ["Playlists", "Random Song", "Update TailsMusic", "Manual text to speech", "Re scan Songs", 
@@ -481,64 +460,54 @@ def shutdown_menu():
         if daemonRunning: cmdq.process_Command()
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
-            key_event = categorize(event)
-            if key_event.keystate == 1:
-                key = key_event.keycode
-                if key == config['backbutton']:
-                    selected = (selected + 1) % len(options)
-                    speak(options[selected])
-                elif key == config['okbutton'] or key == config['okbutton2']:
-                    selected = (selected - 1) % len(options)
-                    speak(options[selected])
-                elif key == config['skipbutton']:
-                    click.play()
-                    choice = options[selected]
-                    if choice == "Shut Down":
-                        speak("Shutting down")
-                        subprocess.run(["sudo", "shutdown", "now"])
-                    elif choice == "Back":
-                        pausesfx.play()
-                        return
-                    elif choice == "Playlists":
-                        playlist_menu()
-                    elif choice == "Random Song":
-                        song_files = sorted([f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')], key=str.lower)
-                        random_song = random.choice(song_files) if song_files else None
-                        pygame.mixer.music.load("songs/" + random_song)
-                        pygame.mixer.music.play()
-                        while pygame.mixer.music.get_busy():
-                            event = dev.read_one()
-                            if event and event.type == ecodes.EV_KEY:
-                                key_event = categorize(event)
-                                if key_event.keystate == 1:
-                                    key = key_event.keycode
-                                    if key == config['skipbutton']:
-                                        pygame.mixer.music.stop()
-                                        break
-                    elif choice == "Manual text to speech":
-                        manual_tts()
-                    elif choice == "Re scan Songs":
-                        speak("Rescanning")
-                        exit(0)
-                    elif choice == "Connect to WiFi":
-                        wifiSetup()
-                    elif choice == "Get local IP":
-                        speak("Your Local IP is: " + wifi.get_ip())
-                    elif choice == "Open App":
-                        run_script_menu()
-                        return
-                    elif choice == "Update TailsMusic":
-                        speak("Updating TailsMusic")
-                        pygame.mixer.music.load("sfx/dialup.mp3")
-                        pygame.mixer.music.play(-1)
-                        try:
-                            subprocess.run(["git", "pull"], check=True)
-                            speak("Reloading TailsMusic")
-                            exit(0)
-                        except Exception as e:
-                            speak("Error updating: " + str(e))
+            selected, action = menu_nav(event, selected, options)
+            if action:
+                click.play()
+                choice = options[selected]
+                if choice == "Shut Down":
+                    speak("Shutting down")
+                    subprocess.run(["sudo", "shutdown", "now"])
+                elif choice == "Back":
                     pausesfx.play()
-                    break
+                    return
+                elif choice == "Playlists":
+                    playlist_menu()
+                elif choice == "Random Song":
+                    song_files = sorted([f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')], key=str.lower)
+                    random_song = random.choice(song_files) if song_files else None
+                    pygame.mixer.music.load("songs/" + random_song)
+                    pygame.mixer.music.play()
+                    while pygame.mixer.music.get_busy():
+                        event = dev.read_one()
+                        if event and event.type == ecodes.EV_KEY:
+                            selected2, action2 = menu_nav(event, 0, ["Stop"])
+                            if action2 and options[0] == "Stop":
+                                pygame.mixer.music.stop()
+                                break
+                elif choice == "Manual text to speech":
+                    manual_tts()
+                elif choice == "Re scan Songs":
+                    speak("Rescanning")
+                    exit(0)
+                elif choice == "Connect to WiFi":
+                    wifiSetup()
+                elif choice == "Get local IP":
+                    speak("Your Local IP is: " + wifi.get_ip())
+                elif choice == "Open App":
+                    run_script_menu()
+                    return
+                elif choice == "Update TailsMusic":
+                    speak("Updating TailsMusic")
+                    pygame.mixer.music.load("sfx/dialup.mp3")
+                    pygame.mixer.music.play(-1)
+                    try:
+                        subprocess.run(["git", "pull"], check=True)
+                        speak("Reloading TailsMusic")
+                        exit(0)
+                    except Exception as e:
+                        speak("Error updating: " + str(e))
+                pausesfx.play()
+                break
 
 def playlist_menu():
     def list_playlists():
@@ -552,35 +521,23 @@ def playlist_menu():
         while waiting:
             event = dev.read_one()
             if event and event.type == ecodes.EV_KEY:
-                try:
-                    key_event = categorize(event)
-                    if key_event.keystate == 1:
-                        key = key_event.keycode
-                        if key == config['backbutton']:
-                            selected = (selected + 1) % len(options)
-                            speak(options[selected])
-                        elif key == config['okbutton'] or key == config['okbutton2']:
-                            selected = (selected - 1) % len(options)
-                            speak(options[selected])
-                        elif key == config['skipbutton']:
-                            click.play()
-                            choice = options[selected]
-                            if choice == "Back":
-                                return
-                            elif choice == "Create":
-                                create_playlist()
-                            else:
-                                manage_playlist(choice)
-                            waiting = False
-                except Exception as e:
-                    print(f"Playlist menu error: {e}")
+                selected, action = menu_nav(event, selected, options)
+                if action:
+                    click.play()
+                    choice = options[selected]
+                    if choice == "Back":
+                        return
+                    elif choice == "Create":
+                        create_playlist()
+                    else:
+                        manage_playlist(choice)
+                    waiting = False
 
 playlist_counter = max((int(f.removeprefix("playlist").removesuffix(".json")) for f in os.listdir("/home/pi/mp3player/playlists/") if f.startswith("playlist") and f.endswith(".json")), default=-1) + 1
 def create_playlist():
     global playlist_counter
     songs = []
     song_files = sorted([f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')])
-
     speak(f"Creating playlist {playlist_counter}")
     selected = 0
     while True:
@@ -588,51 +545,28 @@ def create_playlist():
         options = ["Add song", "Finish"]
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
-            try:
-                key_event = categorize(event)
-                if key_event.keystate == 1:
-                    key = key_event.keycode
-                    print(key)
-                    if key == config['backbutton']:
-                        selected = (selected + 1) % len(options)
-                        speak(options[selected])
-                    elif key == config['okbutton'] or key == config['okbutton2']:
-                        selected = (selected - 1) % len(options)
-                        speak(options[selected])
-                    elif key == config['skipbutton']:
-                        click.play()
-                        if options[selected] == "Finish":
-                            with open(f"{PLAYLIST_DIR}/playlist{playlist_counter}.json", 'w') as f:
-                                json.dump(songs, f)
-                            speak("Playlist saved")
-                            playlist_counter += 1
-                            return
-                        elif options[selected] == "Add song":
-                            song_selected = 0
-                            speak_allowinter(song_files[song_selected])
-                            while True:
-                                if daemonRunning: cmdq.process_Command()
-                                evt = dev.read_one()
-                                if evt and evt.type == ecodes.EV_KEY:
-                                    try:
-                                        k_event = categorize(evt)
-                                        if k_event.keystate == 1:
-                                            k = k_event.keycode
-                                            if k == config['backbutton']:
-                                                song_selected = (song_selected + 1) % len(song_files)
-                                                speak_allowinter(song_files[song_selected])
-                                            elif k == config['okbutton'] or k == config['okbutton2']:
-                                                song_selected = (song_selected - 1) % len(song_files)
-                                                speak_allowinter(song_files[song_selected])
-                                            elif k == config['skipbutton']:
-                                                click.play()
-                                                songs.append(os.path.join(MUSIC_DIR, song_files[song_selected]))
-                                                speak("Song added")
-                                                break
-                                    except Exception as e:
-                                        print(f"Song selection error: {e}")
-            except Exception as e:
-                print(f"Create playlist error: {e}")
+            selected, action = menu_nav(event, selected, options)
+            if action:
+                click.play()
+                if options[selected] == "Finish":
+                    with open(f"{PLAYLIST_DIR}/playlist{playlist_counter}.json", 'w') as f:
+                        json.dump(songs, f)
+                    speak("Playlist saved")
+                    playlist_counter += 1
+                    return
+                elif options[selected] == "Add song":
+                    song_selected = 0
+                    speak_allowinter(song_files[song_selected])
+                    while True:
+                        if daemonRunning: cmdq.process_Command()
+                        evt = dev.read_one()
+                        if evt and evt.type == ecodes.EV_KEY:
+                            song_selected, action = menu_nav(evt, song_selected, song_files)
+                            if action:
+                                click.play()
+                                songs.append(os.path.join(MUSIC_DIR, song_files[song_selected]))
+                                speak("Song added")
+                                break
 
 def manage_playlist(name):
     with open(f"{PLAYLIST_DIR}/{name}") as f:
@@ -644,63 +578,50 @@ def manage_playlist(name):
         if daemonRunning: cmdq.process_Command()
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
-            try:
-                key_event = categorize(event)
-                if key_event.keystate == 1:
-                    key = key_event.keycode
-                    if key == config['backbutton']:
-                        selected = (selected + 1) % len(options)
-                        speak(options[selected])
-                    elif key == config['okbutton'] or key == config['okbutton2']:
-                        selected = (selected - 1) % len(options)
-                        speak(options[selected])
-                    elif key == config['skipbutton']:
-                        click.play()
-                        choice = options[selected]
-                        if choice == "Back":
-                            break
-                        elif choice == "Delete":
-                            speak("Confirm delete")
-                            while True:
-                                if daemonRunning: cmdq.process_Command()
-                                evt = dev.read_one()
-                                if evt and evt.type == ecodes.EV_KEY:
-                                    k_event = categorize(evt)
-                                    if k_event.keystate == 1:
-                                        k = k_event.keycode
-                                        if k == config['skipbutton']:
-                                            click.play()
-                                            os.remove(f"{PLAYLIST_DIR}/{name}")
-                                            speak("Deleted")
-                                            return
-                                        elif k == config['backbutton']:
-                                            speak("Cancel")
-                                            break
-                        elif choice == "Play":
-                            playlist_index = 0
-                            while playlist_index < len(songs):
-                                song = songs[playlist_index]
-                                print(song)
-                                pygame.mixer.music.load(song)
-                                pygame.mixer.music.play()
-                                while pygame.mixer.music.get_busy():
-                                    event = dev.read_one()
-                                    if event and event.type == ecodes.EV_KEY:
-                                        key_event = categorize(event)
-                                        if key_event.keystate == 1:
-                                            key = key_event.keycode
-                                            if key == config['skipbutton']:
-                                                pygame.mixer.music.stop()
-                                                break
-                                            elif key == config['backbutton']:
-                                                pygame.mixer.music.stop()
-                                                playlist_index = max(playlist_index - 2, -1)
-                                                break
-                                playlist_index += 1
-                            speak("Playlist done")
-                            return
-            except Exception as e:
-                print(f"Manage playlist error: {e}")
+            selected, action = menu_nav(event, selected, options)
+            if action:
+                click.play()
+                choice = options[selected]
+                if choice == "Back":
+                    break
+                elif choice == "Delete":
+                    speak("Confirm delete")
+                    while True:
+                        if daemonRunning: cmdq.process_Command()
+                        evt = dev.read_one()
+                        if evt and evt.type == ecodes.EV_KEY:
+                            selected2, action2 = menu_nav(evt, 0, ["Delete", "Cancel"])
+                            if action2:
+                                if ["Delete", "Cancel"][selected2] == "Delete":
+                                    click.play()
+                                    os.remove(f"{PLAYLIST_DIR}/{name}")
+                                    speak("Deleted")
+                                    return
+                                else:
+                                    speak("Cancel")
+                                    break
+                elif choice == "Play":
+                    playlist_index = 0
+                    while playlist_index < len(songs):
+                        song = songs[playlist_index]
+                        print(song)
+                        pygame.mixer.music.load(song)
+                        pygame.mixer.music.play()
+                        while pygame.mixer.music.get_busy():
+                            event = dev.read_one()
+                            if event and event.type == ecodes.EV_KEY:
+                                selected2, action2 = menu_nav(event, 0, ["Skip", "Back"])
+                                if action2:
+                                    if ["Skip", "Back"][selected2] == "Skip":
+                                        pygame.mixer.music.stop()
+                                        break
+                                    elif ["Skip", "Back"][selected2] == "Back":
+                                        pygame.mixer.music.stop()
+                                        playlist_index = max(playlist_index - 2, -1)
+                                        break
+                        playlist_index += 1
+                    speak("Playlist done")
+                    return
 
 def song_menu():
     global index
@@ -711,33 +632,25 @@ def song_menu():
         if daemonRunning: cmdq.process_Command()
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
-            key_event = categorize(event)
-            if key_event.keystate == 1:
-                key = key_event.keycode
-                if key == config['backbutton']:
-                    selected = (selected + 1) % len(options)
-                    speak(options[selected])
-                elif key == config['okbutton'] or key == config['okbutton2']:
-                    selected = (selected - 1) % len(options)
-                    speak(options[selected])
-                elif key == config['skipbutton']:
-                    click.play()
-                    choice = options[selected]
-                    if choice == "Add to Playlist":
-                        add_song_to_playlist(playlist[index])
-                    elif choice == "Show Info":
-                        show_song_info(playlist[index])
-                    elif choice == "Delete Song":
-                        try:
-                            os.remove(playlist[index])
-                            speak("Song deleted")
-                            del playlist[index]
-                            index %= len(playlist)
-                        except Exception as e:
-                            speak("Error deleting song: " + str(e))
-                        break
-                    elif choice == "Back":
-                        break
+            selected, action = menu_nav(event, selected, options)
+            if action:
+                click.play()
+                choice = options[selected]
+                if choice == "Add to Playlist":
+                    add_song_to_playlist(playlist[index])
+                elif choice == "Show Info":
+                    show_song_info(playlist[index])
+                elif choice == "Delete Song":
+                    try:
+                        os.remove(playlist[index])
+                        speak("Song deleted")
+                        del playlist[index]
+                        index %= len(playlist)
+                    except Exception as e:
+                        speak("Error deleting song: " + str(e))
+                    break
+                elif choice == "Back":
+                    break
     speak("Exiting song menu")
 
 def add_song_to_playlist(song_path):
@@ -751,27 +664,19 @@ def add_song_to_playlist(song_path):
     while True:
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
-            key_event = categorize(event)
-            if key_event.keystate == 1:
-                key = key_event.keycode
-                if key == config['backbutton']:
-                    selected = (selected + 1) % len(playlists)
-                    speak(playlists[selected])
-                elif key == config['okbutton'] or key == config['okbutton2']:
-                    selected = (selected - 1) % len(playlists)
-                    speak(playlists[selected])
-                elif key == config['skipbutton']:
-                    with open(os.path.join(PLAYLIST_DIR, playlists[selected]), "r+") as f:
-                        songs = json.load(f)
-                        if song_path not in songs:
-                            songs.append(song_path)
-                            f.seek(0)
-                            json.dump(songs, f)
-                            f.truncate()
-                            speak("Song added to playlist.")
-                        else:
-                            speak("Song already in playlist.")
-                    break
+            selected, action = menu_nav(event, selected, playlists)
+            if action:
+                with open(os.path.join(PLAYLIST_DIR, playlists[selected]), "r+") as f:
+                    songs = json.load(f)
+                    if song_path not in songs:
+                        songs.append(song_path)
+                        f.seek(0)
+                        json.dump(songs, f)
+                        f.truncate()
+                        speak("Song added to playlist.")
+                    else:
+                        speak("Song already in playlist.")
+                break
 
 def show_song_info(song_path):
     try:
@@ -805,5 +710,3 @@ while True:
     if not pygame.mixer.music.get_busy() and not paused:
         sleep(0.5)
         next_song()
-#Wed 25 Jun 04:21:16 2025
-# ================== END ENHANCED COMMAND QUEUE SYSTEM ==================

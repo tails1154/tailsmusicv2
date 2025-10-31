@@ -7,9 +7,9 @@ mp3 player but uses bluetooth and headphone buttons to control
 
 ## TODO
 
-- ~~make it so you can interrupt the tts in some places~~
-- Replace the date and time function with a "song menu" of some sort where you could add a song to a playlist, and other actions ~~(like what)~~
-- (Would take a long time to do by hand) Make the menus and song navigation consistant (aka make it so back and skip would cycle the menus left and right, and not pause/play (in some places, mind you) to cycle back menus, back to cycle forward menus, and skip to select)
+- ~~make it so you can interrupt the tts in some places~~ - DONE
+- ~~Replace the date and time function with a "song menu" of some sort where you could add a song to a playlist, and other actions ~~ - DONE
+- ~~(Would take a long time to do by hand) Make the menus and song navigation consistant (aka make it so back and skip would cycle the menus left and right, and not pause/play (in some places, mind you) to cycle back menus, back to cycle forward menus, and skip to select)~~ - DONE
 
 
 
