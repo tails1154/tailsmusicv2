@@ -3,6 +3,7 @@ print("TailsMusic preinit")
 print("Loading Modules")
 #print("This is a different line")
 totalModules = 10
+global shuffleOn
 print(f"(0/{totalModules}) os")
 import os
 print(f"(1/{totalModules}) pygame")
@@ -452,7 +453,7 @@ def run_script_menu():
                     return
 
 def shutdown_menu():
-    options = ["Playlists", "Random Song", "Update TailsMusic", "Manual text to speech", "Re scan Songs", 
+    options = ["Playlists", "Random Song", "Update TailsMusic", "Shuffle", "Re scan Songs", 
                "Connect to WiFi", "Get local IP", "Open App", "Shut Down", "Back"]
     selected = 0
     speak(options[selected])
@@ -484,6 +485,27 @@ def shutdown_menu():
                             if action2 and options[0] == "Stop":
                                 pygame.mixer.music.stop()
                                 break
+                elif choice == "Shuffle":
+                    shuffleOn = True
+                    while shuffleOn:
+                        song_files = sorted([f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')], key=str.lower)
+                        random_song = random.choice(song_files) if song_files else None
+                        pygame.mixer.music.load(os.path.join(MUSIC_DIR, random_song))
+                        pygame.mixer.music.play()
+                        while pygame.mixer.music.get_busy():
+                            event = dev.read_one()
+                            if event and event.type == ecodes.EV_KEY:
+                                key_event = categorize(event)
+                                key = key_event.keycode
+                                if key_event.keystate == 1:
+                                    if key == config["backbutton"]:
+                                        pygame.mixer.music.stop()
+                                        speak("Exiting shuffle")
+                                        shuffleOn = False
+                                        break
+                                    if key == config["skipbutton"]:
+                                        pygame.mixer.music.stop()
+                                        break
                 elif choice == "Manual text to speech":
                     manual_tts()
                 elif choice == "Re scan Songs":
