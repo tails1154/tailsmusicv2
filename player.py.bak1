@@ -255,11 +255,17 @@ def speak(text):
     print(f"TTS: {text}")
     subprocess.run(["killall", "espeak-ng"], check=False)
     subprocess.run(["espeak-ng", "-s", "130", text], check=True)
+  #  def run_tts():
+  #      with tts_lock:
+   #         try:
+    #            subprocess.run(["espeak-ng", "-s", "130", text], check=True)
+     #       except Exception as e:
+ #               print(f"TTS subprocess error: {e}")
+#    threading.Thread(target=run_tts, daemon=True).start()
 def speak_allowinter(text):
     """Same as speak() but returns immedentally so the user can go quicker, also kills all espeak-ng processes to prevent text overlapping"""
     subprocess.run(["killall", "espeak-ng"], check=False)
-    subprocess.Popen(["espeak-ng", "-s", "130", text])
-
+    subprocess.Popen(["espeak-ng", "-s", "130", text]) # aparantly Popen opens in the background (oh god i spelled it wrong please delete me ajfkldasjflkasdjflkasdjflkasd)
 print("Loading Music Files")
 playlist = sorted(
     [os.path.join(MUSIC_DIR, f) for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
@@ -278,7 +284,7 @@ print("Loading Audio Driver")
 pygame.mixer.init()
 print("Loading sfx...")
 pausesfx = pygame.mixer.Sound("/home/pi/mp3player/sfx/pause.mp3")
-dialup = pygame.mixer.Sound("/home/pi/mp3player/sfx/dialup.mp3")
+dialup = pygame.mixer.Sound("/home/pi/mp3player/sfx/dialup.mp3") # Gotta love the dial up sfx
 panel = pygame.mixer.Sound("/home/pi/mp3player/sfx/panel.mp3")
 click = pygame.mixer.Sound("/home/pi/mp3player/sfx/click.mp3")
 print("Welcome to TailsMusic!")
@@ -291,6 +297,7 @@ def next_song():
     index += 1
     if index >= len(playlist):
         index = 0
+        #exit(0)
     pygame.mixer.music.load(playlist[index])
     pygame.mixer.music.play()
 
@@ -314,115 +321,125 @@ def toggle_pause():
     paused = not paused
     
 def manual_tts():
-    options = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "space", "Done"]
-    selected = 0
-    speak(options[selected])
-    toSpeak = ""
-    while True:
-        if daemonRunning: cmdq.process_Command()
-        event = dev.read_one()
-        if event and event.type == ecodes.EV_KEY:
-            key_event = categorize(event)
-            if key_event.keystate == 1:
-                key = key_event.keycode
-                if key == config['backbutton']:
-                    selected = (selected + 1) % len(options)
-                    speak(options[selected])
-                elif key == config['okbutton'] or key == config['okbutton2']:
-                    selected = (selected - 1) % len(options)
-                    speak(options[selected])
-                elif key == config['skipbutton']:
-                    choice = options[selected]
-                    click.play()
-                    if choice == "space":
-                        toSpeak += " "
-                    elif choice == "Done":
-                        speak(toSpeak)
-                        break
-                    else:
-                        toSpeak += choice
+ """I randomly wanted to make this function to where you could input text with your headphone buttons and tts would play it"""
+ options = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "space", "Done"]
+ selected = 0
+ speak(options[selected])
+ toSpeak = ""
+ while True:
+  if daemonRunning: cmdq.process_Command()
+  event = dev.read_one()
+  if event and event.type == ecodes.EV_KEY:
+   key_event = categorize(event)
+   if key_event.keystate == 1:
+    key = key_event.keycode
+    if key == config['backbutton']:
+     selected = (selected + 1) % len(options)
+     speak(options[selected])
+    elif key == config['okbutton'] or key == config['okbutton2']:
+     selected = (selected - 1) % len(options)
+     speak(options[selected])
+    elif key == config['skipbutton']:
+     choice = options[selected]
+     click.play()
+#     speak(choice)
+     if choice == "space":
+      toSpeak += " "
+     elif choice == "Done":
+      speak(toSpeak)
+      break
+     else:
+      toSpeak += choice
 
 def wifiSetup():
-    speak("Loading wifi networks")
-    pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
-    pygame.mixer.music.play()
-    networks = wifi.scan_wifi()
-    if networks:
-        options = []
-        for i, (ssid, signal) in enumerate(networks):
-            options.append(f"{ssid}")
-        pygame.mixer.music.stop()
-        selected = 0
-        speak("Choose your wifi network")
-        speak(options[selected])
-        while True:
-            if daemonRunning: cmdq.process_Command()
-            event = dev.read_one()
-            if event and event.type == ecodes.EV_KEY:
-                key_event = categorize(event)
-                if key_event.keystate == 1:
-                    key = key_event.keycode
-                    if key == config['backbutton']:
-                        selected = (selected + 1) % len(options)
-                        speak(options[selected])
-                    elif key == config['skipbutton']:
-                        click.play()
-                        wifiName = options[selected]
-                        pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
-                        speak("Enter your wifi password.")
-                        speak("For an easier setup, Connect TailsMusic to Your monitor and type")
-                        speak("n... m... t... u... i... with a keyboard and press enter.")
-                        speak("Enter your wifi password")
-                        options = [
-                            "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
-                            "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
-                            "u", "v", "w", "x", "y", "z",
-                            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
-                            "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
-                            "U", "V", "W", "X", "Y", "Z",
-                            "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-                            "!", "@", "#", "$", "%", "^", "&", "*", "(", ")",
-                            "-", "_", "=", "+", "[", "{", "]", "}", "\\", "|",
-                            ";", ":", "'", "\"", ",", "<", ".", ">", "/", "?", "`", "~", "space", "Done"
-                        ]
-                        selected = 0
-                        wifiPass = ""
-                        speak(options[selected])
-                        while True:
-                            if daemonRunning: cmdq.process_Command()
-                            event = dev.read_one()
-                            if event and event.type == ecodes.EV_KEY:
-                                key_event = categorize(event)
-                                if key_event.keystate == 1:
-                                    key = key_event.keycode
-                                    if key == config['backbutton']:
-                                        selected = (selected + 1) % len(options)
-                                        speak(options[selected])
-                                    elif key == config['okbutton'] or key == config['okbutton2']:
-                                        selected = (selected - 1) % len(options)
-                                        speak(options[selected])
-                                    elif key == config['skipbutton']:
-                                        click.play()
-                                        choice = options[selected]
-                                        if choice == "space":
-                                            wifiPass += ""
-                                        elif choice == "Done":
-                                            speak("Connecting")
-                                            pygame.mixer.music.play()
-                                            try:
-                                                wifi.connect_wifi(wifiName, wifiPass)
-                                            except Exception as e:
-                                                pygame.mixer.music.stop()
-                                                speak("Error connecting: " + str(e))
-                                                break
-                                            pygame.mixer.music.stop()
-                                            speak("Your IP is " + str(wifi.get_ip()))
-                                            break
-                                        else:
-                                            wifiPass += options[selected]
-                        break
+ """This function handles the wifi setup function."""
+ speak("Loading wifi networks")
+ pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
+ pygame.mixer.music.play()
+ networks = wifi.scan_wifi()
+ if networks:
+  options = []
+  for i, (ssid, signal) in enumerate(networks):
+   options.append(f"{ssid}")
+  pygame.mixer.music.stop()
+  selected = 0
+  speak("Choose your wifi network")
+  speak(options[selected])
+  while True:
+   if daemonRunning: cmdq.process_Command()
+   event = dev.read_one()
+   if event and event.type == ecodes.EV_KEY:
+    key_event = categorize(event)
+    if key_event.keystate == 1:
+     key = key_event.keycode
+     if key == config['backbutton']:
+      selected = (selected + 1) % len(options)
+      speak(options[selected])
+     elif key == config['skipbutton']:
+      click.play()
+      wifiName = options[selected]
+      pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
+      speak("Enter your wifi password.")
+      speak("For an easier setup, Connect TailsMusic to Your monitor and type")
+      speak("n... m... t... u... i... with a keyboard and press enter.")
+      speak("Enter your wifi password") # we "need" to say it twice because people get bored and forget what they were doing lol
+      options = [
+    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+    "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
+    "u", "v", "w", "x", "y", "z",
+    "A", "B", "C", "D", "E", "F", "G", "H", "I", "J",
+    "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T",
+    "U", "V", "W", "X", "Y", "Z",
+    "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
+    "!", "@", "#", "$", "%", "^", "&", "*", "(", ")",
+    "-", "_", "=", "+", "[", "{", "]", "}", "\\", "|",
+    ";", ":", "'", "\"", ",", "<", ".", ">", "/", "?", "`", "~", "space", "Done"
+      ]
+      selected = 0
+      wifiPass = ""
+      speak(options[selected])
+      while True:
+       if daemonRunning: cmdq.process_Command()
+       event = dev.read_one()
+       if event and event.type == ecodes.EV_KEY:
+        key_event = categorize(event)
+        if key_event.keystate == 1:
+         key = key_event.keycode
+         if key_event.keystate == 1:
+          key = key_event.keycode
+          print(key)
+          if key == config['backbutton']:
+           selected = (selected + 1) % len(options)
+           speak(options[selected])
+           #sleep(1)
+          elif key == config['okbutton'] or key == config['okbutton2']:
+           selected = (selected - 1) % len(options)
+           speak(options[selected])
+           #sleep(1)
+          elif key == config['skipbutton']:
+           click.play()
+           choice = options[selected]
+           if choice == "space":
+            wifiPass += ""
+           elif choice == "Done":
+            speak("Connecting")
+            pygame.mixer.music.play()
+            try:
+             wifi.connect_wifi(wifiName, wifiPass)
+            except Exception as e:
+             pygame.mixer.music.stop()
+             speak("Error connecting: " + str(e))
+             break
+            pygame.mixer.music.stop()
+            speak("Your IP is " + str(wifi.get_ip()))
+            break
+           else:
+            wifiPass += options[selected]
+      break
 
 def run_script_menu():
+    """This function is the apps launcher"""
+    # Get all .py files in apps/ directory
     py_files = []
     apps_dir = os.path.join(os.path.dirname(__file__), 'apps')
     if os.path.exists(apps_dir):
@@ -449,100 +466,107 @@ def run_script_menu():
                 if key == config['backbutton']:
                     selected = (selected + 1) % len(options)
                     speak(options[selected])
-                elif key == config['okbutton'] or key == config['okbutton2']:
-                    selected = (selected - 1) % len(options)
-                    speak(options[selected])
+                    #sleep(1)
                 elif key == config['skipbutton']:
                     click.play()
                     if options[selected] == "Back":
                         return
                     else:
                         speak(f"Running {options[selected]}")
-                        subprocess.run(["cp", "apps/" + options[selected], "app.py"])
-                        import app as appModule
-                        app = appModule.APP(dev, cmdq)
-                        if app.checkDaemon():
-                            speak("App is a daemon. Running in background")
-                            thread = multiprocessing.Process(target=app.start)
-                            thread.start()
-                            daemonRunning = True
-                        else:
-                            app.start()
-                            os.remove("app.py")
-                            speak("Script finished")
+                        if True:
+                            subprocess.run(["cp", "apps/" + options[selected], "app.py"])
+                            import app as appModule
+                            app = appModule.APP(dev, cmdq)
+                            if app.checkDaemon():
+                             speak("App is a daemon. Running in background")
+                             thread = multiprocessing.Process(target=app.start)
+                             thread.start()
+                             daemonRunning = True
+                            else:
+                             app.start()
+                             os.remove("app.py")
+                             speak("Script finished")
+                        #except Exception as e:
+                        #    speak(f"Error running script: {str(e)}")
                         return
 
 def shutdown_menu():
+    """Despite the name, this is NOT the shutdown menu. That is in this function in a option. The reason for this function name is because early in development before I made menus that does stuff. This function used to just ask if you wanted to shutdown."""
     options = ["Playlists", "Random Song", "Update TailsMusic", "Manual text to speech", "Re scan Songs", 
-               "Connect to WiFi", "Get local IP", "Open App", "Shut Down", "Back"]
+               "Connect to WiFi", "Get local IP", "Open App", "Shut Down", "Back"] # IS THERE ENOUGH OPTIONS???
     selected = 0
     speak(options[selected])
     while True:
         if daemonRunning: cmdq.process_Command()
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
-            key_event = categorize(event)
-            if key_event.keystate == 1:
-                key = key_event.keycode
-                if key == config['backbutton']:
-                    selected = (selected + 1) % len(options)
-                    speak(options[selected])
-                elif key == config['okbutton'] or key == config['okbutton2']:
-                    selected = (selected - 1) % len(options)
-                    speak(options[selected])
-                elif key == config['skipbutton']:
-                    click.play()
-                    choice = options[selected]
-                    if choice == "Shut Down":
-                        speak("Shutting down")
-                        subprocess.run(["sudo", "shutdown", "now"])
-                    elif choice == "Back":
+            if True:
+                key_event = categorize(event)
+                if key_event.keystate == 1:
+                    key = key_event.keycode
+                    if key == config['backbutton']:
+                        selected = (selected + 1) % len(options)
+                        speak(options[selected])
+                        #sleep(1)
+                    elif key == config['okbutton'] or key == config['okbutton2']:
+                                   selected = (selected - 1) % len(options)
+                                   speak(options[selected])
+                    elif key == config['skipbutton']:
+                        click.play()
+                        choice = options[selected]
+                        if choice == "Shut Down":
+                            speak("Shutting down")
+                            subprocess.run(["sudo", "shutdown", "now"])
+                        elif choice == "Back":
+                            pausesfx.play()
+                            return
+                        elif choice == "Playlists":
+                            playlist_menu()
+                        elif choice == "Random Song":
+                            song_files = sorted([f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')], key=str.lower)
+                            random_song = random.choice(song_files) if song_files else None
+                            pygame.mixer.music.load("songs/" + random_song)
+                            pygame.mixer.music.play()
+                            while pygame.mixer.music.get_busy():
+                                 event = dev.read_one()
+                                 if event and event.type == ecodes.EV_KEY:
+                                  key_event = categorize(event)
+                                  if key_event.keystate == 1:
+                                      key = key_event.keycode
+                                      if key == config['skipbutton']:
+                                           pygame.mixer.music.stop()
+                                           break
+                        elif choice == "Manual text to speech":
+                              manual_tts()
+                        elif choice == "Re scan Songs":
+                              speak("Rescanning")
+                              exit(0)
+                        elif choice == "Connect to WiFi":
+                              wifiSetup()
+                        elif choice == "Get local IP":
+                              speak("Your Local IP is: " + wifi.get_ip())
+                        elif choice == "Open App":
+                              #global daemonRuning # nice spelling btw
+                              run_script_menu()
+                              return
+                        elif choice == "Update TailsMusic":
+                            speak("Updating TailsMusic")
+                            pygame.mixer.music.load("sfx/dialup.mp3")
+                            pygame.mixer.music.play(-1)
+                            try:
+                                subprocess.run(["git", "pull"], check=True)
+                                speak("Reloading TailsMusic")
+                                exit(0)
+                            except Exception as e:
+                                speak("Error updating: " + str(e))
                         pausesfx.play()
-                        return
-                    elif choice == "Playlists":
-                        playlist_menu()
-                    elif choice == "Random Song":
-                        song_files = sorted([f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')], key=str.lower)
-                        random_song = random.choice(song_files) if song_files else None
-                        pygame.mixer.music.load("songs/" + random_song)
-                        pygame.mixer.music.play()
-                        while pygame.mixer.music.get_busy():
-                            event = dev.read_one()
-                            if event and event.type == ecodes.EV_KEY:
-                                key_event = categorize(event)
-                                if key_event.keystate == 1:
-                                    key = key_event.keycode
-                                    if key == config['skipbutton']:
-                                        pygame.mixer.music.stop()
-                                        break
-                    elif choice == "Manual text to speech":
-                        manual_tts()
-                    elif choice == "Re scan Songs":
-                        speak("Rescanning")
-                        exit(0)
-                    elif choice == "Connect to WiFi":
-                        wifiSetup()
-                    elif choice == "Get local IP":
-                        speak("Your Local IP is: " + wifi.get_ip())
-                    elif choice == "Open App":
-                        run_script_menu()
-                        return
-                    elif choice == "Update TailsMusic":
-                        speak("Updating TailsMusic")
-                        pygame.mixer.music.load("sfx/dialup.mp3")
-                        pygame.mixer.music.play(-1)
-                        try:
-                            subprocess.run(["git", "pull"], check=True)
-                            speak("Reloading TailsMusic")
-                            exit(0)
-                        except Exception as e:
-                            speak("Error updating: " + str(e))
-                    pausesfx.play()
-                    break
+                        break
 
 def playlist_menu():
+    """This function handles the list of playlists and the Create button"""
     def list_playlists():
         return [f for f in os.listdir(PLAYLIST_DIR) if f.endswith('.json')]
+
     while True:
         if daemonRunning: cmdq.process_Command()
         options = ["Create", *list_playlists(), "Back"]
@@ -559,9 +583,7 @@ def playlist_menu():
                         if key == config['backbutton']:
                             selected = (selected + 1) % len(options)
                             speak(options[selected])
-                        elif key == config['okbutton'] or key == config['okbutton2']:
-                            selected = (selected - 1) % len(options)
-                            speak(options[selected])
+                            #sleep(1)
                         elif key == config['skipbutton']:
                             click.play()
                             choice = options[selected]
@@ -577,15 +599,18 @@ def playlist_menu():
 
 playlist_counter = max((int(f.removeprefix("playlist").removesuffix(".json")) for f in os.listdir("/home/pi/mp3player/playlists/") if f.startswith("playlist") and f.endswith(".json")), default=-1) + 1
 def create_playlist():
+    """This function is the playlist menu that is for adding songs to a playlist and finishing the playlist."""
     global playlist_counter
     songs = []
+    #song_files = [f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
     song_files = sorted([f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')])
 
     speak(f"Creating playlist {playlist_counter}")
     selected = 0
     while True:
-        if daemonRunning: cmdq.process_Command()
+        if daemonRunning: cmdq.process_Command() # yes i love apps on a mp3 player
         options = ["Add song", "Finish"]
+        #speak(options[selected])
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
             try:
@@ -596,9 +621,7 @@ def create_playlist():
                     if key == config['backbutton']:
                         selected = (selected + 1) % len(options)
                         speak(options[selected])
-                    elif key == config['okbutton'] or key == config['okbutton2']:
-                        selected = (selected - 1) % len(options)
-                        speak(options[selected])
+                        #sleep(1)
                     elif key == config['skipbutton']:
                         click.play()
                         if options[selected] == "Finish":
@@ -621,9 +644,11 @@ def create_playlist():
                                             if k == config['backbutton']:
                                                 song_selected = (song_selected + 1) % len(song_files)
                                                 speak_allowinter(song_files[song_selected])
+                                                #sleep(1)
                                             elif k == config['okbutton'] or k == config['okbutton2']:
                                                 song_selected = (song_selected - 1) % len(song_files)
                                                 speak_allowinter(song_files[song_selected])
+                                                #sleep(1)
                                             elif k == config['skipbutton']:
                                                 click.play()
                                                 songs.append(os.path.join(MUSIC_DIR, song_files[song_selected]))
@@ -635,6 +660,7 @@ def create_playlist():
                 print(f"Create playlist error: {e}")
 
 def manage_playlist(name):
+    """This function is for playing, deleting, and going back when selecting a playlist from the playlist menu."""
     with open(f"{PLAYLIST_DIR}/{name}") as f:
         songs = json.load(f)
     options = ["Play", "Delete", "Back"]
@@ -651,14 +677,12 @@ def manage_playlist(name):
                     if key == config['backbutton']:
                         selected = (selected + 1) % len(options)
                         speak(options[selected])
-                    elif key == config['okbutton'] or key == config['okbutton2']:
-                        selected = (selected - 1) % len(options)
-                        speak(options[selected])
+                        #sleep(1)
                     elif key == config['skipbutton']:
                         click.play()
                         choice = options[selected]
                         if choice == "Back":
-                            break
+                          break
                         elif choice == "Delete":
                             speak("Confirm delete")
                             while True:
@@ -701,109 +725,75 @@ def manage_playlist(name):
                             return
             except Exception as e:
                 print(f"Manage playlist error: {e}")
-
-def song_menu():
-    global index
-    options = ["Add to Playlist", "Show Info", "Delete Song", "Back"]
-    selected = 0
-    speak(options[selected])
-    while True:
-        if daemonRunning: cmdq.process_Command()
-        event = dev.read_one()
-        if event and event.type == ecodes.EV_KEY:
-            key_event = categorize(event)
-            if key_event.keystate == 1:
-                key = key_event.keycode
-                if key == config['backbutton']:
-                    selected = (selected + 1) % len(options)
-                    speak(options[selected])
-                elif key == config['okbutton'] or key == config['okbutton2']:
-                    selected = (selected - 1) % len(options)
-                    speak(options[selected])
-                elif key == config['skipbutton']:
-                    click.play()
-                    choice = options[selected]
-                    if choice == "Add to Playlist":
-                        add_song_to_playlist(playlist[index])
-                    elif choice == "Show Info":
-                        show_song_info(playlist[index])
-                    elif choice == "Delete Song":
-                        try:
-                            os.remove(playlist[index])
-                            speak("Song deleted")
-                            del playlist[index]
-                            index %= len(playlist)
-                        except Exception as e:
-                            speak("Error deleting song: " + str(e))
-                        break
-                    elif choice == "Back":
-                        break
-    speak("Exiting song menu")
-
-def add_song_to_playlist(song_path):
-    playlists = [f for f in os.listdir(PLAYLIST_DIR) if f.endswith('.json')]
-    if not playlists:
-        speak("No playlists found. Create one first.")
-        return
-    selected = 0
-    speak("Select playlist to add")
-    speak(playlists[selected])
-    while True:
-        event = dev.read_one()
-        if event and event.type == ecodes.EV_KEY:
-            key_event = categorize(event)
-            if key_event.keystate == 1:
-                key = key_event.keycode
-                if key == config['backbutton']:
-                    selected = (selected + 1) % len(playlists)
-                    speak(playlists[selected])
-                elif key == config['okbutton'] or key == config['okbutton2']:
-                    selected = (selected - 1) % len(playlists)
-                    speak(playlists[selected])
-                elif key == config['skipbutton']:
-                    with open(os.path.join(PLAYLIST_DIR, playlists[selected]), "r+") as f:
-                        songs = json.load(f)
-                        if song_path not in songs:
-                            songs.append(song_path)
-                            f.seek(0)
-                            json.dump(songs, f)
-                            f.truncate()
-                            speak("Song added to playlist.")
-                        else:
-                            speak("Song already in playlist.")
-                    break
-
-def show_song_info(song_path):
+def date_time():
+    """This function speaks the date and time in a 12 hour format"""
+    #TODO: Make like a song speific menu like to add a playlist, etc
     try:
-        fname = os.path.basename(song_path)
-        speak(f"Song name: {fname}")
+        cmd = ["bash", "-c", 'date "+%A %B %e %r %Y"']
+        fullcmd = ""
+        for item in cmd:
+                fullcmd += " " + item
+        print(fullcmd)
+        datetime = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        print(datetime.stderr)
+        speak("The date and time is: " + datetime.stdout)
     except Exception as e:
-        speak("Error showing song info: " + str(e))
+        speak("Error getting date and time: " + str(e))
 
-dev = InputDevice(INPUT_DEVICE)
+dev = InputDevice(INPUT_DEVICE) # Note to self: Why is this so late in the code lol
 print(f"Listening on {INPUT_DEVICE}...")
 while True:
     if daemonRunning: cmdq.process_Command()
     event = dev.read_one()
     if event and event.type == ecodes.EV_KEY:
-        key_event = categorize(event)
-        if key_event.keystate == 1:
-            key = key_event.keycode
-            if key in [config['okbutton'], config['okbutton2']]:
-                toggle_pause()
-            elif key == config['skipbutton']:
-                if paused:
-                    panel.play()
-                    shutdown_menu()
-                else:
-                    next_song()
-            elif key == config['backbutton']:
-                if not paused:
+        if True:
+            key_event = categorize(event)
+            if key_event.keystate == 1:
+                key = key_event.keycode
+                if key in [config['okbutton'], config['okbutton2']]:
+                    toggle_pause()
+                elif key == config['skipbutton']:
+                    if paused:
+                        panel.play()
+                        shutdown_menu()
+                    else:
+                        next_song()
+                elif key == config['backbutton']:
+                   if not paused:
                     prev_song()
-                else:
-                    song_menu()
+                   else:
+                       date_time()
     if not pygame.mixer.music.get_busy() and not paused:
         sleep(0.5)
         next_song()
 #Wed 25 Jun 04:21:16 2025
+# Initialize command queue system
+#command_queue = CommandQueue()
+#c#ommand_queue.start_com# ================== END COMMAND QUEUE SYSTEM ==================
+# Initialize command queue system (example usage)
+#if __name__ == "__main__":
+ #   # For multiprocessing demo
+  #  with CommandQueue(enable_multiprocessing=True, verbose=True) as cmd_queue:
+   #     # Add commands from main process
+    #    cmd_queue.put_command("echo 'Hello from main process'")
+     #   
+        # Simulate adding commands from another proces#s
+ #       def remote_worker(queue):
+#            queue.put("echo 'Hello from remote process'")
+      #      queue.put("python --version")
+            
+#        remote = multiprocessing.Process(
+ #           target=remote_worker,
+  #          args=(cmd_queue.queue,)
+   #     )
+    #    remote.start()
+     #   remote.join()
+        
+     #   try:
+    #        while True:
+  #              # Main process can still add commands
+   #             cmd_queue.put_command("date")
+#                time.sleep(2)
+#        except KeyboardInterrupt:
+ #           print("\nShutting down...")
 # ================== END ENHANCED COMMAND QUEUE SYSTEM ==================
