@@ -284,7 +284,7 @@ print("Loading Audio Driver")
 pygame.mixer.init()
 print("Loading sfx...")
 pausesfx = pygame.mixer.Sound("/home/pi/mp3player/sfx/pause.mp3")
-dialup = pygame.mixer.Sound("/home/pi/mp3player/sfx/dialup.mp3")
+dialup = pygame.mixer.Sound("/home/pi/mp3player/sfx/dialup.mp3") # Gotta love the dial up sfx
 panel = pygame.mixer.Sound("/home/pi/mp3player/sfx/panel.mp3")
 click = pygame.mixer.Sound("/home/pi/mp3player/sfx/click.mp3")
 print("Welcome to TailsMusic!")
@@ -727,6 +727,7 @@ def manage_playlist(name):
                 print(f"Manage playlist error: {e}")
 def date_time():
     """This function speaks the date and time in a 12 hour format"""
+    #TODO: Make like a song speific menu like to add a playlist, etc
     try:
         cmd = ["bash", "-c", 'date "+%A %B %e %r %Y"']
         fullcmd = ""

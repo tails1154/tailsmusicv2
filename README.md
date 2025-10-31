@@ -2,12 +2,30 @@
 better than v1, that's for sure!
 mp3 player but uses bluetooth and headphone buttons to control
 
-ai "enhanced" instructions below
+
 
 
 ## TODO
 
 - ~~make it so you can interrupt the tts in some places~~
+- Replace the date and time function with a "song menu" of some sort where you could add a song to a playlist, and other actions ~~(like what)~~
+- (Would take a long time to do by hand) Make the menus and song navigation consistant (aka make it so back and skip would cycle the menus left and right, and not pause/play and skip to select)
+
+
+
+
+
+
+
+
+
+
+
+
+ai "enhanced" setup instructions below
+
+
+
 
 # **TailsMusic v2 Setup Guide**  
 *A headless MP3 player for Raspberry Pi with Bluetooth headphone control*  
