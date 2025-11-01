@@ -482,6 +482,7 @@ def shutdown_menu():
                         event = dev.read_one()
                         if event and event.type == ecodes.EV_KEY:
                             selected2, action2 = menu_nav(event, 0, ["Stop"])
+                            print(selected2) # there ruff now i used selected2 are you happy
                             if action2 and options[0] == "Stop":
                                 pygame.mixer.music.stop()
                                 break
