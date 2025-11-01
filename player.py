@@ -647,6 +647,7 @@ def manage_playlist(name):
                     return
 
 def song_menu():
+    panel.play()
     global index
     options = ["Add to Playlist", "Show Info", "Delete Song", "Back"]
     selected = 0
@@ -674,7 +675,7 @@ def song_menu():
                     break
                 elif choice == "Back":
                     break
-    speak("Exiting song menu")
+      
 
 def add_song_to_playlist(song_path):
     playlists = [f for f in os.listdir(PLAYLIST_DIR) if f.endswith('.json')]
