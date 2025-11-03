@@ -633,15 +633,7 @@ def manage_playlist(name):
                         while pygame.mixer.music.get_busy():
                             event = dev.read_one()
                             if event and event.type == ecodes.EV_KEY:
-                                selected2, action2 = menu_nav(event, 0, ["Skip", "Back"])
-                                if action2:
-                                    if ["Skip", "Back"][selected2] == "Skip":
-                                        pygame.mixer.music.stop()
-                                        break
-                                    elif ["Skip", "Back"][selected2] == "Back":
-                                        pygame.mixer.music.stop()
-                                        playlist_index = max(playlist_index - 2, -1)
-                                        break
+                                
                         playlist_index += 1
                     speak("Playlist done")
                     return
