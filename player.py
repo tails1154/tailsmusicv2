@@ -649,7 +649,7 @@ def manage_playlist(name):
 def song_menu():
     panel.play()
     global index
-    options = ["Add to Playlist", "Show Info", "Delete Song", "Back"]
+    options = ["Add to Playlist", "Show Info", "Back"]
     selected = 0
     speak(options[selected])
     while True:
