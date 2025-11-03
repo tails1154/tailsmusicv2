@@ -6,3 +6,4 @@ offline_messages.db
 apps/maggiepositive.py
 pager.py
 
+config.json
