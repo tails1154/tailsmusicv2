@@ -641,10 +641,7 @@ def manage_playlist(name):
                                             pygame.mixer.music.stop()
                                         elif key == config['backbutton']:
                                             pygame.mixer.music.stop()
-                                            playlist_index = max(0, playlist_index - 1)
-                                        elif key == config['okbutton'] or key == config['okbutton2']:
-                                            pygame.mixer.music.pause()
-                                            break
+                                            playlist_index = max(0, playlist_index - 2) # -2 because playlistindex increments
                         playlist_index += 1
                     speak("Playlist done")
                     return
