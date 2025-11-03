@@ -630,26 +630,33 @@ def manage_playlist(name):
                         print(song)
                         pygame.mixer.music.load(song)
                         pygame.mixer.music.play()
+                        advance = True  # Flag to control playlist_index increment
+
                         while pygame.mixer.music.get_busy():
                             event = dev.read_one()
                             if event and event.type == ecodes.EV_KEY:
-                                if event.type == ecodes.EV_KEY:
-                                    key_event = categorize(event)
-                                    if key_event.keystate == 1:
-                                        key = key_event.keycode
-                                        if key == config['skipbutton']:
-                                            pygame.mixer.music.stop()
-                                        elif key == config['backbutton']:
-                                            pygame.mixer.music.stop()
-                                            playlist_index = max(0, playlist_index - 2) # -2 because playlistindex increments
-                                            if playlist_index < 0:
-                                                playlist_index = 0 # Make sure we dont go to a song that doesnt exist and henceforth not be able to access the first song again (why? i dont know)
-                                        elif key == config['okbutton'] or key == config['okbutton2']:
-                                            pygame.mixer.music.stop()
-                                            playlist_index = len(songs) # exit playlist
-                        playlist_index += 1
+                                key_event = categorize(event)
+                                if key_event.keystate == 1:
+                                    key = key_event.keycode
+                                    if key == config['skipbutton']:
+                                        pygame.mixer.music.stop()
+                                        break  # Move to next song
+                                    elif key == config['backbutton']:
+                                        pygame.mixer.music.stop()
+                                        playlist_index = max(0, playlist_index - 2)
+                                        advance = False
+                                        break
+                                    elif key == config['okbutton'] or key == config['okbutton2']:
+                                        pygame.mixer.music.stop()
+                                        playlist_index = len(songs)  # Exit playlist
+                                        break
+
+                        if advance:
+                            playlist_index += 1
+
                     speak("Playlist done")
                     return
+
 
 def song_menu():
     panel.play()
