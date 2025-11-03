@@ -642,6 +642,8 @@ def manage_playlist(name):
                                         elif key == config['backbutton']:
                                             pygame.mixer.music.stop()
                                             playlist_index = max(0, playlist_index - 2) # -2 because playlistindex increments
+                                            if playlist_index < 0:
+                                                playlist_index = 0 # Make sure we dont go to a song that doesnt exist and henceforth not be able to access the first song again (why? i dont know)
                         playlist_index += 1
                     speak("Playlist done")
                     return
