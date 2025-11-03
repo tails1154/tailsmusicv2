@@ -646,7 +646,7 @@ def manage_playlist(name):
                                                 playlist_index = 0 # Make sure we dont go to a song that doesnt exist and henceforth not be able to access the first song again (why? i dont know)
                                         elif key == config['okbutton'] or key == config['okbutton2']:
                                             pygame.mixer.music.stop()
-                                            break
+                                            playlist_index = len(songs) # exit playlist
                         playlist_index += 1
                     speak("Playlist done")
                     return
