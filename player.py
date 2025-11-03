@@ -633,7 +633,18 @@ def manage_playlist(name):
                         while pygame.mixer.music.get_busy():
                             event = dev.read_one()
                             if event and event.type == ecodes.EV_KEY:
-                                
+                                if event.type == ecodes.EV_KEY:
+                                    key_event = categorize(event)
+                                    if key_event.keystate == 1:
+                                        key = key_event.keycode
+                                        if key == config['skipbutton']:
+                                            pygame.mixer.music.stop()
+                                        elif key == config['backbutton']:
+                                            pygame.mixer.music.stop()
+                                            playlist_index = max(0, playlist_index - 1)
+                                        elif key == config['okbutton'] or key == config['okbutton2']:
+                                            pygame.mixer.music.pause()
+                                            break
                         playlist_index += 1
                     speak("Playlist done")
                     return
