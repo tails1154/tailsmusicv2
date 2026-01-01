@@ -1,2 +1,4 @@
 pygame
 evdev
+
+pulsectl

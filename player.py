@@ -27,6 +27,13 @@ print(f"(9/{totalModules}) shutil")
 import shutil
 print(f"(10/{totalModules}) queue")
 import queue
+print(f"(11/{totalModules}) pulsectl")
+try:
+    from pulsectl import Pulse
+    _HAS_PULSECTL = True
+except Exception:
+    _HAS_PULSECTL = False
+    Pulse = None
 print("TailsMusic Loading...")
 global daemonRunning
 daemonRunning = False
@@ -413,6 +420,195 @@ def wifiSetup():
                                     wifiPass += options[selected]
                     break
 
+def list_pulse_sinks():
+    """Return list of PulseAudio sinks as (index, name, desc)."""
+    if not _HAS_PULSECTL:
+        return []
+    try:
+        with Pulse('tailsmusic') as p:
+            return [(s.index, s.name, s.description) for s in p.sink_list()]
+    except Exception as e:
+        print("pulsectl list error:", e)
+        return []
+
+
+def set_default_sink_by_name(sink_name: str) -> bool:
+    """Set default sink and move existing sink inputs to it."""
+    if not _HAS_PULSECTL:
+        print("pulsectl not available")
+        return False
+    try:
+        with Pulse('tailsmusic') as p:
+            sinks = {s.name: s for s in p.sink_list()}
+            if sink_name not in sinks:
+                print("Sink not found:", sink_name)
+                return False
+            p.sink_default_set(sinks[sink_name])
+            # Move any active streams to the sink
+            for si in p.sink_input_list():
+                try:
+                    p.sink_input_move(si.index, sinks[sink_name].index)
+                except Exception:
+                    pass
+        return True
+    except Exception as e:
+        print("Error setting default sink:", e)
+        return False
+
+
+def bluetooth_list_devices():
+    """Return list of known bluetooth devices using bluetoothctl."""
+    try:
+        out = subprocess.check_output(['bluetoothctl', 'devices'], text=True)
+        devices = []
+        for line in out.splitlines():
+            # format: Device XX:XX:XX:XX:XX:XX Name
+            parts = line.split(' ', 2)
+            if len(parts) >= 3 and parts[0] == 'Device':
+                mac = parts[1]
+                name = parts[2]
+                devices.append((mac, name))
+        return devices
+    except Exception as e:
+        print('bluetoothctl devices error:', e)
+        return []
+
+
+def bluetooth_scan(timeout=5):
+    """Scan for bluetooth devices for `timeout` seconds and return devices."""
+    try:
+        # start scan
+        subprocess.run(['bluetoothctl', 'scan', 'on'], check=False)
+        sleep(timeout)
+        subprocess.run(['bluetoothctl', 'scan', 'off'], check=False)
+        return bluetooth_list_devices()
+    except Exception as e:
+        print('bluetooth scan error:', e)
+        return []
+
+
+def bluetooth_pair_connect(mac: str) -> bool:
+    """Attempt to pair, trust, and connect to a device via bluetoothctl."""
+    try:
+        subprocess.run(['bluetoothctl', 'pair', mac], check=False)
+        subprocess.run(['bluetoothctl', 'trust', mac], check=False)
+        res = subprocess.run(['bluetoothctl', 'connect', mac], check=False)
+        return res.returncode == 0
+    except Exception as e:
+        print('bluetooth connect error:', e)
+        return False
+
+
+def bluetooth_menu():
+    """UI menu (button-driven) for scanning, pairing and selecting a Bluetooth speaker sink."""
+    options = ["Scan Devices", "Known Devices", "List Audio Sinks", "Back"]
+    selected = 0
+    speak(options[selected])
+    while True:
+        if daemonRunning: cmdq.process_Command()
+        event = dev.read_one()
+        if event and event.type == ecodes.EV_KEY:
+            selected, action = menu_nav(event, selected, options)
+            if action:
+                click.play()
+                choice = options[selected]
+                if choice == "Back":
+                    pausesfx.play()
+                    return
+                elif choice == "Scan Devices":
+                    speak("Scanning for Bluetooth devices")
+                    devices = bluetooth_scan(timeout=6)
+                    if not devices:
+                        speak("No devices found")
+                        continue
+                    dev_opts = [f"{n} ({m})" for m, n in devices]
+                    dev_opts.append("Back")
+                    sel = 0
+                    speak(dev_opts[sel])
+                    while True:
+                        if daemonRunning: cmdq.process_Command()
+                        e = dev.read_one()
+                        if e and e.type == ecodes.EV_KEY:
+                            sel, act = menu_nav(e, sel, dev_opts)
+                            if act:
+                                click.play()
+                                if dev_opts[sel] == "Back":
+                                    break
+                                chosen_mac = devices[sel][0]
+                                chosen_name = devices[sel][1]
+                                speak(f"Pairing with {chosen_name}")
+                                ok = bluetooth_pair_connect(chosen_mac)
+                                if ok:
+                                    speak("Connected")
+                                    # attempt to set pulse sink matching device
+                                    sinks = list_pulse_sinks()
+                                    # try to find sink with MAC in name
+                                    target = None
+                                    for idx, name, desc in sinks:
+                                        if chosen_mac.replace(':', '_') in name or chosen_name in desc or chosen_name in name:
+                                            target = name
+                                            break
+                                    if target:
+                                        set_default_sink_by_name(target)
+                                        speak("Audio routed to speaker")
+                                    else:
+                                        speak("Speaker found but could not route audio automatically")
+                                else:
+                                    speak("Failed to connect to device")
+                                break
+                elif choice == "Known Devices":
+                    devices = bluetooth_list_devices()
+                    if not devices:
+                        speak("No known devices")
+                        continue
+                    dev_opts = [f"{n} ({m})" for m, n in devices]
+                    dev_opts.append("Back")
+                    sel = 0
+                    speak(dev_opts[sel])
+                    while True:
+                        if daemonRunning: cmdq.process_Command()
+                        e = dev.read_one()
+                        if e and e.type == ecodes.EV_KEY:
+                            sel, act = menu_nav(e, sel, dev_opts)
+                            if act:
+                                click.play()
+                                if dev_opts[sel] == "Back":
+                                    break
+                                chosen_mac = devices[sel][0]
+                                chosen_name = devices[sel][1]
+                                speak(f"Connecting to {chosen_name}")
+                                ok = bluetooth_pair_connect(chosen_mac)
+                                if ok:
+                                    speak("Connected")
+                                else:
+                                    speak("Failed to connect")
+                                break
+                elif choice == "List Audio Sinks":
+                    sinks = list_pulse_sinks()
+                    if not sinks:
+                        speak("No audio sinks available")
+                        continue
+                    sink_opts = [f"{name} - {desc}" for idx, name, desc in sinks]
+                    sink_opts.append("Back")
+                    sel = 0
+                    speak(sink_opts[sel])
+                    while True:
+                        if daemonRunning: cmdq.process_Command()
+                        e = dev.read_one()
+                        if e and e.type == ecodes.EV_KEY:
+                            sel, act = menu_nav(e, sel, sink_opts)
+                            if act:
+                                click.play()
+                                if sink_opts[sel] == "Back":
+                                    break
+                                chosen = sinks[sel]
+                                ok = set_default_sink_by_name(chosen[1])
+                                if ok:
+                                    speak("Audio routed to selected sink")
+                                else:
+                                    speak("Failed to set sink")
+                                break
+
 def run_script_menu():
     py_files = []
     apps_dir = os.path.join(os.path.dirname(__file__), 'apps')
@@ -454,7 +650,7 @@ def run_script_menu():
 
 def shutdown_menu():
     options = ["Playlists", "Random Song", "Update TailsMusic", "Shuffle", "Re scan Songs", 
-               "Connect to WiFi", "Get local IP", "Open App", "Shut Down", "Back"]
+               "Connect to WiFi", "Bluetooth", "Get local IP", "Open App", "Shut Down", "Back"]
     selected = 0
     speak(options[selected])
     while True:
@@ -514,6 +710,8 @@ def shutdown_menu():
                     exit(0)
                 elif choice == "Connect to WiFi":
                     wifiSetup()
+                elif choice == "Bluetooth":
+                    bluetooth_menu()
                 elif choice == "Get local IP":
                     speak("Your Local IP is: " + wifi.get_ip())
                 elif choice == "Open App":
