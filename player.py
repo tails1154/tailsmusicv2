@@ -481,11 +481,39 @@ def bluetooth_list_devices():
 def bluetooth_scan(timeout=5):
     """Scan for bluetooth devices for `timeout` seconds and return devices."""
     try:
-        # start scan
-        subprocess.run(['bluetoothctl', 'scan', 'on'], check=False)
-        sleep(timeout)
-        subprocess.run(['bluetoothctl', 'scan', 'off'], check=False)
-        return bluetooth_list_devices()
+        # Run bluetoothctl interactively so we capture discovered (unpaired) devices
+        p = subprocess.Popen(['bluetoothctl'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        try:
+            # start scanning
+            p.stdin.write('scan on\n')
+            p.stdin.flush()
+            sleep(timeout)
+            p.stdin.write('scan off\n')
+            p.stdin.write('devices\n')
+            p.stdin.write('exit\n')
+            out, err = p.communicate(timeout=timeout + 5)
+        except subprocess.TimeoutExpired:
+            p.kill()
+            out, err = p.communicate()
+        devices = []
+        for line in out.splitlines():
+            # look for both 'Device' lines and '[NEW] Device' variants
+            if 'Device' in line:
+                parts = line.split()
+                # find the 'Device' token and ensure there is a MAC and a name
+                try:
+                    i = parts.index('Device')
+                    mac = parts[i+1]
+                    name = ' '.join(parts[i+2:]) if len(parts) > i+2 else ''
+                    devices.append((mac, name))
+                except ValueError:
+                    continue
+                except Exception:
+                    continue
+        # fall back to known devices if nothing found
+        if not devices:
+            return bluetooth_list_devices()
+        return devices
     except Exception as e:
         print('bluetooth scan error:', e)
         return []
