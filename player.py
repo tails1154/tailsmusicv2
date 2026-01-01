@@ -34,9 +34,15 @@ try:
 except Exception:
     _HAS_PULSECTL = False
     Pulse = None
-    os.system("espeak-ng 'pulsectl module not found. installing it'")
-    os.system("pip install pulsectl --break-system-packages")
-    os.system("espeak-ng 'pulsectl module installed. reloading TailsMusic'")
+try:
+    from bleak import BleakScanner
+    _HAS_BLEAK = True
+except Exception:
+    _HAS_BLEAK = False
+    BleakScanner = None
+    os.system("espeak-ng 'pulsectl module not found. installing it' -s 130")
+    os.system("pip install pulsectl bleak --break-system-packages")
+    os.system("espeak-ng 'pulsectl module installed. reloading TailsMusic' -s 130")
     sys.exit(0)
 print("TailsMusic Loading...")
 global daemonRunning
@@ -486,11 +492,23 @@ def bluetooth_list_devices():
 
 def bluetooth_scan(timeout=5):
     """Scan for bluetooth devices for `timeout` seconds and return devices."""
+    # Prefer BLE scan with bleak if available
+    if _HAS_BLEAK:
+        try:
+            devices = []
+            results = BleakScanner.discover(timeout=timeout)
+            for d in results:
+                name = d.name or d.metadata.get('local_name') if getattr(d, 'metadata', None) else d.name
+                devices.append((d.address, name or ''))
+            if devices:
+                return devices
+        except Exception as e:
+            print('bleak scan error:', e)
+
+    # Fallback to bluetoothctl interactive scan for non-BLE or if bleak is unavailable
     try:
-        # Run bluetoothctl interactively so we capture discovered (unpaired) devices
         p = subprocess.Popen(['bluetoothctl'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         try:
-            # start scanning
             p.stdin.write('scan on\n')
             p.stdin.flush()
             sleep(timeout)
@@ -503,20 +521,15 @@ def bluetooth_scan(timeout=5):
             out, err = p.communicate()
         devices = []
         for line in out.splitlines():
-            # look for both 'Device' lines and '[NEW] Device' variants
             if 'Device' in line:
                 parts = line.split()
-                # find the 'Device' token and ensure there is a MAC and a name
                 try:
                     i = parts.index('Device')
                     mac = parts[i+1]
                     name = ' '.join(parts[i+2:]) if len(parts) > i+2 else ''
                     devices.append((mac, name))
-                except ValueError:
-                    continue
                 except Exception:
                     continue
-        # fall back to known devices if nothing found
         if not devices:
             return bluetooth_list_devices()
         return devices
