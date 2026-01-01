@@ -59,7 +59,7 @@ print(f"backbutton: {config['backbutton']}")
 print(f"evtestname: {config['evtestname']}")
 
 # --- Menu navigation helper ---
-def menu_nav(event, selected, options):
+def menu_nav(event, selected, options, allowInterrupt: bool = False):
     """
     Handle menu navigation: back cycles BACK, skip cycles FORWARD, play/pause (okbutton/okbutton2) selects.
     Returns tuple (selected, selected_action) where selected_action is True if play/pause was pressed.
@@ -69,10 +69,16 @@ def menu_nav(event, selected, options):
         key = key_event.keycode
         if key == config['backbutton']:
             selected = (selected - 1) % len(options)
-            speak(options[selected])
+            if allowInterrupt:
+                speak_allowinter(options[selected])
+            else:
+                speak(options[selected])
         elif key == config['skipbutton']:
             selected = (selected + 1) % len(options)
-            speak(options[selected])
+            if allowInterrupt:
+                speak_allowinter(options[selected])
+            else:
+                speak(options[selected])
         elif key in [config['okbutton'], config['okbutton2']]:
             return selected, True
     return selected, False
@@ -556,12 +562,12 @@ def bluetooth_menu():
                     dev_opts = [f"{n} ({m})" for m, n in devices]
                     dev_opts.append("Back")
                     sel = 0
-                    speak(dev_opts[sel])
+                    speak_allowinter(dev_opts[sel])
                     while True:
                         if daemonRunning: cmdq.process_Command()
                         e = dev.read_one()
                         if e and e.type == ecodes.EV_KEY:
-                            sel, act = menu_nav(e, sel, dev_opts)
+                            sel, act = menu_nav(e, sel, dev_opts, allowInterrupt=True)
                             if act:
                                 click.play()
                                 if dev_opts[sel] == "Back":
