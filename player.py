@@ -34,6 +34,10 @@ try:
 except Exception:
     _HAS_PULSECTL = False
     Pulse = None
+    os.system("espeak-ng 'pulsectl module not found. installing it'")
+    os.system("pip install pulsectl --break-system-packages")
+    os.system("espeak-ng 'pulsectl module installed. reloading TailsMusic'")
+    sys.exit(0)
 print("TailsMusic Loading...")
 global daemonRunning
 daemonRunning = False
