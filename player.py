@@ -647,7 +647,7 @@ def bluetooth_menu():
                         if daemonRunning: cmdq.process_Command()
                         e = dev.read_one()
                         if e and e.type == ecodes.EV_KEY:
-                            sel, act = menu_nav(e, sel, sink_opts)
+                            sel, act = menu_nav(e, sel, sink_opts, True)
                             if act:
                                 click.play()
                                 if sink_opts[sel] == "Back":
@@ -655,7 +655,7 @@ def bluetooth_menu():
                                 chosen = sinks[sel]
                                 ok = set_default_sink_by_name(chosen[1])
                                 if ok:
-                                    speak("Audio routed to selected sink")
+                                    speak("Audio routed to " + str(chosen[1]))
                                 else:
                                     speak("Failed to set sink")
                                 break
