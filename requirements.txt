@@ -4,3 +4,7 @@ evdev
 pulsectl
 
 bleak
+
+vosk
+sounddevice
+numpy

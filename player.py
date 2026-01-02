@@ -292,14 +292,15 @@ try:
 except Exception as e:
     print("Error removing app.py: " + str(e))
 tts_lock = threading.Lock()
-def speak(text):
+def speak_nointer(text):
     print(f"TTS: {text}")
     subprocess.run(["killall", "espeak-ng"], check=False)
     subprocess.run(["espeak-ng", "-s", "130", text], check=True)
-def speak_allowinter(text):
+def speak(text):
     subprocess.run(["killall", "espeak-ng"], check=False)
     subprocess.Popen(["espeak-ng", "-s", "130", text])
-
+def speak_allowinter(text):
+    speak(text)
 print("Loading Music Files")
 playlist = sorted(
     [os.path.join(MUSIC_DIR, f) for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
