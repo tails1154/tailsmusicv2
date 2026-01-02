@@ -655,7 +655,7 @@ def bluetooth_menu():
                                 chosen = sinks[sel]
                                 ok = set_default_sink_by_name(chosen[1])
                                 if ok:
-                                    speak("Audio routed to " + str(chosen[1]))
+                                    speak("Audio routed to device")
                                 else:
                                     speak("Failed to set sink")
                                 break
