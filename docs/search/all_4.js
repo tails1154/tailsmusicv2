@@ -1,8 +1,9 @@
 var searchData=
 [
-  ['enable_5fmultiprocessing_0',['enable_multiprocessing',['../classplayer_1_1CommandQueue.html#a14fba34b4aedbb8658841e09c8cc77b4',1,'player::CommandQueue']]],
-  ['event_1',['event',['../classtools_1_1API.html#a37f0fe6a66997621f0cbd2a7ee7a5f08',1,'tools.API.event()'],['../namespaceplayer.html#a845e9834f44e93e502243a3a4cf1af66',1,'player.event()']]],
-  ['exampleapp_2',['exampleApp',['../namespaceexampleApp.html',1,'']]],
-  ['exampleapp_2epy_3',['exampleApp.py',['../exampleApp_8py.html',1,'']]],
-  ['exist_5fok_4',['exist_ok',['../namespaceplayer.html#a4eea4a4d651461ea92156a324bdd887d',1,'player']]]
+  ['daemonrunning_0',['daemonRunning',['../namespaceplayer.html#aedcffbdfd219e18f1574e274515318b4',1,'player']]],
+  ['dev_1',['dev',['../classexampleApp_1_1APP.html#a17906c4f997716e87571bda25b6f0ce8',1,'exampleApp.APP.dev()'],['../namespaceplayer.html#aadd2cde38b0fad2c8269fdf8250f38e4',1,'player.dev()']]],
+  ['device_2',['device',['../classtools_1_1API.html#a2ce5f9fea358991fb8fedb1d1d9e7cb1',1,'tools::API']]],
+  ['device_5fpath_3',['device_path',['../namespaceplayer.html#a9a0308cfd658b1f92641add6bbe9d82f',1,'player']]],
+  ['dialup_4',['dialup',['../namespaceplayer.html#a59a5b786857da67939615479f7730c94',1,'player']]],
+  ['docs_2emd_5',['docs.md',['../docs_8md.html',1,'']]]
 ];

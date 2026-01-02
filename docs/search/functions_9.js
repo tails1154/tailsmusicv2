@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['run_5fscript_5fmenu_0',['run_script_menu',['../namespaceplayer.html#a858cc01dd0b2784264bcf0dbb8feb128',1,'player']]]
+  ['next_5fsong_0',['next_song',['../namespaceplayer.html#a8d28dc8f5bac2b94396751c3243a873a',1,'player']]]
 ];

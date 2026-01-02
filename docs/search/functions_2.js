@@ -1,9 +1,7 @@
 var searchData=
 [
-  ['checkdaemon_0',['checkDaemon',['../classexampleApp_1_1APP.html#a15168e74e0af26965b0bc9058d2bfd32',1,'exampleApp::APP']]],
-  ['checkleft_1',['checkLeft',['../classtools_1_1API.html#a223675331151573690ac6d24a645f934',1,'tools::API']]],
-  ['checkplaypause_2',['checkPlayPause',['../classtools_1_1API.html#ae750373c3ed54c1b2b556b8ee8144e26',1,'tools::API']]],
-  ['checkright_3',['checkRight',['../classtools_1_1API.html#a1234b2c67b2f52d8c07123607e8c1341',1,'tools::API']]],
-  ['connect_5fwifi_4',['connect_wifi',['../namespacewifi.html#a4bee0e21c6a34d68ab7fcc673aacf2ee',1,'wifi']]],
-  ['create_5fplaylist_5',['create_playlist',['../namespaceplayer.html#a345175c42955a9cb671531b0b219deda',1,'player']]]
+  ['bluetooth_5flist_5fdevices_0',['bluetooth_list_devices',['../namespaceplayer.html#a5598cc9bab0c663f8a15cee7a443fd14',1,'player']]],
+  ['bluetooth_5fmenu_1',['bluetooth_menu',['../namespaceplayer.html#a321d6a42d0f939e4e721f7d987d24c4a',1,'player']]],
+  ['bluetooth_5fpair_5fconnect_2',['bluetooth_pair_connect',['../namespaceplayer.html#a3263346c09df3c4df1a547131281ad0b',1,'player']]],
+  ['bluetooth_5fscan_3',['bluetooth_scan',['../namespaceplayer.html#a14aaef72fbdb3283687bfc3a2e0f940f',1,'player']]]
 ];

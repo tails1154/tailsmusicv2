@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['manage_5fplaylist_0',['manage_playlist',['../namespaceplayer.html#a38ad6eaccc8b4ef4924e6f056ee1e577',1,'player']]],
-  ['manual_5ftts_1',['manual_tts',['../namespaceplayer.html#a44acf5ba561d37a8af37477646e65646',1,'player']]],
-  ['menu_5fnav_2',['menu_nav',['../namespaceplayer.html#ae6ea975d1451a6bfb753a09e1d017179',1,'player']]]
+  ['isleftpressed_0',['isLeftPressed',['../classtools_1_1API.html#a0d3d7da4ac67d527c5b06ee6a76e326c',1,'tools::API']]],
+  ['isplaypausepressed_1',['isPlayPausePressed',['../classtools_1_1API.html#adec59f567844395aa83957809b42ffe9',1,'tools::API']]],
+  ['isrightpressed_2',['isRightPressed',['../classtools_1_1API.html#a56d504dc163f3ccfdc6dcd9f02f20848',1,'tools::API']]]
 ];

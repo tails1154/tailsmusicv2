@@ -620,7 +620,7 @@ def bluetooth_menu():
                         if daemonRunning: cmdq.process_Command()
                         e = dev.read_one()
                         if e and e.type == ecodes.EV_KEY:
-                            sel, act = menu_nav(e, sel, dev_opts)
+                            sel, act = menu_nav(e, sel, dev_opts, allowInterrupt=True)
                             if act:
                                 click.play()
                                 if dev_opts[sel] == "Back":

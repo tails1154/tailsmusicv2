@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['index_0',['index',['../namespaceplayer.html#a6a3540601d290228e4f7d5c7559580cb',1,'player']]],
-  ['input_5fdevice_1',['INPUT_DEVICE',['../namespaceplayer.html#a32f1f3b91d213d5706e5021d7a1e161a',1,'player']]]
+  ['enable_5fmultiprocessing_0',['enable_multiprocessing',['../classplayer_1_1CommandQueue.html#a14fba34b4aedbb8658841e09c8cc77b4',1,'player::CommandQueue']]],
+  ['event_1',['event',['../classtools_1_1API.html#a37f0fe6a66997621f0cbd2a7ee7a5f08',1,'tools.API.event()'],['../namespaceplayer.html#a845e9834f44e93e502243a3a4cf1af66',1,'player.event()']]],
+  ['exist_5fok_2',['exist_ok',['../namespaceplayer.html#a4eea4a4d651461ea92156a324bdd887d',1,'player']]]
 ];
