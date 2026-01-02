@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['contributor_20covenant_20code_20of_20conduct_0',['Contributor Covenant Code of Conduct',['../md_CODE_OF_CONDUCT.html',1,'']]],
-  ['credits_1',['Credits',['../md_credits.html',1,'']]]
+  ['1_20correction_0',['1. Correction',['../md_CODE__OF__CONDUCT.html#autotoc_md7',1,'']]],
+  ['1_20install_20the_20project_1',['&lt;b&gt;1. Install the Project&lt;/b&gt;',['../md_README.html#autotoc_md20',1,'']]]
 ];

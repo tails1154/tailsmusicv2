@@ -1,6 +1,25 @@
 var searchData=
 [
-  ['list_5fpulse_5fsinks_0',['list_pulse_sinks',['../namespaceplayer.html#a64e3f322c9192312a819dc934f0445d6',1,'player']]],
-  ['listener_5fthread_1',['listener_thread',['../classplayer_1_1CommandQueue.html#af67b97515469ca239292654deab73833',1,'player::CommandQueue']]],
-  ['lock_2',['lock',['../classplayer_1_1CommandQueue.html#a86dc1709298eb408af8cc381e30049c7',1,'player::CommandQueue']]]
+  ['checkdaemon_0',['checkDaemon',['../classexampleApp_1_1APP.html#afb25eda6c2fa6bd285877a99d8a9176a',1,'exampleApp::APP']]],
+  ['checkleft_1',['checkLeft',['../classtools_1_1API.html#ac5f98a04979761c89377f167979fce54',1,'tools::API']]],
+  ['checkplaypause_2',['checkPlayPause',['../classtools_1_1API.html#a9e5847c7ed7cce23f32999bf3b95285c',1,'tools::API']]],
+  ['checkright_3',['checkRight',['../classtools_1_1API.html#a0a04334a31bda7d4e284bdf70f6800e2',1,'tools::API']]],
+  ['click_4',['click',['../namespaceplayer.html#a5bd17acdc36091b676f202773f683f30',1,'player']]],
+  ['cmdq_5',['cmdq',['../namespaceplayer.html#aa0ff4a86aa567568f696d5a1a75290a2',1,'player']]],
+  ['code_20of_20conduct_6',['Contributor Covenant Code of Conduct',['../md_CODE__OF__CONDUCT.html',1,'']]],
+  ['code_5fof_5fconduct_2emd_7',['CODE_OF_CONDUCT.md',['../CODE__OF__CONDUCT_8md.html',1,'']]],
+  ['commandqueue_8',['CommandQueue',['../classplayer_1_1CommandQueue.html',1,'player']]],
+  ['conduct_9',['Contributor Covenant Code of Conduct',['../md_CODE__OF__CONDUCT.html',1,'']]],
+  ['config_10',['config',['../namespaceplayer.html#ad4ea2d8287f3edd58fa8b4b2b0e9eb8e',1,'player.config'],['../namespacetools.html#a44a1cffe39b0a87ef860413cd1820d9b',1,'tools.config']]],
+  ['configure_20button_20controls_11',['&lt;b&gt;5. Configure Button Controls&lt;/b&gt;',['../md_README.html#autotoc_md28',1,'']]],
+  ['configure_20pulseaudio_12',['&lt;b&gt;4. Configure PulseAudio&lt;/b&gt;',['../md_README.html#autotoc_md26',1,'']]],
+  ['connect_5fwifi_13',['connect_wifi',['../namespacewifi.html#a16391b9070e5140de7c862b7faf95f83',1,'wifi']]],
+  ['contributor_20covenant_20code_20of_20conduct_14',['Contributor Covenant Code of Conduct',['../md_CODE__OF__CONDUCT.html',1,'']]],
+  ['control_20guide_15',['TailsMusic Control Guide',['../md_README.html#autotoc_md37',1,'']]],
+  ['controls_16',['Controls',['../md_README.html#autotoc_md28',1,'&lt;b&gt;5. Configure Button Controls&lt;/b&gt;'],['../md_README.html#autotoc_md38',1,'Main Controls']]],
+  ['correction_17',['1. Correction',['../md_CODE__OF__CONDUCT.html#autotoc_md7',1,'']]],
+  ['covenant_20code_20of_20conduct_18',['Contributor Covenant Code of Conduct',['../md_CODE__OF__CONDUCT.html',1,'']]],
+  ['create_5fplaylist_19',['create_playlist',['../namespaceplayer.html#a36d62ae473ff8fa9239f5dc95b328c57',1,'player']]],
+  ['credits_20',['Credits',['../md_credits.html',1,'']]],
+  ['credits_2emd_21',['credits.md',['../credits_8md.html',1,'']]]
 ];

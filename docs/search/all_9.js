@@ -1,5 +1,11 @@
 var searchData=
 [
-  ['key_0',['key',['../classtools_1_1API.html#ab3e7be13ee83e3eacd2615be710a64a2',1,'tools.API.key()'],['../namespaceplayer.html#af1d3537b63fbc24a407af7d49a34d7cd',1,'player.key()']]],
-  ['key_5fevent_1',['key_event',['../classtools_1_1API.html#a85e0ed972365058af6eaf9cd0d1b7ae6',1,'tools.API.key_event()'],['../namespaceplayer.html#a7ff0443fed6d3d2e93c0e3d9ca170c31',1,'player.key_event()']]]
+  ['ban_0',['Ban',['../md_CODE__OF__CONDUCT.html#autotoc_md9',1,'3. Temporary Ban'],['../md_CODE__OF__CONDUCT.html#autotoc_md10',1,'4. Permanent Ban']]],
+  ['bleakscanner_1',['BleakScanner',['../namespaceplayer.html#aaf88ee05c17856e66931cc6853d8bed4',1,'player']]],
+  ['bluetooth_20headphones_2',['&lt;b&gt;2. Pair Bluetooth Headphones&lt;/b&gt;',['../md_README.html#autotoc_md22',1,'']]],
+  ['bluetooth_5flist_5fdevices_3',['bluetooth_list_devices',['../namespaceplayer.html#a70a68656adc37f5668e638ac3b8ac593',1,'player']]],
+  ['bluetooth_5fmenu_4',['bluetooth_menu',['../namespaceplayer.html#afaf9296c4e3ab79bdbd2dd950799d031',1,'player']]],
+  ['bluetooth_5fpair_5fconnect_5',['bluetooth_pair_connect',['../namespaceplayer.html#a3263346c09df3c4df1a547131281ad0b',1,'player']]],
+  ['bluetooth_5fscan_6',['bluetooth_scan',['../namespaceplayer.html#a07fb79705a5a716442b570f4edb3a5af',1,'player']]],
+  ['button_20controls_7',['&lt;b&gt;5. Configure Button Controls&lt;/b&gt;',['../md_README.html#autotoc_md28',1,'']]]
 ];

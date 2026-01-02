@@ -1,8 +1,11 @@
 var searchData=
 [
-  ['index_0',['index',['../namespaceplayer.html#a6a3540601d290228e4f7d5c7559580cb',1,'player']]],
-  ['input_5fdevice_1',['INPUT_DEVICE',['../namespaceplayer.html#a32f1f3b91d213d5706e5021d7a1e161a',1,'player']]],
-  ['isleftpressed_2',['isLeftPressed',['../classtools_1_1API.html#a0d3d7da4ac67d527c5b06ee6a76e326c',1,'tools::API']]],
-  ['isplaypausepressed_3',['isPlayPausePressed',['../classtools_1_1API.html#adec59f567844395aa83957809b42ffe9',1,'tools::API']]],
-  ['isrightpressed_4',['isRightPressed',['../classtools_1_1API.html#a56d504dc163f3ccfdc6dcd9f02f20848',1,'tools::API']]]
+  ['add_20music_20and_20playlists_0',['&lt;b&gt;6. Add Music and Playlists&lt;/b&gt;',['../md_README.html#autotoc_md30',1,'']]],
+  ['add_5fsong_5fto_5fplaylist_1',['add_song_to_playlist',['../namespaceplayer.html#a70b6a417d7c3344233a5f153d32d4026',1,'player']]],
+  ['and_20playlists_2',['&lt;b&gt;6. Add Music and Playlists&lt;/b&gt;',['../md_README.html#autotoc_md30',1,'']]],
+  ['api_3',['API',['../classtools_1_1API.html',1,'tools']]],
+  ['api_4',['api',['../classexampleApp_1_1APP.html#a98b9327f9875820f96c1adbd09f7e234',1,'exampleApp::APP']]],
+  ['app_5',['APP',['../classexampleApp_1_1APP.html',1,'exampleApp']]],
+  ['attribution_6',['Attribution',['../md_CODE__OF__CONDUCT.html#autotoc_md11',1,'']]],
+  ['audio_7',['Audio',['../md_credits.html#autotoc_md13',1,'']]]
 ];

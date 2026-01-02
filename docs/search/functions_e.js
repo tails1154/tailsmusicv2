@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['wifisetup_0',['wifiSetup',['../namespaceplayer.html#aa3959b37b0cc48b3c0815a4a9d45ca64',1,'player']]]
+  ['wifisetup_0',['wifiSetup',['../namespaceplayer.html#a9243c1b439afb274a89648eeae231387',1,'player']]]
 ];

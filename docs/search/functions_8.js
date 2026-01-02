@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['manage_5fplaylist_0',['manage_playlist',['../namespaceplayer.html#a38ad6eaccc8b4ef4924e6f056ee1e577',1,'player']]],
-  ['manual_5ftts_1',['manual_tts',['../namespaceplayer.html#a44acf5ba561d37a8af37477646e65646',1,'player']]],
-  ['menu_5fnav_2',['menu_nav',['../namespaceplayer.html#a8d3f84d03716f2ab2c7b6aa9f0e8b1d9',1,'player']]]
+  ['manage_5fplaylist_0',['manage_playlist',['../namespaceplayer.html#a5b735046a91d579deaf2d628789d482a',1,'player']]],
+  ['manual_5ftts_1',['manual_tts',['../namespaceplayer.html#ac27e9aa9735ca10f7c6a25c6af725602',1,'player']]],
+  ['menu_5fnav_2',['menu_nav',['../namespaceplayer.html#ad9375730f1f7003b9b93e10525147c8d',1,'player']]]
 ];

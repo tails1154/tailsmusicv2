@@ -615,7 +615,7 @@ def bluetooth_menu():
                     dev_opts = [f"{n} ({m})" for m, n in devices]
                     dev_opts.append("Back")
                     sel = 0
-                    speak(dev_opts[sel])
+                    speak_allowinter(dev_opts[sel])
                     while True:
                         if daemonRunning: cmdq.process_Command()
                         e = dev.read_one()
@@ -642,7 +642,7 @@ def bluetooth_menu():
                     sink_opts = [f"{name} - {desc}" for idx, name, desc in sinks]
                     sink_opts.append("Back")
                     sel = 0
-                    speak(sink_opts[sel])
+                    speak_allowinter(sink_opts[sel])
                     while True:
                         if daemonRunning: cmdq.process_Command()
                         e = dev.read_one()

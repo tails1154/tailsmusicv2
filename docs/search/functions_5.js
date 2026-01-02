@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['get_5fip_0',['get_ip',['../namespacewifi.html#af3d08e6a69e84e40392605cd56b22c74',1,'wifi']]],
-  ['getevent_1',['getEvent',['../classtools_1_1API.html#a0efd37342d89e3cc8f26da961cdc69a6',1,'tools::API']]]
+  ['get_5fip_0',['get_ip',['../namespacewifi.html#ac2d784a74fdb06cd89416327db845327',1,'wifi']]],
+  ['getevent_1',['getEvent',['../classtools_1_1API.html#aa3ee147ca3656878dcf4757ed739d9a7',1,'tools::API']]]
 ];

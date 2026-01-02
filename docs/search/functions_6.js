@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['isleftpressed_0',['isLeftPressed',['../classtools_1_1API.html#a0d3d7da4ac67d527c5b06ee6a76e326c',1,'tools::API']]],
-  ['isplaypausepressed_1',['isPlayPausePressed',['../classtools_1_1API.html#adec59f567844395aa83957809b42ffe9',1,'tools::API']]],
-  ['isrightpressed_2',['isRightPressed',['../classtools_1_1API.html#a56d504dc163f3ccfdc6dcd9f02f20848',1,'tools::API']]]
+  ['isleftpressed_0',['isLeftPressed',['../classtools_1_1API.html#a84d4053e62ab4a2b69f17bab678150e5',1,'tools::API']]],
+  ['isplaypausepressed_1',['isPlayPausePressed',['../classtools_1_1API.html#a5e4b764f86ea60003ab6a554410ca38e',1,'tools::API']]],
+  ['isrightpressed_2',['isRightPressed',['../classtools_1_1API.html#ad1a99c6bc6851e2d58e31993ffadc0ac',1,'tools::API']]]
 ];

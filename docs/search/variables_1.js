@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['bleakscanner_0',['BleakScanner',['../namespaceplayer.html#aaf88ee05c17856e66931cc6853d8bed4',1,'player']]]
+  ['api_0',['api',['../classexampleApp_1_1APP.html#a98b9327f9875820f96c1adbd09f7e234',1,'exampleApp::APP']]]
 ];

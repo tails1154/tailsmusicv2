@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['toggle_5fpause_0',['toggle_pause',['../namespaceplayer.html#a64c6a6dfd917e12c23a41b4c7e4264ce',1,'player']]]
+  ['toggle_5fpause_0',['toggle_pause',['../namespaceplayer.html#af498c0f07198bba324525781204b3580',1,'player']]]
 ];
