@@ -1,78 +1,48 @@
 # TailsMusic v2 — Agent Guide
 
-## Entrypoint
+## Entrypoint & runtime
+- `player.py` runs as `#!/bin/python3` on Raspberry Pi OS. Must run from `/home/pi/mp3player/`.
+- Hardcoded paths in code: `MUSIC_DIR = /home/pi/mp3player/songs`, `PLAYLIST_DIR = /home/pi/mp3player/playlists`, `sfx/`, `apps/` all under repo root.
 
-`player.py` is the sole entrypoint. Run with `python3 player.py`.
+## Config
+- `config.json` maps button key codes (`okbutton`, `okbutton2`, `backbutton`, `skipbutton`) and `evtestname` (substring-matched against input device name).
+- `.gitignore` lists `config.json` — it is intentionally **not** committed. Do not add it to a commit.
 
-## Project structure
+## Button navigation convention (all menus)
+- `backbutton` → cycle BACK (left), `skipbutton` → cycle FORWARD (right), `okbutton`/`okbutton2` → select/confirm.
+- Always implement menus via the `menu_nav()` helper in `player.py` for consistency.
 
-| Path | Purpose |
-|---|---|
-| `player.py` | Main loop: pygame audio, evdev button handler, all menus |
-| `tools.py` | `tools.API` helper class for app developers |
-| `wifi.py` | WiFi scan/connect via `nmcli` |
-| `config.json` | Button keycode mappings + `evtestname` device name prefix |
-| `apps/*.py` | Pluggable apps with class `APP(dev, queue)` + `checkDaemon() -> bool` + `start()` |
-| `songs/` | MP3 files (gitignored) |
-| `playlists/` | JSON playlist files (gitignored) |
-| `sfx/` | 5 WAV/MP3 sound effects (pause, click, panel, dialup, bonk) |
-| `bashrc` | Auto-start script for Raspberry Pi — also shows PulseAudio/Bluetooth pairing flow |
+## Lint & CI (no tests)
+- **Ruff**: `uvx ruff check --output-format=github` (CI via `astral-sh/setup-uv@v7`).
+- Rules in `pyproject.toml`: E, F, YTT, T10, ISC, G, PIE, RSE, PLC, PLE, RUF.
+- Ignored: E501 (line-length), E402 (import-not-at-top), E701 (multi-stmt-colon), PLC0415 (import-outside-top-level).
+- **No test framework**, no typechecker, no pre-commit hooks.
 
-## Config (`config.json`)
+## App plugin system
+- `apps/*.py` files must export a class `APP` with `__init__(self, dev, queue)`, `checkDaemon(self) -> bool`, and `start(self)`.
+- The app `.py` is copied to `app.py`, then `import app as appModule` / `appModule.APP(dev, cmdq).start()`.
+- If `checkDaemon()` returns `True`, the app runs in a `multiprocessing.Process` (background) and sets `daemonRunning = True` (affects whether `cmdq.process_Command()` is called in the main loop).
+- `exampleApp.py` is the canonical template. `tools.py` provides `API(device)` for button polling and TTS.
 
-- `evtestname` is matched as substring (not exact). Example: `"SIMOLIO"` matches `"SIMOLIO (AVRCP)"`.
-- Button keys: `okbutton`, `okbutton2`, `skipbutton`, `backbutton` — values are evdev `KEY_*` codes.
+## System dependencies (Raspberry Pi OS)
+- `pulseaudio`, `pulseaudio-module-bluetooth`, `espeak-ng`, `evtest`, `python3-evdev`, `nmcli` (NetworkManager for WiFi).
+- Python: `pygame`, `evdev`, `pulsectl` (optional), `bleak` (optional), `vosk`/`sounddevice`/`numpy` (optional).
+- The code uses `pip install --break-system-packages` for auto-install — do not replicate this pattern in new code.
 
-## Navigation convention (menus)
+## Code quirks & gotchas
+- Many `try/except Exception` swallowing errors silently. Avoid this in new code.
+- `os.system()` used for pip auto-install + restart. Prefer `subprocess.run()`.
+- `shutil.rmtree("__pycache__")` on startup — stale cache is expected.
+- `global daemonRunning` flag controls `cmdq.process_Command()` polling in the main event loop.
+- `app.py` is deleted at startup (`os.remove("app.py")`) and after non-daemon apps finish. It is in `.gitignore`.
+- `player.py` auto-advances to next song when `pygame.mixer.music.get_busy()` is false.
 
-- **Back button** = cycle left/back through options
-- **Skip button** = cycle right/forward
-- **OK/OK2** = select current option
-- All menus use `menu_nav()` in `player.py`.
+## Docs
+- Doxygen: `./docs.sh` regenerates HTML docs (runs `doxygen`, copies `docs/html/*` to `docs/`, removes source).
+- `push.sh` runs `docs.sh` before committing. The workflow is: `./docs.sh && git add . && git commit`.
 
-## App system
-
-- Apps live in `apps/*.py`. Copied to `app.py`, then `import app as appModule` at runtime.
-- Each app must define class `APP` with:
-  - `__init__(self, dev, queue)` — `dev` is evdev `InputDevice`, `queue` is `CommandQueue`
-  - `checkDaemon(self) -> bool` — `True` = run in background process, `False` = run interactively
-  - `start(self)` — app logic
-- Daemon apps get a `multiprocessing.Process`; interactive apps block the main thread.
-- `tools.API(dev)` provides helpers: `speak()`, `checkLeft/Right/PlayPause()`, `getEvent()`.
-
-## Button layout in main loop
-
-| Button | When playing | When paused |
-|---|---|---|
-| OK/OK2 | Play/pause toggle | Play/pause toggle |
-| Skip | Next track | Open shutdown menu |
-| Back | Previous track | Open song menu |
-
-## Linting & CI
-
-- Only CI check: `uvx ruff check --output-format=github`
-- Lint config in `pyproject.toml` with Ruff (selects E, F, YTT, T10, ISC, G, PIE, RSE, PLC, PLE, RUF; ignores E501, E402, E701, PLC0415).
-- **No tests exist** — no test framework, no test directory.
-
-## System dependencies
-
-`apt: pulseaudio pulseaudio-module-bluetooth espeak-ng evtest python3-evdev`
-
-Python deps in `requirements.txt`: `pygame evdev pulsectl bleak vosk sounddevice numpy`
-
-On missing `pulsectl`/`bleak`, `player.py` auto-installs with `--break-system-packages` then exits.
-
-## Hardcoded paths
-
-- Music: `/home/pi/mp3player/songs/`
-- Playlists: `/home/pi/mp3player/playlists/`
-- SFX: `/home/pi/mp3player/sfx/`
-- `config.json` read from current working directory
-
-## Docs generation
-
-`./docs.sh` runs Doxygen then flattens `docs/html/` into `docs/`.
-
-## `config.json` is gitignored
-
-The repo's `config.json` is in `.gitignore`. A default is present in the working tree but won't be committed.
+## Architecture
+- `player.py` — main event loop, Bluetooth input via `evdev`, playback via `pygame.mixer`, TTS via `espeak-ng`.
+- `tools.py` — `API` helper class for app development (button polling wrappers).
+- `wifi.py` — `scan_wifi()` / `connect_wifi()` using `nmcli`, `get_ip()` via `ip route`.
+- `apps/pager.py`, `apps/pager_message.py` — optional pager system with external Node.js server + SQLite offline cache.
