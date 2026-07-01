@@ -318,6 +318,8 @@ if not playlist:
 index = 0
 paused = False
 print("Loading Audio Driver")
+os.environ['SDL_AUDIODRIVER'] = 'alsa'
+pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=2048)
 pygame.mixer.init()
 print("Loading sfx...")
 pausesfx = pygame.mixer.Sound("/home/pi/mp3player/sfx/pause.mp3")
