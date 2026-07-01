@@ -53,7 +53,8 @@ log-queries
 log-dhcp
 """)
 
-        _run(["sudo", "ifconfig", HOTSPOT_IFACE, HOTSPOT_IP, "netmask", "255.255.255.0", "up"])
+        _run(["sudo", "ip", "addr", "add", f"{HOTSPOT_IP}/24", "dev", HOTSPOT_IFACE])
+        _run(["sudo", "ip", "link", "set", HOTSPOT_IFACE, "up"])
 
         _run(["sudo", "pkill", "-9", "dnsmasq"], check=False)
         _run(["sudo", "pkill", "-9", "hostapd"], check=False)

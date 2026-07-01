@@ -26,6 +26,7 @@
 
 ## System dependencies (Raspberry Pi OS)
 - `pulseaudio`, `pulseaudio-module-bluetooth`, `espeak-ng`, `evtest`, `python3-evdev`, `nmcli` (NetworkManager for WiFi).
+- Captive portal hotspot: `hostapd`, `dnsmasq` (optional — only needed for the "Setup Hotspot" feature).
 - Python: `pygame`, `evdev`, `pulsectl` (optional), `bleak` (optional), `vosk`/`sounddevice`/`numpy` (optional).
 - The code uses `pip install --break-system-packages` for auto-install — do not replicate this pattern in new code.
 
