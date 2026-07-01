@@ -7,5 +7,7 @@ var searchData=
   ['_5fexecute_5fcommand_4',['_execute_command',['../classplayer_1_1CommandQueue.html#a8637bdaef2c891c2fed2a379d9f948ac',1,'player::CommandQueue']]],
   ['_5fhas_5fbleak_5',['_HAS_BLEAK',['../namespaceplayer.html#a0bbd7e4952b7586ecd14f6afee665b1c',1,'player']]],
   ['_5fhas_5fpulsectl_6',['_HAS_PULSECTL',['../namespaceplayer.html#a99107aec45429b72099bda0ee161fbfc',1,'player']]],
-  ['_5fremote_5fcommand_5fprocessor_7',['_remote_command_processor',['../classplayer_1_1CommandQueue.html#a85855dbe5da349d38441c5625f27bc65',1,'player::CommandQueue']]]
+  ['_5fremote_5fcommand_5fprocessor_7',['_remote_command_processor',['../classplayer_1_1CommandQueue.html#a85855dbe5da349d38441c5625f27bc65',1,'player::CommandQueue']]],
+  ['_5frun_8',['_run',['../namespacehotspot.html#afa41bcc122d7b728409fe09d66fa055b',1,'hotspot']]],
+  ['_5fwrite_5ffile_9',['_write_file',['../namespacehotspot.html#af2d3b1113c73ed107c9b5a672884cb99',1,'hotspot']]]
 ];

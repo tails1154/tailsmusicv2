@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['main_20controls_0',['Main Controls',['../md_README.html#autotoc_md38',1,'']]],
-  ['music_20and_20playlists_1',['&lt;b&gt;6. Add Music and Playlists&lt;/b&gt;',['../md_README.html#autotoc_md30',1,'']]]
+  ['lint_20ci_20no_20tests_0',['Lint &amp;amp; CI (no tests)',['../md_AGENTS.html#autotoc_md4',1,'']]]
 ];

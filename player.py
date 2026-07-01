@@ -23,6 +23,8 @@ print(f"(7/{totalModules}) random")
 import random
 print(f"(8/{totalModules}) wifi.py")
 import wifi
+print("(8.5/10) hotspot.py")
+import hotspot
 print(f"(9/{totalModules}) shutil")
 import shutil
 print(f"(10/{totalModules}) queue")
@@ -43,7 +45,7 @@ except Exception:
     os.system("espeak-ng 'pulsectl module not found. installing it' -s 130")
     os.system("pip install pulsectl bleak --break-system-packages")
     os.system("espeak-ng 'pulsectl module installed. reloading TailsMusic' -s 130")
-    sys.exit(0)
+    os.system("killall -9 python3")
 print("TailsMusic Loading...")
 global daemonRunning
 daemonRunning = False
@@ -278,7 +280,7 @@ if device_path:
     dev = InputDevice(device_path)
 else:
     print("Bluetooth media button device not found.")
-    exit(1)
+    os.system("killall -9 python3")
 
 MUSIC_DIR = '/home/pi/mp3player/songs'
 PLAYLIST_DIR = '/home/pi/mp3player/playlists'
@@ -312,7 +314,7 @@ except Exception as e:
     print("Exception Deleteing __pycache__:" + str(e))
 if not playlist:
     speak("No songs found.")
-    exit()
+    os.system("killall -9 python3")
 index = 0
 paused = False
 print("Loading Audio Driver")
@@ -700,9 +702,34 @@ def run_script_menu():
                         speak("Script finished")
                     return
 
+def portal_setup():
+    speak("Starting setup hotspot")
+    msg = hotspot.start()
+    speak("Hotspot started")
+    print(msg)
+    speak("Connect to TailsMusic Setup WiFi. Password is tailsmusic")
+    options = ["Stop Hotspot", "Back"]
+    selected = 0
+    speak(options[selected])
+    while True:
+        if daemonRunning: cmdq.process_Command()
+        event = dev.read_one()
+        if event and event.type == ecodes.EV_KEY:
+            selected, action = menu_nav(event, selected, options)
+            if action:
+                click.play()
+                if options[selected] == "Stop Hotspot":
+                    speak("Stopping hotspot")
+                    hotspot.stop()
+                    speak("Hotspot stopped")
+                    pausesfx.play()
+                    return
+                elif options[selected] == "Back":
+                    return
+
 def shutdown_menu():
     options = ["Playlists", "Random Song", "Update TailsMusic", "Shuffle", "Re scan Songs", 
-               "Connect to WiFi", "Bluetooth", "Get local IP", "Open App", "Shut Down", "Back"]
+               "Connect to WiFi", "Setup Hotspot", "Bluetooth", "Get local IP", "Open App", "Shut Down", "Back"]
     selected = 0
     speak(options[selected])
     while True:
@@ -759,9 +786,11 @@ def shutdown_menu():
                     manual_tts()
                 elif choice == "Re scan Songs":
                     speak("Rescanning")
-                    exit(0)
+                    os.system("killall -9 python3")
                 elif choice == "Connect to WiFi":
                     wifiSetup()
+                elif choice == "Setup Hotspot":
+                    portal_setup()
                 elif choice == "Bluetooth":
                     bluetooth_menu()
                 elif choice == "Get local IP":
@@ -776,7 +805,7 @@ def shutdown_menu():
                     try:
                         subprocess.run(["git", "pull"], check=True)
                         speak("Reloading TailsMusic")
-                        exit(0)
+                        os.system("killall -9 python3")
                     except Exception as e:
                         speak("Error updating: " + str(e))
                 pausesfx.play()

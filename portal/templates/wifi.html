@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WiFi Setup - TailsMusic</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+  <div class="card logo-card">
+    <a href="/" class="back-link">&larr; Back</a>
+    <h1>&#128269; Connect to WiFi</h1>
+    <p class="subtitle">Select a network to connect</p>
+  </div>
+
+  <div class="card" id="scanning-card">
+    <h2>Scanning...</h2>
+    <div class="spinner"></div>
+  </div>
+
+  <div class="card" id="networks-card" style="display:none">
+    <h2>Available Networks</h2>
+    <div id="network-list"></div>
+    <button class="btn btn-secondary" onclick="scanNetworks()">&#8635; Rescan</button>
+  </div>
+
+  <div class="card" id="password-card" style="display:none">
+    <h2>Enter Password</h2>
+    <p id="selected-ssid" class="selected-ssid"></p>
+    <input type="password" id="password-input" placeholder="WiFi password" autocomplete="off">
+    <button class="btn" onclick="connectToWifi()">Connect</button>
+    <button class="btn btn-secondary" onclick="backToNetworks()">Cancel</button>
+    <p id="password-error" class="error"></p>
+  </div>
+
+  <div class="card" id="connected-card" style="display:none">
+    <h2>&#9989; Connected!</h2>
+    <p id="connected-msg"></p>
+    <p class="small">You can close this page. TailsMusic will use this network.</p>
+    <button class="btn" onclick="location.href='/'">Done</button>
+  </div>
+</div>
+<script src="/static/script.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['player_0',['player',['../namespaceplayer.html',1,'']]]
+  ['hotspot_0',['hotspot',['../namespacehotspot.html',1,'']]]
 ];

@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['of_20conduct_0',['Contributor Covenant Code of Conduct',['../md_CODE__OF__CONDUCT.html',1,'']]],
-  ['our_20pledge_1',['Our Pledge',['../md_CODE__OF__CONDUCT.html#autotoc_md1',1,'']]],
-  ['our_20standards_2',['Our Standards',['../md_CODE__OF__CONDUCT.html#autotoc_md2',1,'']]]
+  ['main_20controls_0',['Main Controls',['../md_README.html#autotoc_md48',1,'']]],
+  ['menus_1',['Button navigation convention (all menus)',['../md_AGENTS.html#autotoc_md3',1,'']]],
+  ['music_20and_20playlists_2',['&lt;b&gt;6. Add Music and Playlists&lt;/b&gt;',['../md_README.html#autotoc_md40',1,'']]]
 ];

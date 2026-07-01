@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TailsMusic Setup</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+  <div class="card logo-card">
+    <div class="logo">&#9835;</div>
+    <h1>TailsMusic</h1>
+    <p class="subtitle">Setup Portal</p>
+  </div>
+
+  <div class="card" onclick="location.href='/upload'">
+    <div class="card-icon">&#128228;</div>
+    <div class="card-content">
+      <h2>Upload Songs</h2>
+      <p>Add MP3 files or entire folders to your music library</p>
+    </div>
+    <div class="card-arrow">&rarr;</div>
+  </div>
+
+  <div class="card" onclick="location.href='/wifi'">
+    <div class="card-icon">&#128269;</div>
+    <div class="card-content">
+      <h2>Connect to WiFi</h2>
+      <p>Scan for networks and join the internet</p>
+    </div>
+    <div class="card-arrow">&rarr;</div>
+  </div>
+
+  <div class="card status-card">
+    <div class="card-content">
+      <h2>Status</h2>
+      <p id="status-songs">Songs: --</p>
+      <p id="status-ip">IP: --</p>
+    </div>
+  </div>
+
+  <p class="footer">After setup, turn off the hotspot and restart TailsMusic</p>
+</div>
+<script src="/static/script.js"></script>
+</body>
+</html>

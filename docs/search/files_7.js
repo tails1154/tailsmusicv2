@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['wifi_2epy_0',['wifi.py',['../wifi_8py.html',1,'']]]
+  ['security_2emd_0',['SECURITY.md',['../SECURITY_8md.html',1,'']]]
 ];

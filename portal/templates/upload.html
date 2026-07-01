@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Songs - TailsMusic</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+  <div class="card logo-card">
+    <a href="/" class="back-link">&larr; Back</a>
+    <h1>&#128228; Upload Songs</h1>
+    <p class="subtitle">Drop MP3 files or a ZIP folder below</p>
+  </div>
+
+  <div class="card">
+    <div class="upload-zone" id="dropzone">
+      <div class="upload-icon">&#128196;</div>
+      <p>Drag & drop MP3 files or ZIP folders here</p>
+      <p class="small">or click to browse</p>
+      <input type="file" id="fileInput" multiple accept=".mp3,.zip" style="display:none">
+    </div>
+  </div>
+
+  <div class="card" id="progress-card" style="display:none">
+    <h2>Uploading...</h2>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+    <p id="progress-text">0 files uploaded</p>
+  </div>
+
+  <div class="card" id="results-card" style="display:none">
+    <h2>&#9989; Upload Complete</h2>
+    <ul id="file-list"></ul>
+    <button class="btn" onclick="location.href='/upload'">Upload More</button>
+    <button class="btn btn-secondary" onclick="location.href='/'">Done</button>
+  </div>
+</div>
+<script src="/static/script.js"></script>
+</body>
+</html>
