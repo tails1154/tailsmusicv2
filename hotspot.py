@@ -25,6 +25,7 @@ def start():
         return "Portal is already running"
 
     try:
+        _run(["sudo", "nmcli", "device", "set", HOTSPOT_IFACE, "managed", "no"], check=False)
         _run(["sudo", "nmcli", "radio", "wifi", "off"], check=False)
         time.sleep(1)
 
@@ -110,5 +111,12 @@ def stop():
     _run(["sudo", "pkill", "-9", "hostapd"], check=False)
     _run(["sudo", "pkill", "-9", "-f", "portal.server"], check=False)
     _run(["sudo", "iptables", "-t", "nat", "-F", "PREROUTING"], check=False)
+
+    _run(["sudo", "ip", "addr", "flush", "dev", HOTSPOT_IFACE], check=False)
+    _run(["sudo", "ip", "link", "set", HOTSPOT_IFACE, "down"], check=False)
+    _run(["sudo", "ip", "link", "set", HOTSPOT_IFACE, "up"], check=False)
+    _run(["sudo", "nmcli", "device", "set", HOTSPOT_IFACE, "managed", "yes"], check=False)
     _run(["sudo", "nmcli", "radio", "wifi", "on"], check=False)
+    _run(["sudo", "nmcli", "device", "connect", HOTSPOT_IFACE], check=False)
+    _run(["sudo", "nmcli", "device", "wifi", "rescan"], check=False)
     return "Hotspot stopped"
