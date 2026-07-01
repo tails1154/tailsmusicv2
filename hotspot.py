@@ -26,7 +26,9 @@ def start():
 
     try:
         _run(["sudo", "nmcli", "device", "set", HOTSPOT_IFACE, "managed", "no"], check=False)
-        _run(["sudo", "nmcli", "radio", "wifi", "off"], check=False)
+        _run(["sudo", "pkill", "-9", "wpa_supplicant"], check=False)
+        _run(["sudo", "rfkill", "unblock", "wifi"], check=False)
+        _run(["sudo", "ip", "link", "set", HOTSPOT_IFACE, "down"])
         time.sleep(1)
 
         _write_file("/tmp/hostapd.conf", f"""interface={HOTSPOT_IFACE}
@@ -68,8 +70,17 @@ log-dhcp
 
         hostapd_proc = subprocess.Popen(
             ["sudo", "hostapd", "/tmp/hostapd.conf"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
+        time.sleep(2)
+
+        if hostapd_proc.poll() is not None:
+            out, err = hostapd_proc.communicate()
+            raise RuntimeError(
+                f"hostapd failed (exit {hostapd_proc.returncode})\n"
+                f"stdout: {out.decode(errors='replace')}\n"
+                f"stderr: {err.decode(errors='replace')}"
+            )
 
         _run(["sudo", "iptables", "-t", "nat", "-F", "PREROUTING"], check=False)
         _run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING",
@@ -90,6 +101,8 @@ log-dhcp
 
     except subprocess.CalledProcessError as e:
         return f"Hotspot error: {e.stderr}"
+    except RuntimeError as e:
+        return f"Hotspot error: {e}"
 
 def stop():
     if not is_running():
