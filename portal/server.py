@@ -144,6 +144,10 @@ class PortalHandler(SimpleHTTPRequestHandler):
             else:
                 self._json_response({"success": False, "message": "Expected multipart form data"})
 
+        elif path == '/api/hotspot/stop':
+            subprocess.Popen(["sh", "-c", "sleep 1 && sudo killall -9 python3"])
+            self._json_response({"success": True, "message": "Hotspot stopping"})
+
         elif path == '/api/upload/zip':
             length = int(self.headers.get('Content-Length', 0))
             raw = self.rfile.read(length)
