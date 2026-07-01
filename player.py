@@ -709,7 +709,7 @@ def portal_setup():
     msg = hotspot.start()
     speak("Hotspot started")
     print(msg)
-    speak("Connect to TailsMusic Setup WiFi. Password is tailsmusic")
+    speak("Connect to TailsMusic Setup WiFi. It is an open network")
     options = ["Stop Hotspot", "Back"]
     selected = 0
     speak(options[selected])
