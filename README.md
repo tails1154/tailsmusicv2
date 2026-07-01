@@ -1,188 +1,130 @@
-# TailsMusicv2
-better than v1, that's for sure!
-mp3 player but uses bluetooth and headphone buttons to control
+# TailsMusic v2
 
+A headless MP3 player for Raspberry Pi with Bluetooth headphone controls, WiFi setup, and a captive portal for song uploads.
 
+## Quick Start
 
+```bash
+# On a fresh Raspberry Pi OS lite:
+sudo apt install -y git
+git clone https://github.com/tails1154/tailsmusicv2 /home/pi/mp3player
+cd /home/pi/mp3player
+sudo bash setup.sh
+```
 
-## TODO
+The setup script will guide you through:
+- Installing all dependencies
+- Pairing Bluetooth headphones
+- Auto-start on boot (systemd service)
+- Creating a default `config.json`
 
-- ~~make it so you can interrupt the tts in some places~~ - DONE
-- ~~Replace the date and time function with a "song menu" of some sort where you could add a song to a playlist, and other actions~~  - DONE
-- ~~(Would take a long time to do by hand) Make the menus and song navigation consistant (aka make it so back and skip would cycle the menus left and right, and not pause/play (in some places, mind you) to cycle back menus, back to cycle forward menus, and skip to select)~~ - DONE
+## Requirements
 
+### Hardware
+- Raspberry Pi (any model with WiFi)
+- Bluetooth headphones with media buttons (tested with SIMOLIO)
+- MicroSD card (8GB+)
+- Power supply
 
+### System Dependencies (installed by setup.sh)
+```bash
+sudo apt install -y \
+  pulseaudio pulseaudio-module-bluetooth \
+  espeak-ng evtest python3-evdev \
+  network-manager \
+  hostapd dnsmasq \
+  python3-pip python3-pygame
+```
 
+### Python Packages (installed by setup.sh)
+```bash
+pip3 install --break-system-packages pygame evdev pulsectl bleak
+```
 
+## Manual Setup
 
-
-
-
-
-
-
-
-ai "enhanced" setup instructions below
-
-
-
-
-# **TailsMusic v2 Setup Guide**  
-*A headless MP3 player for Raspberry Pi with Bluetooth headphone control*  
-
-### **Prerequisites**  
-- Raspberry Pi OS (Debian-based)  
-- Bluetooth headphones (tested with SIMOLIO)  
-- Basic terminal knowledge  
-
----
-
-## **1. Install the Project**  
+### 1. Install the Project
 ```bash
 cd /home/pi
 git clone https://github.com/tails1154/tailsmusicv2 mp3player
 cd mp3player
 ```
 
----
-
-## **2. Pair Bluetooth Headphones**  
-1. Find your headphones’ MAC address:  
-   ```bash
-   sudo bluetoothctl scan le
-   ```
-   - Note the MAC address (e.g., `AA:BB:CC:DD:EE:FF`).  
-
-2. Pair and trust the device:  
-   ```bash
-   sudo bluetoothctl pair AA:BB:CC:DD:EE:FF
-   sudo bluetoothctl trust AA:BB:CC:DD:EE:FF
-   ```
-
----
-
-## **3. Install Dependencies**  
+### 2. Pair Bluetooth Headphones
 ```bash
-sudo apt update
-sudo apt install -y pulseaudio pulseaudio-module-bluetooth espeak-ng evtest python3-evdev
+sudo bluetoothctl scan on          # Find your headphones MAC
+sudo bluetoothctl pair AA:BB:CC:DD:EE:FF
+sudo bluetoothctl trust AA:BB:CC:DD:EE:FF
+sudo bluetoothctl connect AA:BB:CC:DD:EE:FF
 ```
 
----
-
-## **4. Configure PulseAudio**  
-1. Restart PulseAudio:  
-   ```bash
-   pulseaudio --kill && pulseaudio --start
-   ```
-
-2. Find your Bluetooth sink:  
-   ```bash
-   pactl list short sinks
-   ```
-   - Note the `bluez_sink.XX_XX_XX_XX_XX_XX` address.  
-
-3. Update `bashrc` in the repo:  
-   - Replace all `bluez_sink.XX_XX_XX_XX_XX_XX` references with your sink.  
-   - Update the `bluetoothctl connect` command with your headphones’ MAC.  
-
-4. Apply the new `bashrc`:  
-   ```bash
-   cp ~/.bashrc ~/.bashrc.bak  # Backup
-   cp bashrc ~/.bashrc         # Overwrite
-   ```
-
----
-
-## **5. Configure Button Controls**  
-1. Identify your headphone buttons:  
-   ```bash
-   sudo evtest
-   ```
-   - Select your headphones from the list.  
-   - Press buttons (Play/Pause, Next, etc.) and note the `(KEY_XXX)` codes (e.g., `KEY_PLAYCD`, `KEY_NEXTSONG`).  
-
-2. Update `config.json`:  
-   - Replace the codes with the ones you noted down.
-   - Replace the "evtestname" field with the name of the device you selected in evtest. (example name below)
-
-Example name:
-```
-$ evtest
-No device specified, trying to scan all of /dev/input/event*
-Available devices:
-/dev/input/event0:	Dell KB216 Wired Keyboard
-/dev/input/event1:	etc
-/dev/input/event2:	vc4-hdmi
-/dev/input/event5:	SIMOLIO (AVRCP)
-                         ^
-			 |  This is our bluetooth headphones. Yours will be different.
-```
-
-The config file checks if that json text is INCLUDED in the device name, so instead of putting `SIMOLIO (AVRCP)`, I put just `SIMOLIO`
-
-
----
-
-## **6. Add Music and Playlists**  
+### 3. Configure Button Controls
 ```bash
-mkdir -p /home/pi/mp3player/songs
-mkdir -p /home/pi/mp3player/playlists
+sudo evtest                        # Find your device and note button codes
 ```
-- Place MP3 files in `songs/`.  
-- Playlists are auto-generated or manually created via the script.  
+Edit `config.json` to match your headphone's button codes and device name (e.g., `"evtestname": "SIMOLIO"` matches `SIMOLIO (AVRCP)`).
 
----
+### 4. Add Music
+Place `.mp3` files in `/home/pi/mp3player/songs/`.
 
-## **7. Reboot**  
+### 5. Run
+```bash
+cd /home/pi/mp3player && python3 player.py
+```
 
+## Controls
 
-Your system should auto start tailsmusic when you log in (after a short delay)
+| Button (when playing)      | Action         |
+|----------------------------|----------------|
+| **OK / OK2**               | Play/Pause     |
+| **Skip**                   | Next track     |
+| **Back**                   | Previous track |
 
----
+| Button (when paused)       | Action                   |
+|----------------------------|--------------------------|
+| **Skip**                   | Open shutdown menu       |
+| **Back**                   | Song menu (add to playlist) |
 
-## **Troubleshooting**  
-- **Bluetooth not connecting?**  
-  Run `bluetoothctl` and ensure the device is paired/trusted:  
-  ```bash
-  connect AA:BB:CC:DD:EE:FF
-  ```
+From the **shutdown menu** you can:
+- Manage playlists
+- Play random songs / shuffle
+- Connect to WiFi
+- **Start setup hotspot** (creates `TailsMusic-Setup` WiFi for uploading songs via web browser)
+- Manage Bluetooth audio sinks
+- Open apps from the `apps/` directory
+- Update TailsMusic via git pull
+- Shut down the Pi
 
-- **No sound?**  
-  Check PulseAudio sinks:  
-  ```bash
-  pacmd list-sinks | grep -e 'name:' -e 'index'
-  ```
+## Captive Portal (Hotspot)
 
-- **Buttons not working?**  
-  Double-check `evtest` codes and update `config.json`.  
+Select **Setup Hotspot** from the menu to create a WiFi network:
 
----
+- **SSID:** `TailsMusic-Setup`
+- **Password:** `tailsmusic`
 
-### **Done!**  
-Your **TailsMusic** should now:  
-Auto-connect to Bluetooth headphones.  
-Respond to media buttons.  
-Announce actions via eSpeak.  
+Connect from any device — a captive portal opens automatically with:
+- Upload MP3 files or ZIP folders
+- Scan and connect to WiFi networks
+- View system status
 
+## Project Structure
 
+| Path | Purpose |
+|------|---------|
+| `player.py` | Main music player (entrypoint) |
+| `hotspot.py` | WiFi hotspot + captive portal control |
+| `portal/` | Web server, HTML templates, CSS, JS |
+| `wifi.py` | WiFi scanning/connection via nmcli |
+| `tools.py` | API helper for app development |
+| `apps/` | Plugin-based app system |
+| `setup.sh` | One-shot Raspberry Pi setup script |
+| `bashrc` | Bluetooth auto-connect template |
+| `config.json` | Button code mappings (not committed) |
+| `TailsFile` | Entrypoint marker (`./player.py`) |
 
+## Troubleshooting
 
-# TailsMusic Control Guide
-
-## Main Controls
-
-| Button                | Action                                                                                           |
-|-----------------------|--------------------------------------------------------------------------------------------------|
-| **OK / OK2**          | Play/Pause toggle                                                                                |
-| **Skip**              | Next track                                                                                       |
-| **Back**              | Previous track                                                                                   |
-| **Skip (when paused)**| Open shutdown menu                                                                               |
-| **Back (when paused)**| Speak current date and time                                                                      |
-
-- **Button names** (“okbutton”, “okbutton2”, “skipbutton”, “backbutton”) are mapped in your `config.json` and may correspond to your headphone/media controls.
-
-
-**Notes:**
-- Button assignments can be customized in `config.json`.
-- Long presses are not used; actions change depending on whether playback is paused or active.
-- All menus, playlists, and WiFi setup are accessible/controllable via the defined buttons; no keyboard or mouse is required. (but setting up wifi is painful)
+- **Bluetooth not connecting?** Run `bluetoothctl` and check the device is paired/trusted.
+- **No sound?** Check PulseAudio sinks: `pactl list short sinks`
+- **Buttons not working?** Re-run `sudo evtest` to confirm button codes and update `config.json`.
+- **ALSA underrun errors?** The player sets a 2048-sample audio buffer. If you still see underruns, edit `player.py` and increase `buffer=4096` in the `pygame.mixer.pre_init()` call.
