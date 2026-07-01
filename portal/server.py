@@ -13,7 +13,7 @@ HTML = {}
 
 def load_templates():
     base = os.path.dirname(__file__)
-    for name in ["index.html", "upload.html", "wifi.html"]:
+    for name in ["index.html", "upload.html", "wifi.html", "bluetooth.html"]:
         path = os.path.join(base, "templates", name)
         if os.path.exists(path):
             with open(path) as f:
@@ -67,6 +67,76 @@ def _connect_wifi(ssid, password):
     except subprocess.CalledProcessError as e:
         return False, e.stderr or "Failed to connect"
 
+def _bt_scan(timeout=8):
+    try:
+        p = subprocess.Popen(["sudo", "bluetoothctl"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        p.stdin.write("scan on\n")
+        p.stdin.flush()
+        import time as _t
+        _t.sleep(timeout)
+        p.stdin.write("scan off\n")
+        p.stdin.write("devices\n")
+        p.stdin.write("exit\n")
+        out, _ = p.communicate(timeout=timeout + 5)
+        devices = []
+        for line in out.splitlines():
+            if "Device" in line:
+                parts = line.split()
+                try:
+                    i = parts.index("Device")
+                    mac = parts[i + 1]
+                    name = " ".join(parts[i + 2:]) if len(parts) > i + 2 else ""
+                    if mac not in [d[0] for d in devices]:
+                        devices.append({"mac": mac, "name": name or "Unknown"})
+                except Exception:
+                    pass
+        return devices
+    except Exception as e:
+        return [{"mac": "", "name": f"Scan error: {e}"}]
+
+def _bt_list():
+    try:
+        out = subprocess.check_output(["sudo", "bluetoothctl", "devices"], text=True)
+        devices = []
+        for line in out.splitlines():
+            parts = line.split(" ", 2)
+            if len(parts) >= 3 and parts[0] == "Device":
+                devices.append({"mac": parts[1], "name": parts[2]})
+        return devices
+    except Exception as e:
+        return [{"mac": "", "name": f"Error: {e}"}]
+
+def _bt_pair_connect(mac):
+    try:
+        subprocess.run(["sudo", "bluetoothctl", "pair", mac], capture_output=True, text=True, timeout=15)
+        subprocess.run(["sudo", "bluetoothctl", "trust", mac], capture_output=True, text=True, timeout=10)
+        r = subprocess.run(["sudo", "bluetoothctl", "connect", mac], capture_output=True, text=True, timeout=20)
+        if r.returncode == 0:
+            return True, "Connected"
+        return False, r.stderr or "Failed to connect"
+    except Exception as e:
+        return False, str(e)
+
+def _bt_sinks():
+    try:
+        r = subprocess.run(["pactl", "list", "short", "sinks"], capture_output=True, text=True, timeout=5)
+        sinks = []
+        for line in r.stdout.strip().split("\n"):
+            if line:
+                parts = line.split("\t")
+                if len(parts) >= 2:
+                    sinks.append({"index": parts[0], "name": parts[1]})
+        return sinks
+    except Exception:
+        return []
+
+def _bt_set_sink(name):
+    try:
+        subprocess.run(["pactl", "set-default-sink", name], capture_output=True, text=True, timeout=5)
+        return True, "Sink set"
+    except Exception as e:
+        return False, str(e)
+
 def _get_ip():
     try:
         result = subprocess.run(
@@ -93,6 +163,14 @@ class PortalHandler(SimpleHTTPRequestHandler):
             self._serve_html("wifi.html")
         elif path == '/api/wifi/scan':
             self._json_response(_scan_wifi())
+        elif path == '/bluetooth':
+            self._serve_html("bluetooth.html")
+        elif path == '/api/bluetooth/scan':
+            self._json_response({"devices": _bt_scan()})
+        elif path == '/api/bluetooth/list':
+            self._json_response({"devices": _bt_list()})
+        elif path == '/api/bluetooth/sinks':
+            self._json_response({"sinks": _bt_sinks()})
         elif path == '/api/status':
             self._json_response({
                 "ip": _get_ip(),
@@ -124,6 +202,22 @@ class PortalHandler(SimpleHTTPRequestHandler):
             ssid = data.get('ssid', [''])[0]
             password = data.get('password', [''])[0]
             ok, msg = _connect_wifi(ssid, password)
+            self._json_response({"success": ok, "message": msg})
+
+        elif path == '/api/bluetooth/pair':
+            length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(length).decode()
+            data = parse_qs(body)
+            mac = data.get('mac', [''])[0]
+            ok, msg = _bt_pair_connect(mac)
+            self._json_response({"success": ok, "message": msg})
+
+        elif path == '/api/bluetooth/sink/set':
+            length = int(self.headers.get('Content-Length', 0))
+            body = self.rfile.read(length).decode()
+            data = parse_qs(body)
+            name = data.get('name', [''])[0]
+            ok, msg = _bt_set_sink(name)
             self._json_response({"success": ok, "message": msg})
 
         elif path == '/api/upload/song':

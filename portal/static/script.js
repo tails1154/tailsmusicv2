@@ -157,3 +157,137 @@ function stopHotspot() {
     if (btn) btn.textContent = 'Hotspot stopping, TailsMusic will restart...';
   });
 }
+
+function scanBt() {
+  document.getElementById('bt-scanning').style.display = 'block';
+  document.getElementById('bt-scanning').querySelector('h2').textContent = 'Scanning...';
+  document.getElementById('bt-results').style.display = 'none';
+  document.getElementById('bt-connected').style.display = 'none';
+  fetch('/api/bluetooth/scan')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      document.getElementById('bt-scanning').style.display = 'none';
+      document.getElementById('bt-results').style.display = 'block';
+      document.getElementById('bt-results-title').textContent = 'Found Devices';
+      renderBtDevices(d.devices);
+    })
+    .catch(function () {
+      document.getElementById('bt-scanning').style.display = 'none';
+      document.getElementById('bt-results').style.display = 'block';
+      document.getElementById('bt-error').textContent = 'Scan failed';
+    });
+}
+
+function listBt() {
+  document.getElementById('bt-scanning').style.display = 'block';
+  document.getElementById('bt-results').style.display = 'none';
+  document.getElementById('bt-connected').style.display = 'none';
+  document.getElementById('bt-scanning').querySelector('h2').textContent = 'Loading...';
+  fetch('/api/bluetooth/list')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      document.getElementById('bt-scanning').style.display = 'none';
+      document.getElementById('bt-results').style.display = 'block';
+      document.getElementById('bt-results-title').textContent = 'Known Devices';
+      renderBtDevices(d.devices);
+    })
+    .catch(function () {
+      document.getElementById('bt-scanning').style.display = 'none';
+      document.getElementById('bt-results').style.display = 'block';
+      document.getElementById('bt-error').textContent = 'Failed to list devices';
+    });
+}
+
+function renderBtDevices(devices) {
+  var list = document.getElementById('bt-device-list');
+  var err = document.getElementById('bt-error');
+  list.innerHTML = '';
+  err.textContent = '';
+  if (devices.length === 0 || devices[0].mac === '') {
+    err.textContent = 'No devices found';
+    return;
+  }
+  devices.forEach(function (dev) {
+    var div = document.createElement('div');
+    div.className = 'network-item';
+    div.innerHTML = '<span class="network-name">' + dev.name + '</span><span class="network-signal">' + dev.mac + '</span>';
+    div.addEventListener('click', function () {
+      pairBt(dev.mac, dev.name);
+    });
+    list.appendChild(div);
+  });
+}
+
+function pairBt(mac, name) {
+  if (!confirm('Connect to ' + name + ' (' + mac + ')?')) return;
+  document.getElementById('bt-error').textContent = 'Pairing & connecting...';
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/bluetooth/pair', true);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      var resp = JSON.parse(xhr.responseText);
+      if (resp.success) {
+        document.getElementById('bt-results').style.display = 'none';
+        document.getElementById('bt-connected').style.display = 'block';
+        document.getElementById('bt-connected-msg').textContent = 'Connected to ' + name;
+      } else {
+        document.getElementById('bt-error').textContent = resp.message || 'Failed';
+      }
+    } else {
+      document.getElementById('bt-error').textContent = 'Server error';
+    }
+  };
+  xhr.onerror = function () {
+    document.getElementById('bt-error').textContent = 'Connection error';
+  };
+  xhr.send('mac=' + encodeURIComponent(mac));
+}
+
+function listSinks() {
+  var list = document.getElementById('sink-list');
+  var err = document.getElementById('sink-error');
+  list.innerHTML = '<div class="spinner"></div>';
+  err.textContent = '';
+  fetch('/api/bluetooth/sinks')
+    .then(function (r) { return r.json(); })
+    .then(function (d) {
+      list.innerHTML = '';
+      if (!d.sinks || d.sinks.length === 0) {
+        list.innerHTML = '<p class="small">No audio sinks found</p>';
+        return;
+      }
+      d.sinks.forEach(function (s) {
+        var div = document.createElement('div');
+        div.className = 'network-item';
+        div.innerHTML = '<span class="network-name">' + s.name + '</span><span class="network-signal">Set</span>';
+        div.addEventListener('click', function () {
+          setSink(s.name);
+        });
+        list.appendChild(div);
+      });
+    })
+    .catch(function () {
+      list.innerHTML = '';
+      err.textContent = 'Failed to list sinks';
+    });
+}
+
+function setSink(name) {
+  document.getElementById('sink-error').textContent = 'Setting sink...';
+  var xhr = new XMLHttpRequest();
+  xhr.open('POST', '/api/bluetooth/sink/set', true);
+  xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  xhr.onload = function () {
+    if (xhr.status === 200) {
+      var resp = JSON.parse(xhr.responseText);
+      document.getElementById('sink-error').textContent = resp.success ? 'Audio routed to ' + name : resp.message;
+    } else {
+      document.getElementById('sink-error').textContent = 'Server error';
+    }
+  };
+  xhr.onerror = function () {
+    document.getElementById('sink-error').textContent = 'Connection error';
+  };
+  xhr.send('name=' + encodeURIComponent(name));
+}

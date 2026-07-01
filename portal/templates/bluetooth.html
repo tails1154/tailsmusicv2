@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bluetooth - TailsMusic</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+  <div class="card logo-card">
+    <a href="/" class="back-link">&larr; Back</a>
+    <h1>&#128264; Bluetooth</h1>
+    <p class="subtitle">Pair and connect audio devices</p>
+  </div>
+
+  <div class="card">
+    <button class="btn" onclick="scanBt()">&#8987; Scan for Devices</button>
+    <button class="btn btn-secondary" onclick="listBt()">&#128203; Known Devices</button>
+  </div>
+
+  <div class="card" id="bt-scanning" style="display:none">
+    <h2>Scanning...</h2>
+    <div class="spinner"></div>
+    <p class="small">This takes about 8 seconds</p>
+  </div>
+
+  <div class="card" id="bt-results" style="display:none">
+    <h2 id="bt-results-title">Devices</h2>
+    <div id="bt-device-list"></div>
+    <p id="bt-error" class="error"></p>
+  </div>
+
+  <div class="card" id="bt-connected" style="display:none">
+    <h2>&#9989; Connected!</h2>
+    <p id="bt-connected-msg"></p>
+    <button class="btn" onclick="location.href='/'">Done</button>
+  </div>
+
+  <div class="card">
+    <h2>Audio Sinks</h2>
+    <button class="btn btn-secondary" onclick="listSinks()">&#128266; Refresh Sinks</button>
+    <div id="sink-list" style="margin-top: 12px;"></div>
+    <p id="sink-error" class="error"></p>
+  </div>
+</div>
+<script src="/static/script.js"></script>
+</body>
+</html>
