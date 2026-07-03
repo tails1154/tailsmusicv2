@@ -1063,6 +1063,7 @@ while True:
                     prev_song()
                 else:
                     song_menu()
+    time.sleep(0.05)
     if not pygame.mixer.music.get_busy() and not paused:
         sleep(0.5)
         next_song()
