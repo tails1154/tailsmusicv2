@@ -29,8 +29,7 @@ print(f"(9/{totalModules}) shutil")
 import shutil
 print(f"(10/{totalModules}) queue")
 import queue
-import urllib.request
-import urllib.parse
+import requests
 print(f"(11/{totalModules}) pulsectl")
 try:
     from pulsectl import Pulse
@@ -262,12 +261,6 @@ class CommandQueue:
         self.stop()
 
 
-cmdq = CommandQueue(20, True, True)
-cmdq.start_command_listener()
-cmdq.start_remote_processor()
-print("Modules Loaded!")
-print("TailsMusic Loading...")
-print("Finding Headphones")
 def find_simolio():
     """This finds the bluetooth input device for button presses."""
     for path in list_devices():
@@ -276,26 +269,6 @@ def find_simolio():
             return path
     return None
 
-device_path = find_simolio()
-if device_path:
-    print("Using Headphone device:", device_path)
-    dev = InputDevice(device_path)
-else:
-    print("Bluetooth media button device not found.")
-    sys.exit(1)
-
-MUSIC_DIR = '/home/pi/mp3player/songs'
-PLAYLIST_DIR = '/home/pi/mp3player/playlists'
-INPUT_DEVICE = device_path
-os.makedirs(PLAYLIST_DIR, exist_ok=True)
-daemonRunning = False
-try:
-    print("Remvoing stale app.py")
-    os.remove("app.py")
-    print("Starting Voice")
-except Exception as e:
-    print("Error removing app.py: " + str(e))
-tts_lock = threading.Lock()
 def speak_nointer(text):
     print(f"TTS: {text}")
     subprocess.run(["killall", "espeak-ng"], check=False)
@@ -322,38 +295,9 @@ def update_tailsign(status=None):
             if song_name.endswith(".mp3"):
                 song_name = song_name[:-4]
             text = "[TailsMusic] " + song_name
-        data = urllib.parse.urlencode({"text": text}).encode()
-        urllib.request.urlopen("http://127.0.0.1:1998/postsign", data=data, timeout=2)
+        requests.post("http://127.0.0.1:1998/postsign", data={"text": text}, timeout=2)
     except Exception:
         pass
-print("Loading Music Files")
-playlist = sorted(
-    [os.path.join(MUSIC_DIR, f) for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
-)
-print("Removing __pycache__")
-try:
-    shutil.rmtree("__pycache__")
-except Exception as e:
-    print("Exception Deleteing __pycache__:" + str(e))
-if not playlist:
-    speak("No songs found.")
-    os.system("killall -9 python3")
-index = 0
-paused = False
-print("Loading Audio Driver")
-os.environ['SDL_AUDIODRIVER'] = 'alsa'
-pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=2048)
-pygame.mixer.init()
-print("Loading sfx...")
-pausesfx = pygame.mixer.Sound("/home/pi/mp3player/sfx/pause.mp3")
-dialup = pygame.mixer.Sound("/home/pi/mp3player/sfx/dialup.mp3")
-panel = pygame.mixer.Sound("/home/pi/mp3player/sfx/panel.mp3")
-click = pygame.mixer.Sound("/home/pi/mp3player/sfx/click.mp3")
-print("Welcome to TailsMusic!")
-pygame.mixer.music.load(playlist[index])
-pygame.mixer.music.play()
-update_tailsign()
-
 def next_song():
     global index
     index += 1
@@ -876,7 +820,6 @@ def playlist_menu():
                         manage_playlist(choice)
                     waiting = False
 
-playlist_counter = max((int(f.removeprefix("playlist").removesuffix(".json")) for f in os.listdir("/home/pi/mp3player/playlists/") if f.startswith("playlist") and f.endswith(".json")), default=-1) + 1
 def create_playlist():
     global playlist_counter
     songs = []
@@ -1041,29 +984,86 @@ def show_song_info(song_path):
     except Exception as e:
         speak("Error showing song info: " + str(e))
 
-dev = InputDevice(INPUT_DEVICE)
-print(f"Listening on {INPUT_DEVICE}...")
-while True:
-    if daemonRunning: cmdq.process_Command()
-    event = dev.read_one()
-    if event and event.type == ecodes.EV_KEY:
-        key_event = categorize(event)
-        if key_event.keystate == 1:
-            key = key_event.keycode
-            if key in [config['okbutton'], config['okbutton2']]:
-                toggle_pause()
-            elif key == config['skipbutton']:
-                if paused:
-                    panel.play()
-                    shutdown_menu()
-                else:
-                    next_song()
-            elif key == config['backbutton']:
-                if not paused:
-                    prev_song()
-                else:
-                    song_menu()
-    time.sleep(0.05)
-    if not pygame.mixer.music.get_busy() and not paused:
-        sleep(0.5)
-        next_song()
+
+if __name__ == "__main__":
+    cmdq = CommandQueue(20, True, True)
+    cmdq.start_command_listener()
+    cmdq.start_remote_processor()
+    print("Modules Loaded!")
+    print("TailsMusic Loading...")
+    print("Finding Headphones")
+    device_path = find_simolio()
+    if device_path:
+        print("Using Headphone device:", device_path)
+        dev = InputDevice(device_path)
+    else:
+        print("Bluetooth media button device not found.")
+        sys.exit(1)
+
+    MUSIC_DIR = '/home/pi/mp3player/songs'
+    PLAYLIST_DIR = '/home/pi/mp3player/playlists'
+    INPUT_DEVICE = device_path
+    os.makedirs(PLAYLIST_DIR, exist_ok=True)
+    daemonRunning = False
+    try:
+        print("Remvoing stale app.py")
+        os.remove("app.py")
+        print("Starting Voice")
+    except Exception as e:
+        print("Error removing app.py: " + str(e))
+    tts_lock = threading.Lock()
+    print("Loading Music Files")
+    playlist = sorted(
+        [os.path.join(MUSIC_DIR, f) for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
+    )
+    print("Removing __pycache__")
+    try:
+        shutil.rmtree("__pycache__")
+    except Exception as e:
+        print("Exception Deleteing __pycache__:" + str(e))
+    if not playlist:
+        speak("No songs found.")
+        sys.exit(1)
+    index = 0
+    paused = False
+    print("Loading Audio Driver")
+    os.environ['SDL_AUDIODRIVER'] = 'alsa'
+    pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=2048)
+    pygame.mixer.init()
+    print("Loading sfx...")
+    pausesfx = pygame.mixer.Sound("/home/pi/mp3player/sfx/pause.mp3")
+    dialup = pygame.mixer.Sound("/home/pi/mp3player/sfx/dialup.mp3")
+    panel = pygame.mixer.Sound("/home/pi/mp3player/sfx/panel.mp3")
+    click = pygame.mixer.Sound("/home/pi/mp3player/sfx/click.mp3")
+    print("Welcome to TailsMusic!")
+    pygame.mixer.music.load(playlist[index])
+    pygame.mixer.music.play()
+    update_tailsign()
+
+    playlist_counter = max((int(f.removeprefix("playlist").removesuffix(".json")) for f in os.listdir("/home/pi/mp3player/playlists/") if f.startswith("playlist") and f.endswith(".json")), default=-1) + 1
+    dev = InputDevice(INPUT_DEVICE)
+    print(f"Listening on {INPUT_DEVICE}...")
+    while True:
+        if daemonRunning: cmdq.process_Command()
+        event = dev.read_one()
+        if event and event.type == ecodes.EV_KEY:
+            key_event = categorize(event)
+            if key_event.keystate == 1:
+                key = key_event.keycode
+                if key in [config['okbutton'], config['okbutton2']]:
+                    toggle_pause()
+                elif key == config['skipbutton']:
+                    if paused:
+                        panel.play()
+                        shutdown_menu()
+                    else:
+                        next_song()
+                elif key == config['backbutton']:
+                    if not paused:
+                        prev_song()
+                    else:
+                        song_menu()
+        time.sleep(0.05)
+        if not pygame.mixer.music.get_busy() and not paused:
+            sleep(0.5)
+            next_song()
