@@ -29,6 +29,8 @@ print(f"(9/{totalModules}) shutil")
 import shutil
 print(f"(10/{totalModules}) queue")
 import queue
+import urllib.request
+import urllib.parse
 print(f"(11/{totalModules}) pulsectl")
 try:
     from pulsectl import Pulse
@@ -303,6 +305,27 @@ def speak(text):
     subprocess.Popen(["espeak-ng", "-s", "130", text])
 def speak_allowinter(text):
     speak(text)
+
+def update_tailsign(status=None):
+    """Update the TailSign display with current song info.
+    Only updates if 'show_on_tailsign' is enabled in config.
+    """
+    if not config.get("show_on_tailsign", False):
+        return
+    try:
+        if status == "paused":
+            text = "[TailsMusic] Paused"
+        elif status:
+            text = "[TailsMusic] " + str(status)
+        else:
+            song_name = os.path.basename(playlist[index])
+            if song_name.endswith(".mp3"):
+                song_name = song_name[:-4]
+            text = "[TailsMusic] " + song_name
+        data = urllib.parse.urlencode({"text": text}).encode()
+        urllib.request.urlopen("http://127.0.0.1:1998/postsign", data=data, timeout=2)
+    except Exception:
+        pass
 print("Loading Music Files")
 playlist = sorted(
     [os.path.join(MUSIC_DIR, f) for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
@@ -329,6 +352,7 @@ click = pygame.mixer.Sound("/home/pi/mp3player/sfx/click.mp3")
 print("Welcome to TailsMusic!")
 pygame.mixer.music.load(playlist[index])
 pygame.mixer.music.play()
+update_tailsign()
 
 def next_song():
     global index
@@ -337,12 +361,14 @@ def next_song():
         index = 0
     pygame.mixer.music.load(playlist[index])
     pygame.mixer.music.play()
+    update_tailsign()
 
 def prev_song():
     global index
     index = (index - 1) % len(playlist)
     pygame.mixer.music.load(playlist[index])
     pygame.mixer.music.play()
+    update_tailsign()
 
 def toggle_pause():
     global paused
@@ -350,9 +376,11 @@ def toggle_pause():
         pausesfx.play()
         time.sleep(pausesfx.get_length())
         pygame.mixer.music.unpause()
+        update_tailsign()
     else:
         pausesfx.play()
         pygame.mixer.music.pause()
+        update_tailsign("paused")
     paused = not paused
 
 def manual_tts():
@@ -730,11 +758,16 @@ def portal_setup():
                     return
 
 def shutdown_menu():
-    options = ["Playlists", "Random Song", "Update TailsMusic", "Shuffle", "Re scan Songs", 
-               "Connect to WiFi", "Setup Hotspot", "Bluetooth", "Get local IP", "Open App", "Shut Down", "Back"]
     selected = 0
-    speak(options[selected])
+    first_render = True
     while True:
+        tailsign_status = "On" if config.get("show_on_tailsign", False) else "Off"
+        options = ["Playlists", "Random Song", "Update TailsMusic", "Shuffle", "Re scan Songs", 
+                   "Connect to WiFi", "Setup Hotspot", "Bluetooth", "Get local IP", "Open App", 
+                   f"Show on TailSign: {tailsign_status}", "Shut Down", "Back"]
+        if first_render:
+            speak(options[selected])
+            first_render = False
         if daemonRunning: cmdq.process_Command()
         event = dev.read_one()
         if event and event.type == ecodes.EV_KEY:
@@ -742,7 +775,13 @@ def shutdown_menu():
             if action:
                 click.play()
                 choice = options[selected]
-                if choice == "Shut Down":
+                if choice and choice.startswith("Show on TailSign"):
+                    current = config.get("show_on_tailsign", False)
+                    config["show_on_tailsign"] = not current
+                    with open("config.json", "w") as cfg_f:
+                        json.dump(config, cfg_f, indent=4)
+                    speak("Show on TailSign " + ("enabled" if not current else "disabled"))
+                elif choice == "Shut Down":
                     speak("Shutting down")
                     subprocess.run(["sudo", "shutdown", "now"])
                 elif choice == "Back":
