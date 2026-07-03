@@ -282,7 +282,7 @@ if device_path:
     dev = InputDevice(device_path)
 else:
     print("Bluetooth media button device not found.")
-    os.system("killall -9 python3")
+    sys.exit(1)
 
 MUSIC_DIR = '/home/pi/mp3player/songs'
 PLAYLIST_DIR = '/home/pi/mp3player/playlists'
