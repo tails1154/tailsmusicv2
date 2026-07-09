@@ -18,6 +18,12 @@ The setup script will guide you through:
 - Auto-start on boot (systemd service)
 - Creating a default `config.json`
 
+
+
+## Long Start
+
+
+
 ## Requirements
 
 ### Hardware
