@@ -991,13 +991,6 @@ def show_song_info(song_path):
 def ai_mode():
     global index, paused, shuffleOn
     try:
-        import speech_recognition as sr
-    except ImportError:
-        speak("Installing speech recognition")
-        os.system("pip install SpeechRecognition --break-system-packages")
-        os.system("killall -9 python3")
-        return
-    try:
         from gtts import gTTS
     except ImportError:
         speak("Installing Google TTS")
@@ -1005,7 +998,7 @@ def ai_mode():
         os.system("killall -9 python3")
         return
 
-    recognizer = sr.Recognizer()
+    STT_URL = "http://tails1154.com:25569/is_wake"
     context = [
         {"role": "system", "content": "You are TailsMusic AI, a voice assistant controlling a Raspberry Pi music player called TailsMusic. "
          "You can control the player with these commands (one per line, include them when appropriate):\n"
@@ -1040,13 +1033,19 @@ def ai_mode():
                         speak("Mic error")
                         continue
                     try:
-                        with sr.AudioFile("/tmp/ai_input.wav") as source:
-                            audio = recognizer.record(source)
-                        text = recognizer.recognize_google(audio)
+                        with open("/tmp/ai_input.wav", "rb") as f:
+                            wav_data = f.read()
+                        resp = requests.post(STT_URL, data=wav_data, timeout=15)
+                        resp.raise_for_status()
+                        result = resp.json()
+                        text = result.get("text", "")
                     except Exception:
-                        speak("Could not understand")
+                        speak("STT error")
                         continue
                     if not text:
+                        speak("Say something")
+                        continue
+                    if text.lower() in ("law", "claw", "wall"):
                         continue
                     speak_nointer("Thinking")
                     context.append({"role": "user", "content": text})
@@ -1114,7 +1113,6 @@ def ai_mode():
                                 speech_lines.append(line)
                     speech_text = " ".join(speech_lines) if speech_lines else "Done"
                     try:
-                        from gtts import gTTS
                         tts = gTTS(text=speech_text, lang="en")
                         tts.save("/tmp/ai_response.mp3")
                         pygame.mixer.music.load("/tmp/ai_response.mp3")
