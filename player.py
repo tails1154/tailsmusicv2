@@ -1053,7 +1053,7 @@ def ai_mode():
                         continue
                     if not text or text.lower() in ("law", "claw", "wall"):
                         continue
-                    speak_nointer("Thinking")
+                    speak_nointer("You said " + text)
                     context.append({"role": "user", "content": text})
                     try:
                         resp = requests.post("https://ai.tails1154.com/api/chat",
