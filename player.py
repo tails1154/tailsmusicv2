@@ -1029,7 +1029,7 @@ def ai_mode():
             if key_event.keystate == 1:
                 key = key_event.keycode
                 if key == config['backbutton']:
-                    speak("Exiting AI mode")
+                    speak_nointer("Exiting AI mode")
                     os.system("killall -9 python3")
                     return
                 elif key in [config['okbutton'], config['okbutton2']]:
@@ -1037,9 +1037,11 @@ def ai_mode():
                     print("HFP on")
                     subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "handsfree_head_unit"], capture_output=True)
                     sleep(0.5)
-                    source_name = subprocess.run(["pactl", "get-default-source"], capture_output=True, text=True).stdout.strip()
+                    source_name = "bluez_source.00_1E_7C_C8_C3_D8.handsfree_head_unit"
+                    print(f"Source: {source_name}")
                     speak("Listening")
                     proc = subprocess.Popen(["parec", "-d", source_name, "--rate=16000", "--format=s16le", "--channels=1", "--raw"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                    killed = False
                     for _ in range(100):
                         if daemonRunning: cmdq.process_Command()
                         event = dev.read_one()
@@ -1047,15 +1049,17 @@ def ai_mode():
                             ke = categorize(event)
                             if ke.keystate == 1 and ke.keycode in [config['okbutton'], config['okbutton2'], config['skipbutton']]:
                                 proc.kill()
+                                killed = True
                                 break
                         sleep(0.05)
-                    else:
+                    if not killed:
                         proc.kill()
-                    proc.wait()
-                    raw_data = proc.stdout.read()
+                    raw_data = proc.communicate()[0]
+                    print(f"Recorded {len(raw_data)} bytes")
                     print("A2DP on")
                     subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "a2dp_sink"], capture_output=True)
-                    if not raw_data:
+                    if len(raw_data) < 16000:
+                        print(f"Too little data: {len(raw_data)}")
                         continue
                     import struct
                     wav_data = struct.pack('<4sI4s4sIHHIIHH4sI',
@@ -1064,11 +1068,14 @@ def ai_mode():
                         16000 * 2, 2, 16,
                         b'data', len(raw_data)) + raw_data
                     try:
+                        print("Sending to STT...")
                         resp = requests.post(STT_URL, data=wav_data, timeout=15)
                         resp.raise_for_status()
                         result = resp.json()
                         text = result.get("text", "")
-                    except Exception:
+                        print(f"STT: '{text}'")
+                    except Exception as e:
+                        print(f"STT error: {e}")
                         continue
                     if not text or text.lower() in ("law", "claw", "wall"):
                         continue
@@ -1095,7 +1102,8 @@ def ai_mode():
                                     pass
                         if not response_text:
                             response_text = resp.text
-                    except Exception:
+                    except Exception as e:
+                        print(f"AI error: {e}")
                         continue
                     context.pop()
                     context.pop()
