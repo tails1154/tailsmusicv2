@@ -1080,18 +1080,13 @@ def ai_mode():
                             headers={"Content-Type": "application/json"},
                             timeout=30)
                         resp.raise_for_status()
-                        response_text = ""
-                        reader = resp.iter_lines()
-                        for line in reader:
-                            if line:
-                                try:
-                                    data = json.loads(line)
-                                    if "response" in data:
-                                        response_text += data["response"]
-                                except Exception:
-                                    pass
-                        if not response_text:
-                            response_text = resp.text
+                        data = resp.json()
+                        if "choices" in data:
+                            response_text = data["choices"][0]["message"]["content"]
+                        elif "response" in data:
+                            response_text = data["response"]
+                        else:
+                            response_text = str(data)
                     except Exception as e:
                         print(f"AI error: {e}")
                         continue

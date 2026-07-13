@@ -154,7 +154,6 @@ AI_CONTEXT = []
 
 def _ai_chat(user_msg):
     import requests as _req
-    import random as _rnd
     global AI_CONTEXT
     if not AI_CONTEXT:
         AI_CONTEXT.append({"role": "system", "content": "You are TailsMusic AI, a voice assistant controlling a Raspberry Pi music player called TailsMusic. "
@@ -177,17 +176,13 @@ def _ai_chat(user_msg):
             json={"messages": AI_CONTEXT},
             headers={"Content-Type": "application/json"}, timeout=30)
         r.raise_for_status()
-        resp_text = ""
-        for line in r.iter_lines():
-            if line:
-                try:
-                    d = json.loads(line)
-                    if "response" in d:
-                        resp_text += d["response"]
-                except:
-                    pass
-        if not resp_text:
-            resp_text = r.text
+        data = r.json()
+        if "choices" in data:
+            resp_text = data["choices"][0]["message"]["content"]
+        elif "response" in data:
+            resp_text = data["response"]
+        else:
+            resp_text = str(data)
         AI_CONTEXT.append({"role": "assistant", "content": resp_text})
         commands = []
         speech = []
