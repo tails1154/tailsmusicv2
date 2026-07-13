@@ -13,7 +13,7 @@ HTML = {}
 
 def load_templates():
     base = os.path.dirname(__file__)
-    for name in ["index.html", "upload.html", "wifi.html", "bluetooth.html"]:
+    for name in ["index.html", "upload.html", "wifi.html", "bluetooth.html", "ai.html"]:
         path = os.path.join(base, "templates", name)
         if os.path.exists(path):
             with open(path) as f:
@@ -150,6 +150,57 @@ def _get_ip():
     except Exception:
         return "Not connected"
 
+AI_CONTEXT = []
+
+def _ai_chat(user_msg):
+    import requests as _req
+    import random as _rnd
+    global AI_CONTEXT
+    if not AI_CONTEXT:
+        AI_CONTEXT.append({"role": "system", "content": "You are TailsMusic AI, a voice assistant controlling a Raspberry Pi music player called TailsMusic. "
+         "You can control the player with these commands (one per line, include them when appropriate):\n"
+         "!next - skip to next song\n"
+         "!prev - go to previous song\n"
+         "!pause - toggle pause/play\n"
+         "!volume N - set volume 0-100\n"
+         "!shuffle - toggle shuffle mode\n"
+         "!play SONG_NAME - find and play a song (use partial name)\n"
+         "!current - says the currently playing song name\n"
+         "!search QUERY - search for songs matching QUERY\n"
+         "!stop - stop playback\n"
+         "!help - list available voice commands\n\n"
+         "When the user asks you to control playback, respond naturally AND include the appropriate command on its own line. "
+         "Keep responses brief and conversational since they will be spoken aloud."})
+    AI_CONTEXT.append({"role": "user", "content": user_msg})
+    try:
+        r = _req.post("https://ai.tails1154.com/api/chat",
+            json={"messages": AI_CONTEXT},
+            headers={"Content-Type": "application/json"}, timeout=30)
+        r.raise_for_status()
+        resp_text = ""
+        for line in r.iter_lines():
+            if line:
+                try:
+                    d = json.loads(line)
+                    if "response" in d:
+                        resp_text += d["response"]
+                except:
+                    pass
+        if not resp_text:
+            resp_text = r.text
+        AI_CONTEXT.append({"role": "assistant", "content": resp_text})
+        commands = []
+        speech = []
+        for line in resp_text.split("\n"):
+            line = line.strip()
+            if line.startswith("!"):
+                commands.append(line[1:].strip())
+            elif line:
+                speech.append(line)
+        return {"response": " ".join(speech), "commands": commands}
+    except Exception as e:
+        return {"response": f"AI error: {e}", "commands": []}
+
 class PortalHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed = urlparse(self.path)
@@ -157,6 +208,8 @@ class PortalHandler(SimpleHTTPRequestHandler):
 
         if path == '/':
             self._serve_html("index.html")
+        elif path == '/ai':
+            self._serve_html("ai.html")
         elif path == '/upload':
             self._serve_html("upload.html")
         elif path == '/wifi':
@@ -241,6 +294,18 @@ class PortalHandler(SimpleHTTPRequestHandler):
         elif path == '/api/hotspot/stop':
             subprocess.Popen(["sh", "-c", "sleep 1 && sudo killall -9 python3"])
             self._json_response({"success": True, "message": "Hotspot stopping"})
+
+        elif path == '/api/ai/chat':
+            length = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(length).decode())
+            msg = body.get("message", "")
+            result = _ai_chat(msg)
+            for cmd in result.get("commands", []):
+                if cmd == "next":
+                    subprocess.run(["pkill", "-f", "next_song"])
+                elif cmd == "prev":
+                    subprocess.run(["pkill", "-f", "prev_song"])
+            self._json_response(result)
 
         elif path == '/api/upload/zip':
             length = int(self.headers.get('Content-Length', 0))
