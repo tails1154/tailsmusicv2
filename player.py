@@ -999,19 +999,26 @@ def ai_mode():
         return
 
     STT_URL = "http://tails1154.com:25569/is_wake"
+    system_prompt = (
+        "You are TailsMusic AI, a voice assistant controlling a Raspberry Pi music player called TailsMusic. "
+        "You can control the player with these commands (one per line, include them when appropriate):\n"
+        "!next - skip to next song\n"
+        "!prev - go to previous song\n"
+        "!pause - toggle pause/play\n"
+        "!volume N - set volume 0-100\n"
+        "!shuffle - toggle shuffle mode\n"
+        "!play SONG_NAME - find and play a song (use partial name)\n"
+        "!search QUERY - search for songs matching QUERY, returns matching song names\n"
+        "!current - says the currently playing song name\n"
+        "!stop - stop playback\n"
+        "!help - list available voice commands\n\n"
+        "When the user asks you to control playback, respond naturally AND include the appropriate command on its own line. "
+        "If they ask about the current song, use !current. "
+        "If they ask to find/play a specific song, use !play or !search. "
+        "Keep responses brief and conversational since they will be spoken aloud."
+    )
     context = [
-        {"role": "system", "content": "You are TailsMusic AI, a voice assistant controlling a Raspberry Pi music player called TailsMusic. "
-         "You can control the player with these commands (one per line, include them when appropriate):\n"
-         "!next - skip to next song\n"
-         "!prev - go to previous song\n"
-         "!pause - toggle pause/play\n"
-         "!volume N - set volume 0-100\n"
-         "!shuffle - toggle shuffle mode\n"
-         "!play SONG_NAME - find and play a song (use partial name)\n"
-         "!stop - stop playback\n"
-         "!help - list available voice commands\n\n"
-         "When the user asks you to control playback, respond naturally AND include the appropriate command on its own line. "
-         "Keep responses brief and conversational since they will be spoken aloud."}
+        {"role": "system", "content": system_prompt}
     ]
     speak("AI mode")
     while True:
@@ -1055,6 +1062,9 @@ def ai_mode():
                     if not text or text.lower() in ("law", "claw", "wall"):
                         continue
                     speak_nointer("You said " + text)
+                    current_song = os.path.basename(playlist[index]) if playlist else "none"
+                    state_msg = f"Current state: playing '{current_song}', paused={paused}, shuffle={'on' if shuffleOn else 'off'}, total songs={len(playlist)}"
+                    context.append({"role": "system", "content": state_msg})
                     context.append({"role": "user", "content": text})
                     try:
                         resp = requests.post("https://ai.tails1154.com/api/chat",
@@ -1076,6 +1086,9 @@ def ai_mode():
                             response_text = resp.text
                     except Exception:
                         continue
+                    context.pop()
+                    context.pop()
+                    context.append({"role": "user", "content": text})
                     context.append({"role": "assistant", "content": response_text})
                     speech_lines = []
                     for line in response_text.split("\n"):
@@ -1112,8 +1125,19 @@ def ai_mode():
                                     pygame.mixer.music.load(playlist[index])
                                     pygame.mixer.music.play()
                                     update_tailsign()
+                            elif cmd == "current":
+                                song_name = os.path.basename(playlist[index]) if playlist else "nothing"
+                                speech_lines.append(f"Currently playing {song_name}")
+                            elif cmd.startswith("search"):
+                                query = cmd[7:].strip().lower()
+                                matches = [os.path.basename(s) for s in playlist if query in os.path.basename(s).lower()]
+                                if matches:
+                                    names = ", ".join(m[:30] for m in matches[:5])
+                                    speech_lines.append(f"Found {len(matches)} songs: {names}")
+                                else:
+                                    speech_lines.append("No songs found")
                             elif cmd == "help":
-                                speech_lines.append("Commands: next, prev, pause, volume, shuffle, play, stop")
+                                speech_lines.append("Commands: next, prev, pause, volume, shuffle, play, stop, current, search")
                         else:
                             if line:
                                 speech_lines.append(line)
