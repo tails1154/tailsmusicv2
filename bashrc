@@ -115,28 +115,14 @@ echo "Press Ctrl-C now to enter terminal"
 echo "Waiting 2 seconds"
 sleep 2
 while [ yes ]; do
-echo "Stopping pulseaudio"
-pulseaudio --kill
-echo "Starting pulseaudio"
-pulseaudio --start
-echo "Waiting 1 second"
-sleep 1
-echo "The bluetooth device is ready to uh connect"
-sudo bluetoothctl connect 04:57:91:08:28:51
+echo "Connecting Bluetooth"
+sudo bluetoothctl connect 00:1E:7C:C8:C3:D8 2>/dev/null
 while [ "$?" != "0" ]; do
-echo "Restarting pulseaudio"
-pulseaudio --kill
-echo "Starting pulseaudio"
-pulseaudio --start
-echo "Connecting"
-sudo bluetoothctl connect 04:57:91:08:28:51
+echo "Retrying Bluetooth"
+sudo bluetoothctl connect 00:1E:7C:C8:C3:D8 2>/dev/null
 done
-echo "Waiting 1 second"
 sleep 1
-echo "Setting default PA device (Just in case)"
-pactl set-default-sink bluez_sink.04_57_91_08_28_51.a2dp_sink
-echo "Second one in case first one didnt work"
-pactl set-default-sink bluez_sink.04_57_91_08_28_51.handsfree_head_unit
+pactl set-default-sink bluez_sink.00_1E_7C_C8_C3_D8.a2dp_sink
 
 
 # Created by `pipx` on 2025-06-24 04:44:52
