@@ -148,7 +148,8 @@ echo "Starting tailsmusic mp3 player"
 
 
 cd /home/pi/mp3player
-python3 player.py
+echo "=== tailsmusic started $(date) ===" >> tailsmusic.log
+PYTHONUNBUFFERED=1 python3 player.py >> tailsmusic.log 2>&1
 
 cd
 #done
