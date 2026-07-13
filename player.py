@@ -998,7 +998,7 @@ if __name__ == "__main__":
         dev = InputDevice(device_path)
     else:
         print("Bluetooth media button device not found.")
-        sys.exit(1)
+        os.system("killall -9 python3")
 
     MUSIC_DIR = '/home/pi/mp3player/songs'
     PLAYLIST_DIR = '/home/pi/mp3player/playlists'
@@ -1023,7 +1023,7 @@ if __name__ == "__main__":
         print("Exception Deleteing __pycache__:" + str(e))
     if not playlist:
         speak("No songs found.")
-        sys.exit(1)
+        os.system("killall -9 python3")
     index = 0
     paused = False
     print("Loading Audio Driver")

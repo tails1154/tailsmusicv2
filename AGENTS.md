@@ -37,6 +37,7 @@
 - `global daemonRunning` flag controls `cmdq.process_Command()` polling in the main event loop.
 - `app.py` is deleted at startup (`os.remove("app.py")`) and after non-daemon apps finish. It is in `.gitignore`.
 - `player.py` auto-advances to next song when `pygame.mixer.music.get_busy()` is false.
+- `sys.exit()` is intentionally replaced with `os.system("killall -9 python3")` — this is a hard-kill pattern for the single-process embedded environment.
 
 ## Docs
 - Doxygen: `./docs.sh` regenerates HTML docs (runs `doxygen`, copies `docs/html/*` to `docs/`, removes source).
