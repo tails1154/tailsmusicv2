@@ -1034,6 +1034,8 @@ def ai_mode():
                     return
                 elif key in [config['okbutton'], config['okbutton2']]:
                     click.play()
+                    subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "handsfree_head_unit"], capture_output=True)
+                    sleep(0.3)
                     speak("Listening")
                     proc = subprocess.Popen(["arecord", "-d", "7", "-f", "S16_LE", "-r", "16000", "-t", "wav", "/tmp/ai_input.wav"], stderr=subprocess.DEVNULL)
                     while proc.poll() is None:
@@ -1048,6 +1050,7 @@ def ai_mode():
                                     proc.wait()
                                     break
                         sleep(0.05)
+                    subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "a2dp_sink"], capture_output=True)
                     if proc.returncode == -9:
                         continue
                     try:
@@ -1204,9 +1207,6 @@ if __name__ == "__main__":
         os.system("killall -9 python3")
     index = 0
     paused = False
-    print("Switching to HFP mode for mic")
-    subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "handsfree_head_unit"], capture_output=True)
-    sleep(0.5)
     print("Loading Audio Driver")
     os.environ['SDL_AUDIODRIVER'] = 'pulseaudio'
     pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=2048)
