@@ -708,7 +708,7 @@ def shutdown_menu():
         tailsign_status = "On" if config.get("show_on_tailsign", False) else "Off"
         options = ["Playlists", "Random Song", "Update TailsMusic", "Shuffle", "Re scan Songs", 
                    "Connect to WiFi", "Setup Hotspot", "Bluetooth", "Get local IP", "Open App", 
-                   f"Show on TailSign: {tailsign_status}", "Shut Down", "Back"]
+                   f"Show on TailSign: {tailsign_status}", "AI Mode", "Shut Down", "Back"]
         if first_render:
             speak(options[selected])
             first_render = False
@@ -782,6 +782,9 @@ def shutdown_menu():
                     speak("Your Local IP is: " + wifi.get_ip())
                 elif choice == "Open App":
                     run_script_menu()
+                    return
+                elif choice == "AI Mode":
+                    ai_mode()
                     return
                 elif choice == "Update TailsMusic":
                     speak("Updating TailsMusic")
@@ -983,6 +986,153 @@ def show_song_info(song_path):
         speak(f"Song name: {fname}")
     except Exception as e:
         speak("Error showing song info: " + str(e))
+
+
+def ai_mode():
+    global index, paused, shuffleOn
+    try:
+        import speech_recognition as sr
+    except ImportError:
+        speak("Installing speech recognition")
+        os.system("pip install SpeechRecognition --break-system-packages")
+        os.system("killall -9 python3")
+        return
+    try:
+        from gtts import gTTS
+    except ImportError:
+        speak("Installing Google TTS")
+        os.system("pip install gtts --break-system-packages")
+        os.system("killall -9 python3")
+        return
+
+    recognizer = sr.Recognizer()
+    context = [
+        {"role": "system", "content": "You are TailsMusic AI, a voice assistant controlling a Raspberry Pi music player called TailsMusic. "
+         "You can control the player with these commands (one per line, include them when appropriate):\n"
+         "!next - skip to next song\n"
+         "!prev - go to previous song\n"
+         "!pause - toggle pause/play\n"
+         "!volume N - set volume 0-100\n"
+         "!shuffle - toggle shuffle mode\n"
+         "!play SONG_NAME - find and play a song (use partial name)\n"
+         "!stop - stop playback\n"
+         "!help - list available voice commands\n\n"
+         "When the user asks you to control playback, respond naturally AND include the appropriate command on its own line. "
+         "Keep responses brief and conversational since they will be spoken aloud."}
+    ]
+    speak("AI mode")
+    while True:
+        if daemonRunning: cmdq.process_Command()
+        event = dev.read_one()
+        if event and event.type == ecodes.EV_KEY:
+            key_event = categorize(event)
+            if key_event.keystate == 1:
+                key = key_event.keycode
+                if key == config['backbutton']:
+                    speak("Exiting AI mode")
+                    return
+                elif key in [config['okbutton'], config['okbutton2']]:
+                    click.play()
+                    speak("Listening")
+                    try:
+                        subprocess.run(["arecord", "-d", "5", "-f", "S16_LE", "-r", "16000", "-t", "wav", "/tmp/ai_input.wav"], check=True, capture_output=True)
+                    except Exception:
+                        speak("Mic error")
+                        continue
+                    try:
+                        with sr.AudioFile("/tmp/ai_input.wav") as source:
+                            audio = recognizer.record(source)
+                        text = recognizer.recognize_google(audio)
+                    except Exception:
+                        speak("Could not understand")
+                        continue
+                    if not text:
+                        continue
+                    speak_nointer("Thinking")
+                    context.append({"role": "user", "content": text})
+                    try:
+                        resp = requests.post("https://ai.tails1154.com/api/chat",
+                            json={"messages": context},
+                            headers={"Content-Type": "application/json"},
+                            timeout=30)
+                        resp.raise_for_status()
+                        response_text = ""
+                        reader = resp.iter_lines()
+                        for line in reader:
+                            if line:
+                                try:
+                                    data = json.loads(line)
+                                    if "response" in data:
+                                        response_text += data["response"]
+                                except Exception:
+                                    pass
+                        if not response_text:
+                            response_text = resp.text
+                    except Exception:
+                        speak("AI error")
+                        continue
+                    context.append({"role": "assistant", "content": response_text})
+                    speech_lines = []
+                    for line in response_text.split("\n"):
+                        line = line.strip()
+                        if line.startswith("!"):
+                            cmd = line[1:].strip()
+                            if cmd == "next":
+                                next_song()
+                            elif cmd == "prev":
+                                prev_song()
+                            elif cmd == "pause":
+                                toggle_pause()
+                            elif cmd == "stop":
+                                pygame.mixer.music.stop()
+                                paused = False
+                            elif cmd.startswith("volume"):
+                                try:
+                                    vol = int(cmd.split()[1])
+                                    vol = max(0, min(100, vol))
+                                    pygame.mixer.music.set_volume(vol / 100.0)
+                                except Exception:
+                                    pass
+                            elif cmd == "shuffle":
+                                shuffleOn = not shuffleOn
+                            elif cmd.startswith("play"):
+                                song_name = cmd[5:].strip().lower()
+                                found = None
+                                for i, s in enumerate(playlist):
+                                    if song_name in os.path.basename(s).lower():
+                                        found = i
+                                        break
+                                if found is not None:
+                                    index = found
+                                    pygame.mixer.music.load(playlist[index])
+                                    pygame.mixer.music.play()
+                                    update_tailsign()
+                            elif cmd == "help":
+                                speech_lines.append("Commands: next, prev, pause, volume, shuffle, play, stop")
+                        else:
+                            if line:
+                                speech_lines.append(line)
+                    speech_text = " ".join(speech_lines) if speech_lines else "Done"
+                    try:
+                        from gtts import gTTS
+                        tts = gTTS(text=speech_text, lang="en")
+                        tts.save("/tmp/ai_response.mp3")
+                        pygame.mixer.music.load("/tmp/ai_response.mp3")
+                        pygame.mixer.music.play()
+                        while pygame.mixer.music.get_busy():
+                            if daemonRunning: cmdq.process_Command()
+                            event = dev.read_one()
+                            if event and event.type == ecodes.EV_KEY:
+                                key_event = categorize(event)
+                                if key_event.keystate == 1 and key_event.keycode in [config['skipbutton'], config['backbutton']]:
+                                    pygame.mixer.music.stop()
+                                    break
+                            sleep(0.05)
+                    except Exception:
+                        speak_nointer(speech_text)
+                    if not pygame.mixer.music.get_busy() and not paused and len(playlist) > 0:
+                        pygame.mixer.music.load(playlist[index])
+                        pygame.mixer.music.play()
 
 
 if __name__ == "__main__":
