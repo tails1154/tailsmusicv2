@@ -125,6 +125,11 @@ sleep 1
 pactl set-default-sink bluez_sink.00_1E_7C_C8_C3_D8.a2dp_sink
 
 
+echo "Starting portal server"
+sudo pkill -9 -f portal.server 2>/dev/null
+sleep 0.5
+sudo python3 -m portal.server &
+
 # Created by `pipx` on 2025-06-24 04:44:52
 export PATH="$PATH:/home/tails1154/.local/bin"
 
