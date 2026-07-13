@@ -1208,8 +1208,8 @@ if __name__ == "__main__":
     subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "handsfree_head_unit"], capture_output=True)
     sleep(0.5)
     print("Loading Audio Driver")
-    os.environ['SDL_AUDIODRIVER'] = 'alsa'
-    pygame.mixer.pre_init(frequency=16000, size=-16, channels=1, buffer=2048)
+    os.environ['SDL_AUDIODRIVER'] = 'pulseaudio'
+    pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=2048)
     pygame.mixer.init()
     print("Loading sfx...")
     pausesfx = pygame.mixer.Sound("/home/pi/mp3player/sfx/pause.mp3")
