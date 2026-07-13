@@ -999,6 +999,9 @@ def ai_mode():
         return
 
     STT_URL = "http://tails1154.com:25569/is_wake"
+    BT_CARD = "bluez_card.00_1E_7C_C8_C3_D8"
+    HFP_PROFILE = "handsfree_head_unit"
+    A2DP_PROFILE = "a2dp_sink"
     context = [
         {"role": "system", "content": "You are TailsMusic AI, a voice assistant controlling a Raspberry Pi music player called TailsMusic. "
          "You can control the player with these commands (one per line, include them when appropriate):\n"
@@ -1027,6 +1030,8 @@ def ai_mode():
                     return
                 elif key in [config['okbutton'], config['okbutton2']]:
                     click.play()
+                    subprocess.run(["pactl", "set-card-profile", BT_CARD, HFP_PROFILE], capture_output=True)
+                    sleep(0.5)
                     speak("Listening")
                     proc = subprocess.Popen(["arecord", "-d", "7", "-f", "S16_LE", "-r", "16000", "-t", "wav", "/tmp/ai_input.wav"], stderr=subprocess.DEVNULL)
                     while proc.poll() is None:
@@ -1041,6 +1046,7 @@ def ai_mode():
                                     proc.wait()
                                     break
                         sleep(0.05)
+                    subprocess.run(["pactl", "set-card-profile", BT_CARD, A2DP_PROFILE], capture_output=True)
                     if proc.returncode == -9:
                         continue
                     try:
