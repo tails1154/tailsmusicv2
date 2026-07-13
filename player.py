@@ -271,10 +271,10 @@ def find_simolio():
 
 def speak_nointer(text):
     print(f"TTS: {text}")
-    subprocess.run(["killall", "espeak-ng"], check=False)
+    subprocess.run(["killall", "espeak-ng"], capture_output=True, check=False)
     subprocess.run(["espeak-ng", "-s", "130", text], check=True)
 def speak(text):
-    subprocess.run(["killall", "espeak-ng"], check=False)
+    subprocess.run(["killall", "espeak-ng"], capture_output=True, check=False)
     subprocess.Popen(["espeak-ng", "-s", "130", text])
 def speak_allowinter(text):
     speak(text)
@@ -1036,28 +1036,35 @@ def ai_mode():
                     click.play()
                     print("Switching to HFP for mic")
                     subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "handsfree_head_unit"], capture_output=True)
-                    sleep(0.3)
+                    sleep(0.5)
+                    source_name = subprocess.run(["pactl", "get-default-source"], capture_output=True, text=True).stdout.strip()
+                    print(f"Using source: {source_name}")
                     speak("Listening")
-                    proc = subprocess.Popen(["arecord", "-d", "5", "-f", "S16_LE", "-r", "16000", "-t", "wav", "/tmp/ai_input.wav"], stderr=subprocess.DEVNULL)
-                    while proc.poll() is None:
+                    proc = subprocess.Popen(["parec", "-d", source_name, "--rate=16000", "--format=s16le", "--channels=1", "--raw"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                    for _ in range(100):
                         if daemonRunning: cmdq.process_Command()
                         event = dev.read_one()
                         if event and event.type == ecodes.EV_KEY:
-                            key_event = categorize(event)
-                            if key_event.keystate == 1:
-                                key = key_event.keycode
-                                if key in [config['okbutton'], config['okbutton2'], config['skipbutton']]:
-                                    proc.kill()
-                                    proc.wait()
-                                    break
+                            ke = categorize(event)
+                            if ke.keystate == 1 and ke.keycode in [config['okbutton'], config['okbutton2'], config['skipbutton']]:
+                                proc.kill()
+                                break
                         sleep(0.05)
+                    else:
+                        proc.kill()
+                    proc.wait()
+                    raw_data = proc.stdout.read()
                     print("Switching back to A2DP")
                     subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "a2dp_sink"], capture_output=True)
-                    if proc.returncode == -9:
+                    if not raw_data:
                         continue
+                    import struct
+                    wav_data = struct.pack('<4sI4s4sIHHIIHH4sI',
+                        b'RIFF', 36 + len(raw_data), b'WAVE',
+                        b'fmt ', 16, 1, 1, 16000,
+                        16000 * 2, 2, 16,
+                        b'data', len(raw_data)) + raw_data
                     try:
-                        with open("/tmp/ai_input.wav", "rb") as f:
-                            wav_data = f.read()
                         resp = requests.post(STT_URL, data=wav_data, timeout=15)
                         resp.raise_for_status()
                         result = resp.json()
