@@ -1023,11 +1023,12 @@ def ai_mode():
                 key = key_event.keycode
                 if key == config['backbutton']:
                     speak("Exiting AI mode")
+                    os.system("killall -9 python3")
                     return
                 elif key in [config['okbutton'], config['okbutton2']]:
                     click.play()
                     speak("Listening")
-                    proc = subprocess.Popen(["arecord", "-d", "5", "-f", "S16_LE", "-r", "16000", "-t", "wav", "/tmp/ai_input.wav"], stderr=subprocess.DEVNULL)
+                    proc = subprocess.Popen(["arecord", "-d", "7", "-f", "S16_LE", "-r", "16000", "-t", "wav", "/tmp/ai_input.wav"], stderr=subprocess.DEVNULL)
                     while proc.poll() is None:
                         if daemonRunning: cmdq.process_Command()
                         event = dev.read_one()
