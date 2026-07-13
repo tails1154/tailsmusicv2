@@ -1034,48 +1034,38 @@ def ai_mode():
                     return
                 elif key in [config['okbutton'], config['okbutton2']]:
                     click.play()
-                    print("HFP on")
-                    subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "handsfree_head_unit"], capture_output=True)
-                    sleep(0.5)
-                    source_name = "bluez_source.00_1E_7C_C8_C3_D8.handsfree_head_unit"
-                    print(f"Source: {source_name}")
-                    speak("Listening")
-                    proc = subprocess.Popen(["parec", "-d", source_name, "--rate=16000", "--format=s16le", "--channels=1", "--raw"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                    killed = False
-                    for _ in range(100):
-                        if daemonRunning: cmdq.process_Command()
-                        event = dev.read_one()
-                        if event and event.type == ecodes.EV_KEY:
-                            ke = categorize(event)
-                            if ke.keystate == 1 and ke.keycode in [config['okbutton'], config['okbutton2'], config['skipbutton']]:
-                                proc.kill()
-                                killed = True
-                                break
-                        sleep(0.05)
-                    if not killed:
-                        proc.kill()
-                    raw_data = proc.communicate()[0]
-                    print(f"Recorded {len(raw_data)} bytes")
-                    print("A2DP on")
-                    subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "a2dp_sink"], capture_output=True)
-                    if len(raw_data) < 16000:
-                        print(f"Too little data: {len(raw_data)}")
+                    speak("Recording")
+                    try:
+                        raw_data = b""
+                        mic_source = "bluez_source.00_1E_7C_C8_C3_D8.handsfree_head_unit"
+                        proc = subprocess.Popen(["parec", "-d", mic_source, "--rate=16000", "--format=s16le", "--channels=1", "--raw"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                        for _ in range(100):
+                            if daemonRunning: cmdq.process_Command()
+                            event = dev.read_one()
+                            if event and event.type == ecodes.EV_KEY:
+                                ke = categorize(event)
+                                if ke.keystate == 1 and ke.keycode in [config['okbutton'], config['okbutton2'], config['skipbutton']]:
+                                    proc.kill()
+                                    break
+                            sleep(0.05)
+                        else:
+                            proc.kill()
+                        raw_data = proc.communicate()[0]
+                    except Exception:
+                        speak("Mic error")
+                        continue
+                    if len(raw_data) < 8000:
+                        speak("Nothing heard")
                         continue
                     import struct
-                    wav_data = struct.pack('<4sI4s4sIHHIIHH4sI',
-                        b'RIFF', 36 + len(raw_data), b'WAVE',
-                        b'fmt ', 16, 1, 1, 16000,
-                        16000 * 2, 2, 16,
-                        b'data', len(raw_data)) + raw_data
+                    wav = struct.pack('<4sI4s4sIHHIIHH4sI', b'RIFF', 36 + len(raw_data), b'WAVE', b'fmt ', 16, 1, 1, 16000, 32000, 2, 16, b'data', len(raw_data)) + raw_data
                     try:
-                        print("Sending to STT...")
-                        resp = requests.post(STT_URL, data=wav_data, timeout=15)
-                        resp.raise_for_status()
-                        result = resp.json()
-                        text = result.get("text", "")
-                        print(f"STT: '{text}'")
+                        r = requests.post(STT_URL, data=wav, timeout=15)
+                        r.raise_for_status()
+                        text = r.json().get("text", "")
                     except Exception as e:
-                        print(f"STT error: {e}")
+                        print(f"STT err: {e}")
+                        speak("STT error")
                         continue
                     if not text or text.lower() in ("law", "claw", "wall"):
                         continue
