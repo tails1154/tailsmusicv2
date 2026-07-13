@@ -1027,10 +1027,20 @@ def ai_mode():
                 elif key in [config['okbutton'], config['okbutton2']]:
                     click.play()
                     speak("Listening")
-                    try:
-                        subprocess.run(["arecord", "-d", "5", "-f", "S16_LE", "-r", "16000", "-t", "wav", "/tmp/ai_input.wav"], check=True, capture_output=True)
-                    except Exception:
-                        speak("Mic error")
+                    proc = subprocess.Popen(["arecord", "-d", "5", "-f", "S16_LE", "-r", "16000", "-t", "wav", "/tmp/ai_input.wav"], stderr=subprocess.DEVNULL)
+                    while proc.poll() is None:
+                        if daemonRunning: cmdq.process_Command()
+                        event = dev.read_one()
+                        if event and event.type == ecodes.EV_KEY:
+                            key_event = categorize(event)
+                            if key_event.keystate == 1:
+                                key = key_event.keycode
+                                if key in [config['okbutton'], config['okbutton2'], config['skipbutton']]:
+                                    proc.kill()
+                                    proc.wait()
+                                    break
+                        sleep(0.05)
+                    if proc.returncode == -9:
                         continue
                     try:
                         with open("/tmp/ai_input.wav", "rb") as f:
@@ -1040,12 +1050,8 @@ def ai_mode():
                         result = resp.json()
                         text = result.get("text", "")
                     except Exception:
-                        speak("STT error")
                         continue
-                    if not text:
-                        speak("Say something")
-                        continue
-                    if text.lower() in ("law", "claw", "wall"):
+                    if not text or text.lower() in ("law", "claw", "wall"):
                         continue
                     speak_nointer("Thinking")
                     context.append({"role": "user", "content": text})
@@ -1068,7 +1074,6 @@ def ai_mode():
                         if not response_text:
                             response_text = resp.text
                     except Exception:
-                        speak("AI error")
                         continue
                     context.append({"role": "assistant", "content": response_text})
                     speech_lines = []
@@ -1111,26 +1116,26 @@ def ai_mode():
                         else:
                             if line:
                                 speech_lines.append(line)
-                    speech_text = " ".join(speech_lines) if speech_lines else "Done"
+                    speech_text = " ".join(speech_lines) if speech_lines else "Say something"
                     try:
-                        tts = gTTS(text=speech_text, lang="en")
-                        tts.save("/tmp/ai_response.mp3")
-                        pygame.mixer.music.load("/tmp/ai_response.mp3")
-                        pygame.mixer.music.play()
-                        while pygame.mixer.music.get_busy():
-                            if daemonRunning: cmdq.process_Command()
-                            event = dev.read_one()
-                            if event and event.type == ecodes.EV_KEY:
-                                key_event = categorize(event)
-                                if key_event.keystate == 1 and key_event.keycode in [config['skipbutton'], config['backbutton']]:
-                                    pygame.mixer.music.stop()
-                                    break
-                            sleep(0.05)
+                        if speech_text:
+                            tts = gTTS(text=speech_text, lang="en")
+                            tts.save("/tmp/ai_response.mp3")
+                            sfx = pygame.mixer.Sound("/tmp/ai_response.mp3")
+                            chan = sfx.play()
+                            if chan:
+                                tts_len = sfx.get_length()
+                                for _ in range(int(tts_len / 0.05)):
+                                    if daemonRunning: cmdq.process_Command()
+                                    event = dev.read_one()
+                                    if event and event.type == ecodes.EV_KEY:
+                                        ke = categorize(event)
+                                        if ke.keystate == 1 and ke.keycode in [config['skipbutton'], config['backbutton']]:
+                                            sfx.stop()
+                                            break
+                                    sleep(0.05)
                     except Exception:
                         speak_nointer(speech_text)
-                    if not pygame.mixer.music.get_busy() and not paused and len(playlist) > 0:
-                        pygame.mixer.music.load(playlist[index])
-                        pygame.mixer.music.play()
 
 
 if __name__ == "__main__":
