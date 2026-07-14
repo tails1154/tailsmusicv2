@@ -1060,10 +1060,10 @@ def ai_mode():
                             event = dev.read_one()
                             if event and event.type == ecodes.EV_KEY:
                                 ke = categorize(event)
-                                if ke.keystate == 1 and ke.keycode in [config['okbutton'], config['okbutton2']]:
+                                if ke.keystate == 1 and ke.keycode == config['skipbutton']:
                                     proc.kill()
                                     break
-                                elif ke.keystate == 1 and ke.keycode == config['skipbutton']:
+                                elif ke.keystate == 1 and ke.keycode in [config['okbutton'], config['okbutton2'], config['backbutton']]:
                                     proc.kill()
                                     raw_data = b""
                                     break
