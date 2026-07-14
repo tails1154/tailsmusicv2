@@ -1034,6 +1034,8 @@ def ai_mode():
                     return
                 elif key in [config['okbutton'], config['okbutton2']]:
                     click.play()
+                    subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "handsfree_head_unit"], capture_output=True)
+                    sleep(0.5)
                     speak("Recording")
                     try:
                         mic_source = "bluez_source.00_1E_7C_C8_C3_D8.handsfree_head_unit"
@@ -1052,7 +1054,9 @@ def ai_mode():
                         raw_data = proc.communicate()[0]
                     except Exception:
                         speak("Mic error")
+                        subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "a2dp_sink"], capture_output=True)
                         continue
+                    subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "a2dp_sink"], capture_output=True)
                     if len(raw_data) < 8000:
                         speak("Nothing heard")
                         continue
@@ -1208,7 +1212,7 @@ if __name__ == "__main__":
     index = 0
     paused = False
     print("Loading Audio Driver")
-    os.environ['SDL_AUDIODRIVER'] = 'pulseaudio'
+    os.environ['SDL_AUDIODRIVER'] = 'alsa'
     pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=2048)
     pygame.mixer.init()
     print("Loading sfx...")

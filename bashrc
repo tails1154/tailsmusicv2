@@ -126,10 +126,7 @@ echo "Retrying Bluetooth"
 sudo bluetoothctl connect 00:1E:7C:C8:C3:D8 2>/dev/null
 done
 sleep 1
-pactl set-card-profile bluez_card.00_1E_7C_C8_C3_D8 handsfree_head_unit
-sleep 1
-pactl set-default-sink bluez_sink.00_1E_7C_C8_C3_D8.handsfree_head_unit
-pactl set-default-source bluez_source.00_1E_7C_C8_C3_D8.handsfree_head_unit
+pactl set-default-sink bluez_sink.00_1E_7C_C8_C3_D8.a2dp_sink
 
 
 echo "Starting portal server"
