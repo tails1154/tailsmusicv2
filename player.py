@@ -726,8 +726,20 @@ def shutdown_menu():
                         json.dump(config, cfg_f, indent=4)
                     speak("Show on TailSign " + ("enabled" if not current else "disabled"))
                 elif choice == "Shut Down":
-                    speak("Shutting down")
-                    subprocess.run(["sudo", "shutdown", "now"])
+                    speak("Confirm shutdown?")
+                    confirm_opts = ["Cancel", "Shut Down"]
+                    conf_sel = 0
+                    while True:
+                        if daemonRunning: cmdq.process_Command()
+                        event = dev.read_one()
+                        if event and event.type == ecodes.EV_KEY:
+                            conf_sel, confirmed = menu_nav(event, conf_sel, confirm_opts)
+                            if confirmed:
+                                click.play()
+                                if confirm_opts[conf_sel] == "Shut Down":
+                                    speak("Shutting down")
+                                    subprocess.run(["sudo", "shutdown", "now"])
+                                break
                 elif choice == "Back":
                     pausesfx.play()
                     return
