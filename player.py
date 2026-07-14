@@ -1072,6 +1072,7 @@ def ai_mode():
                     if len(raw_data) < 8000:
                         speak("Nothing heard")
                         continue
+                    speak_nointer("Transcribing")
                     import struct
                     wav = struct.pack('<4sI4s4sIHHIIHH4sI', b'RIFF', 36 + len(raw_data), b'WAVE', b'fmt ', 16, 1, 1, 16000, 32000, 2, 16, b'data', len(raw_data)) + raw_data
                     try:
@@ -1085,6 +1086,7 @@ def ai_mode():
                     if not text or text.lower() in ("law", "claw", "wall"):
                         continue
                     speak_nointer("You said " + text)
+                    speak_nointer("Thinking")
                     current_song = os.path.basename(playlist[index]) if playlist else "none"
                     state_msg = f"Current state: playing '{current_song}', paused={paused}, shuffle={'on' if shuffleOn else 'off'}, total songs={len(playlist)}"
                     context.append({"role": "system", "content": state_msg})
