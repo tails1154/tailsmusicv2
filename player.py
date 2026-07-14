@@ -27,6 +27,7 @@ print("(8.5/10) hotspot.py")
 import hotspot
 print(f"(9/{totalModules}) shutil")
 import shutil
+import traceback
 print(f"(10/{totalModules}) queue")
 import queue
 import requests
@@ -1051,6 +1052,7 @@ def ai_mode():
                     subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "handsfree_head_unit"], capture_output=True)
                     sleep(0.5)
                     speak("Recording")
+                    raw_data = None
                     try:
                         mic_source = "bluez_source.00_1E_7C_C8_C3_D8.handsfree_head_unit"
                         rec_path = "/tmp/ai_recording.wav"
