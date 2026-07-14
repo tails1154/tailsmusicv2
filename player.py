@@ -1001,7 +1001,9 @@ def show_song_info(song_path):
 
 
 def ai_mode():
-    global index, paused
+    global index, paused, shuffleOn
+    if 'shuffleOn' not in globals():
+        shuffleOn = False
     try:
         from gtts import gTTS
     except ImportError:
@@ -1052,18 +1054,22 @@ def ai_mode():
                     try:
                         mic_source = "bluez_source.00_1E_7C_C8_C3_D8.handsfree_head_unit"
                         proc = subprocess.Popen(["parec", "-d", mic_source, "--rate=16000", "--format=s16le", "--channels=1", "--raw"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                        for _ in range(100):
+                        raw_data = None
+                        while True:
                             if daemonRunning: cmdq.process_Command()
                             event = dev.read_one()
                             if event and event.type == ecodes.EV_KEY:
                                 ke = categorize(event)
-                                if ke.keystate == 1 and ke.keycode in [config['okbutton'], config['okbutton2'], config['skipbutton']]:
+                                if ke.keystate == 1 and ke.keycode in [config['okbutton'], config['okbutton2']]:
                                     proc.kill()
                                     break
+                                elif ke.keystate == 1 and ke.keycode == config['skipbutton']:
+                                    proc.kill()
+                                    raw_data = b""
+                                    break
                             sleep(0.05)
-                        else:
-                            proc.kill()
-                        raw_data = proc.communicate()[0]
+                        if raw_data is None:
+                            raw_data = proc.communicate()[0]
                     except Exception:
                         speak("Mic error")
                         subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "a2dp_sink"], capture_output=True)
@@ -1088,7 +1094,7 @@ def ai_mode():
                     speak_nointer("You said " + text)
                     speak_nointer("Thinking")
                     current_song = os.path.basename(playlist[index]) if playlist else "none"
-                    state_msg = f"Current state: playing '{current_song}', paused={paused}, shuffle={'on' if globals().get('shuffleOn', False) else 'off'}, total songs={len(playlist)}"
+                    state_msg = f"Current state: playing '{current_song}', paused={paused}, shuffle={'on' if shuffleOn else 'off'}, total songs={len(playlist)}"
                     context.append({"role": "system", "content": state_msg})
                     context.append({"role": "user", "content": text})
                     try:
@@ -1165,6 +1171,7 @@ def ai_mode():
                     speech_text = " ".join(speech_lines) if speech_lines else "Say something"
                     try:
                         if speech_text:
+                            speak_nointer("Generating Text To Speech")
                             tts = gTTS(text=speech_text, lang="en")
                             tts.save("/tmp/ai_response.mp3")
                             sfx = pygame.mixer.Sound("/tmp/ai_response.mp3")
