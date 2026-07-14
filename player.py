@@ -1052,38 +1052,39 @@ def ai_mode():
                     return
                 elif key in [config['okbutton'], config['okbutton2']]:
                     click.play()
-                    subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "handsfree_head_unit"], capture_output=True)
-                    sleep(0.5)
-                    speak("Recording")
-                    raw_data = None
                     try:
-                        mic_source = "bluez_source.00_1E_7C_C8_C3_D8.handsfree_head_unit"
-                        rec_path = "/tmp/ai_recording.wav"
-                        proc = subprocess.Popen(["parec", "--file-format=wav", "-d", mic_source, "--rate=16000", "--format=s16le", "--channels=1", rec_path], stderr=subprocess.DEVNULL)
-                        while True:
-                            if daemonRunning: cmdq.process_Command()
-                            event = dev.read_one()
-                            if event and event.type == ecodes.EV_KEY:
-                                ke = categorize(event)
-                                if ke.keystate == 1 and ke.keycode == config['skipbutton']:
-                                    proc.terminate()
-                                    break
-                                elif ke.keystate == 1 and ke.keycode in [config['okbutton'], config['okbutton2'], config['backbutton']]:
-                                    proc.terminate()
-                                    raw_data = b""
-                                    break
-                            sleep(0.05)
-                        proc.wait()
-                        if raw_data is None:
-                            with open(rec_path, "rb") as f:
-                                raw_data = f.read()
-                    except Exception as e:
-                        print(f"Mic error: {e}")
-                        traceback.print_exc()
-                        speak("Mic error")
+                        subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "handsfree_head_unit"], capture_output=True)
+                        sleep(0.5)
+                        speak("Recording")
+                        raw_data = None
+                        try:
+                            mic_source = "bluez_source.00_1E_7C_C8_C3_D8.handsfree_head_unit"
+                            rec_path = "/tmp/ai_recording.wav"
+                            proc = subprocess.Popen(["parec", "--file-format=wav", "-d", mic_source, "--rate=16000", "--format=s16le", "--channels=1", rec_path], stderr=subprocess.DEVNULL)
+                            while True:
+                                if daemonRunning: cmdq.process_Command()
+                                event = dev.read_one()
+                                if event and event.type == ecodes.EV_KEY:
+                                    ke = categorize(event)
+                                    if ke.keystate == 1 and ke.keycode == config['skipbutton']:
+                                        proc.terminate()
+                                        break
+                                    elif ke.keystate == 1 and ke.keycode in [config['backbutton']]:
+                                        proc.terminate()
+                                        raw_data = b""
+                                        break
+                                sleep(0.05)
+                            proc.wait()
+                            if raw_data is None:
+                                with open(rec_path, "rb") as f:
+                                    raw_data = f.read()
+                        except Exception as e:
+                            print(f"Mic error: {e}")
+                            traceback.print_exc()
+                            speak("Mic error")
+                            continue
+                    finally:
                         subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "a2dp_sink"], capture_output=True)
-                        continue
-                    subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "a2dp_sink"], capture_output=True)
                     if len(raw_data) < 8000:
                         speak("Nothing heard")
                         continue
