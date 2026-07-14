@@ -1053,23 +1053,25 @@ def ai_mode():
                     speak("Recording")
                     try:
                         mic_source = "bluez_source.00_1E_7C_C8_C3_D8.handsfree_head_unit"
-                        proc = subprocess.Popen(["parec", "-d", mic_source, "--rate=16000", "--format=s16le", "--channels=1", "--raw"], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-                        raw_data = None
+                        rec_path = "/tmp/ai_recording.wav"
+                        proc = subprocess.Popen(["parec", "--file-format=wav", "-d", mic_source, "--rate=16000", "--format=s16le", "--channels=1", rec_path], stderr=subprocess.DEVNULL)
                         while True:
                             if daemonRunning: cmdq.process_Command()
                             event = dev.read_one()
                             if event and event.type == ecodes.EV_KEY:
                                 ke = categorize(event)
                                 if ke.keystate == 1 and ke.keycode == config['skipbutton']:
-                                    proc.kill()
+                                    proc.terminate()
                                     break
                                 elif ke.keystate == 1 and ke.keycode in [config['okbutton'], config['okbutton2'], config['backbutton']]:
-                                    proc.kill()
+                                    proc.terminate()
                                     raw_data = b""
                                     break
                             sleep(0.05)
+                        proc.wait()
                         if raw_data is None:
-                            raw_data = proc.communicate()[0]
+                            with open(rec_path, "rb") as f:
+                                raw_data = f.read()
                     except Exception:
                         speak("Mic error")
                         subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "a2dp_sink"], capture_output=True)
@@ -1079,10 +1081,8 @@ def ai_mode():
                         speak("Nothing heard")
                         continue
                     speak_nointer("Transcribing")
-                    import struct
-                    wav = struct.pack('<4sI4s4sIHHIIHH4sI', b'RIFF', 36 + len(raw_data), b'WAVE', b'fmt ', 16, 1, 1, 16000, 32000, 2, 16, b'data', len(raw_data)) + raw_data
                     try:
-                        r = requests.post(STT_URL, data=wav, timeout=15)
+                        r = requests.post(STT_URL, data=raw_data, timeout=15)
                         r.raise_for_status()
                         text = r.json().get("text", "")
                     except Exception as e:
