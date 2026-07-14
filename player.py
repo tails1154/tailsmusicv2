@@ -4,7 +4,6 @@ print("Loading Modules")
 #print("This is a different line")
 totalModules = 10
 global shuffleOn
-ai_context = []
 print(f"(0/{totalModules}) os")
 import os
 print(f"(1/{totalModules}) pygame")
@@ -710,7 +709,7 @@ def shutdown_menu():
         tailsign_status = "On" if config.get("show_on_tailsign", False) else "Off"
         options = ["Playlists", "Random Song", "Update TailsMusic", "Shuffle", "Re scan Songs", 
                    "Connect to WiFi", "Setup Hotspot", "Bluetooth", "Get local IP", "Open App", 
-                   f"Show on TailSign: {tailsign_status}", "AI Mode", "Clear AI Context", "Shut Down", "Back"]
+                   f"Show on TailSign: {tailsign_status}", "AI Mode", "Shut Down", "Back"]
         if first_render:
             speak(options[selected])
             first_render = False
@@ -800,10 +799,6 @@ def shutdown_menu():
                 elif choice == "AI Mode":
                     ai_mode()
                     return
-                elif choice == "Clear AI Context":
-                    global ai_context
-                    ai_context = []
-                    speak("AI context cleared")
                 elif choice == "Update TailsMusic":
                     speak("Updating TailsMusic")
                     pygame.mixer.music.load("sfx/dialup.mp3")
@@ -1007,7 +1002,7 @@ def show_song_info(song_path):
 
 
 def ai_mode():
-    global index, paused, shuffleOn, ai_context
+    global index, paused, shuffleOn
     if 'shuffleOn' not in globals():
         shuffleOn = False
     try:
@@ -1019,8 +1014,8 @@ def ai_mode():
         return
 
     STT_URL = "http://tails1154.com:25569/is_wake"
-    if not ai_context:
-        system_prompt = (
+    context = [
+        {"role": "system", "content": (
             "You are TailsMusic AI, a voice assistant controlling a Raspberry Pi music player called TailsMusic. "
             "You can control the player with these commands (one per line, include them when appropriate):\n"
             "!next - skip to next song\n"
@@ -1037,8 +1032,8 @@ def ai_mode():
             "If they ask about the current song, use !current. "
             "If they ask to find/play a specific song, use !play or !search. "
             "Keep responses brief and conversational since they will be spoken aloud."
-        )
-        ai_context.append({"role": "system", "content": system_prompt})
+        )}
+    ]
     speak("AI mode")
     while True:
         if daemonRunning: cmdq.process_Command()
@@ -1120,11 +1115,11 @@ def ai_mode():
                     speak_nointer("Thinking")
                     current_song = os.path.basename(playlist[index]) if playlist else "none"
                     state_msg = f"Current state: playing '{current_song}', paused={paused}, shuffle={'on' if shuffleOn else 'off'}, total songs={len(playlist)}"
-                    ai_context.append({"role": "system", "content": state_msg})
-                    ai_context.append({"role": "user", "content": text})
+                    context.append({"role": "system", "content": state_msg})
+                    context.append({"role": "user", "content": text})
                     try:
                         resp = requests.post("https://ai.tails1154.com/api/chat",
-                            json={"messages": ai_context},
+                            json={"messages": context},
                             headers={"Content-Type": "application/json"},
                             timeout=30)
                         resp.raise_for_status()
@@ -1138,10 +1133,10 @@ def ai_mode():
                     except Exception as e:
                         print(f"AI error: {e}")
                         continue
-                    ai_context.pop()
-                    ai_context.pop()
-                    ai_context.append({"role": "user", "content": text})
-                    ai_context.append({"role": "assistant", "content": response_text})
+                    context.pop()
+                    context.pop()
+                    context.append({"role": "user", "content": text})
+                    context.append({"role": "assistant", "content": response_text})
                     speech_lines = []
                     for line in response_text.split("\n"):
                         line = line.strip()
