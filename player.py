@@ -1096,6 +1096,23 @@ def ai_mode():
                     if not text or text.lower() in ("law", "claw", "wall"):
                         continue
                     speak_nointer("You said " + text)
+                    speak_nointer("Press skip if correct, back to re record")
+                    confirmed = False
+                    while not confirmed:
+                        if daemonRunning: cmdq.process_Command()
+                        event = dev.read_one()
+                        if event and event.type == ecodes.EV_KEY:
+                            ke = categorize(event)
+                            if ke.keystate == 1:
+                                if ke.keycode == config['skipbutton']:
+                                    click.play()
+                                    confirmed = True
+                                elif ke.keycode in [config['backbutton'], config['okbutton'], config['okbutton2']]:
+                                    click.play()
+                                    break
+                        sleep(0.05)
+                    if not confirmed:
+                        continue
                     speak_nointer("Thinking")
                     current_song = os.path.basename(playlist[index]) if playlist else "none"
                     state_msg = f"Current state: playing '{current_song}', paused={paused}, shuffle={'on' if shuffleOn else 'off'}, total songs={len(playlist)}"
