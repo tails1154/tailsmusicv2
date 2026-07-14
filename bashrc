@@ -115,6 +115,10 @@ echo "Press Ctrl-C now to enter terminal"
 echo "Waiting 2 seconds"
 sleep 2
 while [ yes ]; do
+echo "Setting up USB Bluetooth adapter"
+sudo hciconfig hci0 down 2>/dev/null
+sudo hciconfig hci1 up 2>/dev/null
+sleep 1
 echo "Connecting Bluetooth"
 sudo bluetoothctl connect 00:1E:7C:C8:C3:D8 2>/dev/null
 while [ "$?" != "0" ]; do
