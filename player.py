@@ -1045,7 +1045,6 @@ def ai_mode():
                 key = key_event.keycode
                 if key == config['backbutton']:
                     speak_nointer("Exiting AI mode")
-                    os.system("killall -9 python3")
                     return
                 elif key in [config['okbutton'], config['okbutton2']]:
                     click.play()
