@@ -1001,7 +1001,7 @@ def show_song_info(song_path):
 
 
 def ai_mode():
-    global index, paused, shuffleOn
+    global index, paused
     try:
         from gtts import gTTS
     except ImportError:
@@ -1088,7 +1088,7 @@ def ai_mode():
                     speak_nointer("You said " + text)
                     speak_nointer("Thinking")
                     current_song = os.path.basename(playlist[index]) if playlist else "none"
-                    state_msg = f"Current state: playing '{current_song}', paused={paused}, shuffle={'on' if shuffleOn else 'off'}, total songs={len(playlist)}"
+                    state_msg = f"Current state: playing '{current_song}', paused={paused}, shuffle={'on' if globals().get('shuffleOn', False) else 'off'}, total songs={len(playlist)}"
                     context.append({"role": "system", "content": state_msg})
                     context.append({"role": "user", "content": text})
                     try:
