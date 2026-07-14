@@ -115,15 +115,11 @@ echo "Press Ctrl-C now to enter terminal"
 echo "Waiting 2 seconds"
 sleep 2
 while [ yes ]; do
-echo "Using USB Bluetooth adapter"
-sudo hciconfig hci1 up 2>/dev/null
-sudo hciconfig hci0 down 2>/dev/null
-sleep 1
 echo "Connecting Bluetooth"
-sudo bluetoothctl --adapter 40:ED:00:3B:60:A9 connect 00:1E:7C:C8:C3:D8 2>/dev/null
+sudo bluetoothctl connect 00:1E:7C:C8:C3:D8 2>/dev/null
 while [ "$?" != "0" ]; do
 echo "Retrying Bluetooth"
-sudo bluetoothctl --adapter 40:ED:00:3B:60:A9 connect 00:1E:7C:C8:C3:D8 2>/dev/null
+sudo bluetoothctl connect 00:1E:7C:C8:C3:D8 2>/dev/null
 done
 sleep 1
 pactl set-default-sink bluez_sink.00_1E_7C_C8_C3_D8.a2dp_sink
