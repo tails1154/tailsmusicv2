@@ -1072,7 +1072,9 @@ def ai_mode():
                         if raw_data is None:
                             with open(rec_path, "rb") as f:
                                 raw_data = f.read()
-                    except Exception:
+                    except Exception as e:
+                        print(f"Mic error: {e}")
+                        traceback.print_exc()
                         speak("Mic error")
                         subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "a2dp_sink"], capture_output=True)
                         continue
