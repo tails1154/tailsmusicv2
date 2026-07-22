@@ -192,44 +192,17 @@ install_python_packages() {
     } | dialog --title "TailsMusic Setup" --gauge "Installing Python packages..." 8 70 0
 }
 
-# ── Step 5: Create directories & copy files ────────────────────────────
+# ── Step 5: Create directories ─────────────────────────────────────────
 
 setup_directories() {
     {
-        gauge_update 10 "Creating directories..."
+        gauge_update 20 "Creating directories..."
         mkdir -p "$MUSIC_DIR" "$PLAYLIST_DIR" "$SFX_DIR"
 
-        gauge_update 30 "Copying player files..."
-        local SCRIPT_DIR
-        SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
-        # Copy core Python files
-        for f in player.py tools.py wifi.py hotspot.py; do
-            if [ -f "$SCRIPT_DIR/$f" ]; then
-                cp "$SCRIPT_DIR/$f" "$INSTALL_DIR/"
-            fi
-            gauge_update $((30 + 5))
-        done
-
-        gauge_update 60 "Copying apps..."
-        if [ -d "$SCRIPT_DIR/apps" ]; then
-            cp -r "$SCRIPT_DIR/apps" "$INSTALL_DIR/"
-        fi
-
-        gauge_update 70 "Copying portal..."
-        if [ -d "$SCRIPT_DIR/portal" ]; then
-            cp -r "$SCRIPT_DIR/portal" "$INSTALL_DIR/"
-        fi
-
-        gauge_update 80 "Copying SFX files..."
-        if [ -d "$SCRIPT_DIR/sfx" ]; then
-            cp -r "$SCRIPT_DIR/sfx/"* "$SFX_DIR/"
-        fi
-
-        gauge_update 90 "Setting permissions..."
+        gauge_update 80 "Setting permissions..."
         chown -R pi:pi "$INSTALL_DIR" 2>/dev/null || true
 
-        gauge_update 100 "File setup complete!"
+        gauge_update 100 "Directory setup complete!"
         sleep 1
     } | dialog --title "TailsMusic Setup" --gauge "Setting up directories..." 8 70 0
 }
@@ -575,20 +548,6 @@ on boot (via ~/.bashrc)?"; then
         cp "$BASHRC" "$BASHRC_BAK"
     fi
 
-    # Build the auto-start snippet
-    local BT_CONNECT_LINE=""
-    if [ -n "$BT_MAC" ]; then
-        BT_CONNECT_LINE="sudo bluetoothctl connect $BT_MAC 2>/dev/null"
-    fi
-
-    local BT_SINK_LINE=""
-    if [ -n "$BT_MAC" ]; then
-        BT_SINK_LINE="pactl set-default-sink bluez_sink.${BT_MAC//:/_}.a2dp_sink 2>/dev/null || true"
-    fi
-
-    local SCRIPT_DIR
-    SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-
     cat > "$BASHRC" << 'INNEREOF'
 # ~/.bashrc: executed by bash(1) for non-login shells.
 case $- in
@@ -761,7 +720,7 @@ main_menu() {
             "full"     "Full guided setup (recommended)" \
             "pkgs"     "Install system packages only" \
             "pip"      "Install Python packages only" \
-            "files"    "Copy files & create directories" \
+            "files"    "Create required directories" \
             "bt"       "Pair Bluetooth device" \
             "input"    "Configure input device & buttons" \
             "wifi"     "Configure WiFi" \
@@ -813,14 +772,6 @@ main_menu() {
 
 check_root
 install_dialog
-
-# Copy this script to install dir so it persists for reconfiguration
-SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-if [ "$SCRIPT_DIR" != "$INSTALL_DIR" ]; then
-    mkdir -p "$INSTALL_DIR"
-    cp "$0" "$INSTALL_DIR/setup.sh"
-    chown pi:pi "$INSTALL_DIR/setup.sh" 2>/dev/null || true
-fi
 
 if [ "$1" = "--full" ] || [ "$1" = "-f" ]; then
     full_setup
