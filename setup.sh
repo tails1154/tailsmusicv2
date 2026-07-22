@@ -210,19 +210,30 @@ setup_directories() {
 # ── Step 6: Bluetooth audio setup ──────────────────────────────────────
 
 bt_scan() {
-    # Pipe commands into bluetoothctl's interactive session.
-    # scan on -> sleep $1 -> scan off -> devices -> exit
     local timeout="${1:-8}"
-    {
-        echo "power on"
-        echo "agent on"
-        echo "default-agent"
-        echo "scan on"
-        sleep "$timeout"
-        echo "scan off"
-        echo "devices"
-        echo "exit"
-    } | bluetoothctl 2>/dev/null
+    python3 - "$timeout" << 'PYEOF'
+import sys
+import asyncio
+
+timeout = int(sys.argv[1])
+
+async def scan():
+    try:
+        from bleak import BleakScanner
+        devices = await BleakScanner.discover(timeout=timeout, return_adv=True)
+        for addr, (name, adv_data) in devices.items():
+            display = adv_data.local_name or name or ""
+            print(f"{addr}\t{display}")
+    except ImportError:
+        pass
+
+try:
+    asyncio.run(scan())
+except Exception:
+    pass
+PYEOF
+    # Also include already-known devices from bluetoothctl
+    bluetoothctl devices 2>/dev/null | sed -n 's/^Device \([0-9A-Fa-f:]\{17\}\) \(.*\)/\1\t\2/p'
 }
 
 bluetooth_setup() {
@@ -255,19 +266,21 @@ bluetooth_setup() {
     scan_output=$(cat "$SCAN_FILE")
     rm -f "$SCAN_FILE"
 
-    # Also grab known devices as fallback
-    local known
-    known=$(bluetoothctl devices 2>/dev/null || true)
-    scan_output="${scan_output}${known}"
-
     local menu_args=()
     local seen=()
     while IFS= read -r line; do
-        if [[ "$line" =~ Device[[:space:]]+([0-9A-Fa-f:]{17})[[:space:]]+(.*) ]]; then
-            local mac="${BASH_REMATCH[1]}"
-            local name="${BASH_REMATCH[2]}"
+        local mac="" name=""
+        # bt_scan outputs: MAC\tName
+        if [[ "$line" =~ ^([0-9A-Fa-f:]{17})\	(.*) ]]; then
+            mac="${BASH_REMATCH[1]}"
+            name="${BASH_REMATCH[2]}"
+        # bluetoothctl devices outputs: Device MAC Name
+        elif [[ "$line" =~ Device[[:space:]]+([0-9A-Fa-f:]{17})[[:space:]]+(.*) ]]; then
+            mac="${BASH_REMATCH[1]}"
+            name="${BASH_REMATCH[2]}"
+        fi
+        if [ -n "$mac" ]; then
             [ -z "$name" ] && name="Unknown Device"
-            # deduplicate by MAC
             if [[ ! " ${seen[*]} " =~ " ${mac} " ]]; then
                 seen+=("$mac")
                 menu_args+=("$mac" "$name")
