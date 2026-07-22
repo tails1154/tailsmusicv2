@@ -209,6 +209,22 @@ setup_directories() {
 
 # ── Step 6: Bluetooth audio setup ──────────────────────────────────────
 
+bt_scan() {
+    # Pipe commands into bluetoothctl's interactive session.
+    # scan on -> sleep $1 -> scan off -> devices -> exit
+    local timeout="${1:-8}"
+    {
+        echo "power on"
+        echo "agent on"
+        echo "default-agent"
+        echo "scan on"
+        sleep "$timeout"
+        echo "scan off"
+        echo "devices"
+        echo "exit"
+    } | bluetoothctl 2>/dev/null
+}
+
 bluetooth_setup() {
     if ! yesno "Do you want to pair a Bluetooth speaker/headphone now?
 
@@ -216,48 +232,56 @@ bluetooth_setup() {
         return
     fi
 
-    infobox "Scanning for Bluetooth devices...
-Put your device in pairing mode now." 4 55
-    sleep 2
+    # Ensure adapter is unblocked and powered
+    rfkill unblock bluetooth 2>/dev/null || true
+    bluetoothctl power on 2>/dev/null || true
 
-    local devices=()
     local scan_output
 
-    # Start scan and wait
-    bluetoothctl scan on &>/dev/null &
+    # Run scan in background, capturing output to a temp file
+    local SCAN_FILE
+    SCAN_FILE=$(mktemp)
+    bt_scan 8 > "$SCAN_FILE" 2>/dev/null &
     local SCAN_PID=$!
-    # Show scanning progress
+
     {
-        for i in $(seq 1 8); do
-            echo $((i * 12))
-            sleep 1
+        for i in $(seq 1 10); do
+            echo $((i * 10))
+            sleep 0.8
         done
-    } | dialog --title "TailsMusic Setup" --gauge "Scanning for Bluetooth devices (8 seconds)... put your device in pairing mode!" 7 70
+    } | dialog --title "TailsMusic Setup" --gauge "Scanning for Bluetooth devices... put your device in pairing mode!" 7 70
 
-    kill "$SCAN_PID" 2>/dev/null || true
-    bluetoothctl scan off &>/dev/null 2>&1 || true
+    wait "$SCAN_PID" 2>/dev/null || true
+    scan_output=$(cat "$SCAN_FILE")
+    rm -f "$SCAN_FILE"
 
-    # Parse devices
-    scan_output=$(bluetoothctl devices 2>/dev/null || true)
-    if [ -z "$scan_output" ]; then
-        scan_output=$(bluetoothctl devices 2>/dev/null || true)
-    fi
+    # Also grab known devices as fallback
+    local known
+    known=$(bluetoothctl devices 2>/dev/null || true)
+    scan_output="${scan_output}${known}"
 
     local menu_args=()
-    local idx=1
+    local seen=()
     while IFS= read -r line; do
         if [[ "$line" =~ Device[[:space:]]+([0-9A-Fa-f:]{17})[[:space:]]+(.*) ]]; then
             local mac="${BASH_REMATCH[1]}"
             local name="${BASH_REMATCH[2]}"
             [ -z "$name" ] && name="Unknown Device"
-            menu_args+=("$mac" "$name")
-            ((idx++))
+            # deduplicate by MAC
+            if [[ ! " ${seen[*]} " =~ " ${mac} " ]]; then
+                seen+=("$mac")
+                menu_args+=("$mac" "$name")
+            fi
         fi
     done <<< "$scan_output"
 
     if [ ${#menu_args[@]} -eq 0 ]; then
-        msgbox "No Bluetooth devices found. Make sure Bluetooth is enabled
-and your device is in pairing mode.
+        msgbox "No Bluetooth devices found.
+
+Troubleshooting:
+  - Make sure Bluetooth is enabled (rfkill unblock bluetooth)
+  - Put your device in pairing mode
+  - Check 'bluetoothctl power on'
 
 You can run setup again later to pair a device."
         return
@@ -276,15 +300,15 @@ You can run setup again later to pair a device."
     # Pair, trust, connect
     {
         gauge_update 20 "Pairing with device..."
-        bluetoothctl pair "$BT_MAC" 2>/dev/null || true
+        bluetoothctl -- pair "$BT_MAC" 2>/dev/null || true
         sleep 1
 
         gauge_update 50 "Trusting device..."
-        bluetoothctl trust "$BT_MAC" 2>/dev/null || true
+        bluetoothctl -- trust "$BT_MAC" 2>/dev/null || true
         sleep 1
 
         gauge_update 80 "Connecting..."
-        bluetoothctl connect "$BT_MAC" 2>/dev/null || true
+        bluetoothctl -- connect "$BT_MAC" 2>/dev/null || true
         sleep 2
 
         gauge_update 100 "Bluetooth setup complete!"
