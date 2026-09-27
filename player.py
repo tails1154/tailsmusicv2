@@ -60,8 +60,8 @@ def _is_alsa_underrun(line: str) -> bool:
     return "underrun" in message and ("alsa" in message or "pcm" in message)
 
 
-def _restart_after_alsa_underrun(read_fd: int, output_fd: int) -> None:
-    """Mirror stderr and restart once an ALSA underrun is reported."""
+def _monitor_alsa_stderr(read_fd: int, output_fd: int) -> None:
+    """Mirror native audio errors without restarting the player."""
     try:
         with os.fdopen(read_fd, "r", encoding="utf-8", errors="replace") as stream:
             for line in stream:
@@ -73,11 +73,10 @@ def _restart_after_alsa_underrun(read_fd: int, output_fd: int) -> None:
                     try:
                         os.write(
                             output_fd,
-                            b"TailsMusic: ALSA underrun detected; restarting player.\n",
+                            b"TailsMusic: ALSA underrun detected; automatic restart disabled.\n",
                         )
                     except OSError:
                         pass
-                    os.execv(sys.executable, [sys.executable, *sys.argv])
     except (OSError, ValueError):
         pass
 
@@ -89,7 +88,7 @@ def install_alsa_underrun_monitor() -> None:
     os.dup2(write_fd, 2)
     os.close(write_fd)
     threading.Thread(
-        target=_restart_after_alsa_underrun,
+        target=_monitor_alsa_stderr,
         args=(read_fd, output_fd),
         daemon=True,
         name="AlsaUnderrunMonitor",
@@ -1297,9 +1296,18 @@ if __name__ == "__main__":
     index = 0
     paused = False
     print("Loading Audio Driver")
-    os.environ['SDL_AUDIODRIVER'] = 'alsa'
-    pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=2048)
-    pygame.mixer.init()
+    # Route through PulseAudio for Bluetooth devices. Direct ALSA output is
+    # prone to underruns when the Bluetooth sink changes or wakes up.
+    os.environ['SDL_AUDIO_ALSA_BUFFER_SIZE'] = '4096'
+    os.environ['SDL_AUDIODRIVER'] = 'pulse'
+    pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=4096)
+    try:
+        pygame.mixer.init()
+    except pygame.error as pulse_error:
+        print(f"PulseAudio init failed ({pulse_error}); falling back to ALSA")
+        os.environ['SDL_AUDIODRIVER'] = 'alsa'
+        pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=4096)
+        pygame.mixer.init()
     print("Loading sfx...")
     pausesfx = pygame.mixer.Sound("/home/pi/mp3player/sfx/pause.mp3")
     dialup = pygame.mixer.Sound("/home/pi/mp3player/sfx/dialup.mp3")
