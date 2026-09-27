@@ -6,6 +6,7 @@ totalModules = 10
 global shuffleOn
 print(f"(0/{totalModules}) os")
 import os
+import sys
 print(f"(1/{totalModules}) pygame")
 import pygame
 print(f"(2/{totalModules}) evdev")
@@ -51,11 +52,54 @@ except Exception:
 print("TailsMusic Loading...")
 global daemonRunning
 daemonRunning = False
+
+
+def _is_alsa_underrun(line: str) -> bool:
+    """Return True for ALSA/PCM underrun messages emitted by native code."""
+    message = line.lower()
+    return "underrun" in message and ("alsa" in message or "pcm" in message)
+
+
+def _restart_after_alsa_underrun(read_fd: int, output_fd: int) -> None:
+    """Mirror stderr and restart once an ALSA underrun is reported."""
+    try:
+        with os.fdopen(read_fd, "r", encoding="utf-8", errors="replace") as stream:
+            for line in stream:
+                try:
+                    os.write(output_fd, line.encode("utf-8", errors="replace"))
+                except OSError:
+                    pass
+                if _is_alsa_underrun(line):
+                    try:
+                        os.write(
+                            output_fd,
+                            b"TailsMusic: ALSA underrun detected; restarting player.\n",
+                        )
+                    except OSError:
+                        pass
+                    os.execv(sys.executable, [sys.executable, *sys.argv])
+    except (OSError, ValueError):
+        pass
+
+
+def install_alsa_underrun_monitor() -> None:
+    """Capture native stderr output while keeping it visible to the console."""
+    output_fd = os.dup(2)
+    read_fd, write_fd = os.pipe()
+    os.dup2(write_fd, 2)
+    os.close(write_fd)
+    threading.Thread(
+        target=_restart_after_alsa_underrun,
+        args=(read_fd, output_fd),
+        daemon=True,
+        name="AlsaUnderrunMonitor",
+    ).start()
+
+
+install_alsa_underrun_monitor()
 print("multiprocessing")
 import multiprocessing
 print("queue")
-print("sys")
-import sys
 print("what is typing")
 from typing import Optional
 print("nice")
@@ -493,10 +537,10 @@ def bluetooth_scan(timeout=5):
             p.stdin.write('scan off\n')
             p.stdin.write('devices\n')
             p.stdin.write('exit\n')
-            out, err = p.communicate(timeout=timeout + 5)
+            out, _err = p.communicate(timeout=timeout + 5)
         except subprocess.TimeoutExpired:
             p.kill()
-            out, err = p.communicate()
+            out, _err = p.communicate()
         devices = []
         for line in out.splitlines():
             if 'Device' in line:
