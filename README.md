@@ -70,7 +70,7 @@ The hotspot is optional and only requires `hostapd` and `dnsmasq` when enabled.
 
 ## Audio reliability
 
-TailsMusic prefers PulseAudio because it handles Bluetooth sinks more reliably than direct ALSA output. ALSA remains available as a fallback, with a 4096-sample buffer for underrun resistance. The startup template also applies a conservative 15% Bluetooth sink volume to prevent reconnects from restoring an unexpectedly loud level.
+TailsMusic prefers PulseAudio because it handles Bluetooth sinks more reliably than direct ALSA output. ALSA remains available as a fallback, with a 4096-sample buffer for underrun resistance. TailsMusic does not change the Bluetooth sink volume; set that level using your headphones or PulseAudio controls.
 
 If there is no sound, check the live sink and stream:
 
@@ -83,8 +83,7 @@ pactl get-default-sink
 If the Bluetooth sink is muted or too loud, set it explicitly:
 
 ```bash
-pactl set-sink-volume @DEFAULT_SINK@ 15%
-pactl set-sink-mute @DEFAULT_SINK@ 0
+pactl get-sink-volume @DEFAULT_SINK@
 ```
 
 ## Development
