@@ -123,6 +123,8 @@ sudo bluetoothctl connect 00:1E:7C:C8:C3:D8 2>/dev/null
 done
 sleep 1
 pactl set-default-sink bluez_sink.00_1E_7C_C8_C3_D8.a2dp_sink
+pactl set-sink-volume bluez_sink.00_1E_7C_C8_C3_D8.a2dp_sink 15% 2>/dev/null
+pactl set-sink-mute bluez_sink.00_1E_7C_C8_C3_D8.a2dp_sink 0 2>/dev/null
 
 
 echo "Starting portal server"

@@ -669,6 +669,8 @@ EOF
     if [ -n "$BT_MAC" ]; then
         cat >> "$BASHRC" << EOF
     pactl set-default-sink bluez_sink.${BT_MAC//:/_}.a2dp_sink 2>/dev/null || true
+    pactl set-sink-volume bluez_sink.${BT_MAC//:/_}.a2dp_sink 15% 2>/dev/null || true
+    pactl set-sink-mute bluez_sink.${BT_MAC//:/_}.a2dp_sink 0 2>/dev/null || true
 EOF
     fi
 
