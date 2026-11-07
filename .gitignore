@@ -8,3 +8,6 @@ pager.py
 
 config.json
 tailsmusic.log
+
+.venv/
+*.pyc
