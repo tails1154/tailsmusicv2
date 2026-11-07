@@ -18,32 +18,67 @@ TailsMusic turns a Raspberry Pi into a dedicated Bluetooth MP3 player. It is des
 - Supports optional apps through a small plugin API.
 - Includes Bluetooth device discovery, pairing, sink routing, and local-IP helpers.
 
-## Quick start
+## Install on Raspberry Pi OS / Debian
 
-On a fresh Raspberry Pi OS installation:
-
-```bash
-sudo apt update
-sudo apt install -y git
-sudo git clone https://github.com/tails1154/tailsmusicv2 /home/pi/mp3player
-cd /home/pi/mp3player
-sudo bash setup.sh
-```
-
-The setup wizard installs system dependencies, installs Python packages, pairs a Bluetooth device, maps its buttons, creates the music directories, and optionally configures automatic startup.
-
-Add music here:
-
-```text
-/home/pi/mp3player/songs/*.mp3
-```
-
-Then start the player manually when needed:
+The installer supports Raspberry Pi OS and Debian-based Linux, with an optional
+Kivy touchscreen frontend. Run from an existing checkout:
 
 ```bash
-cd /home/pi/mp3player
-python3 player.py
+sudo apt-get update
+sudo apt-get install -y git
+git clone https://github.com/tails1154/tailsmusicv2.git
+cd tailsmusicv2
+sudo bash setup.sh --with-kivy
 ```
+
+Add `--service` to enable the **headless** player as a systemd service. Add
+`--start-service` to also start it immediately; use neither when you intend
+to run only the touchscreen frontend. To preview commands without changing
+anything, run `sudo bash setup.sh --dry-run --with-kivy`.
+
+The new installer checks for errors instead of silently ignoring failures. It
+uses a local `.venv/` with access to distro-installed Python packages and does
+**not** use `--break-system-packages`, rewrite `.bashrc`, delete music, or
+overwrite an existing `config.json`. Optional hotspot dependencies are
+installed only with `--with-hotspot`. Set `--user USERNAME` if your regular
+login username cannot be inferred from sudo.
+
+### Start the Kivy touchscreen interface
+
+On a Pi with a working desktop or other graphical session:
+
+```bash
+cd tailsmusicv2
+.venv/bin/python kivy_player.py
+```
+
+This standalone frontend offers a touch-friendly song list, play/pause,
+previous/next, shuffle, refresh, and volume control. It reads `songs/` inside
+the checkout. It supports local MP3, OGG, WAV and FLAC where the mixer codecs
+are available. Bluetooth pairing and headset-button menus still belong to the
+original headless `player.py`, not the touchscreen frontend.
+
+**Do not run the touchscreen frontend and the headless player at the same time.**
+If you enabled the service, first run `sudo systemctl stop tailsmusic`.
+Audio requires a working user audio session; if Bluetooth playback is silent,
+check `pactl list short sinks` under the same user that runs the player.
+
+### Headless setup
+
+```bash
+sudo bash setup.sh --service
+sudo systemctl start tailsmusic
+journalctl -u tailsmusic -f
+```
+
+Edit `config.json` to match the Bluetooth input device (especially
+`evtestname`), pair headphones with `bluetoothctl`, and place MP3s in
+`songs/`. If you run without systemd: `.venv/bin/python player.py`.
+
+Existing installations can re-run setup without clearing stored music and
+playlists. The installer does not automatically migrate old shell-login startup
+edits: remove any previous TailsMusic loop from `~/.bashrc` to avoid duplicate
+players.
 
 ## Controls
 
@@ -109,7 +144,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow and plugin c
 | `hotspot.py` | Captive hotspot lifecycle |
 | `portal/` | Upload/configuration web portal |
 | `apps/` | Optional app plugins |
-| `setup.sh` | Interactive Raspberry Pi installer |
+| `setup.sh`, `installer.py` | Reliable Debian/Raspberry Pi OS installer and service setup |\n| `kivy_player.py` | Optional touchscreen player |
 | `bashrc` | Bluetooth auto-connect startup template |
 
 ## Roadmap
