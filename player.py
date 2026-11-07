@@ -45,10 +45,7 @@ try:
 except Exception:
     _HAS_BLEAK = False
     BleakScanner = None
-    os.system("espeak-ng 'pulsectl module not found. installing it' -s 130")
-    os.system("pip install pulsectl bleak --break-system-packages")
-    os.system("espeak-ng 'pulsectl module installed. reloading TailsMusic' -s 130")
-    os.system("killall -9 python3")
+    print("Optional Bluetooth LE scanning is unavailable; install bleak in the venv.")
 print("TailsMusic Loading...")
 global daemonRunning
 daemonRunning = False
@@ -394,7 +391,7 @@ def manual_tts():
 
 def wifiSetup():
     speak("Loading wifi networks")
-    pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
+    pygame.mixer.music.load("sfx/dialup.mp3")
     pygame.mixer.music.play()
     networks = wifi.scan_wifi()
     if networks:
@@ -411,7 +408,7 @@ def wifiSetup():
                 if action:
                     click.play()
                     wifiName = options[selected]
-                    pygame.mixer.music.load("/home/pi/mp3player/sfx/dialup.mp3")
+                    pygame.mixer.music.load("sfx/dialup.mp3")
                     speak("Enter your wifi password.")
                     speak("For an easier setup, Connect TailsMusic to Your monitor and type")
                     speak("n... m... t... u... i... with a keyboard and press enter.")
@@ -827,7 +824,7 @@ def shutdown_menu():
                     manual_tts()
                 elif choice == "Re scan Songs":
                     speak("Rescanning")
-                    os.system("killall -9 python3")
+                    sys.exit(0)
                 elif choice == "Connect to WiFi":
                     wifiSetup()
                 elif choice == "Setup Hotspot":
@@ -849,7 +846,7 @@ def shutdown_menu():
                     try:
                         subprocess.run(["git", "pull"], check=True)
                         speak("Reloading TailsMusic")
-                        os.system("killall -9 python3")
+                        sys.exit(0)
                     except Exception as e:
                         speak("Error updating: " + str(e))
                 pausesfx.play()
@@ -1053,7 +1050,7 @@ def ai_mode():
     except ImportError:
         speak("Installing Google TTS")
         os.system("pip install gtts --break-system-packages")
-        os.system("killall -9 python3")
+        sys.exit(0)
         return
 
     STT_URL = "http://tails1154.com:25569/is_wake"
@@ -1267,10 +1264,10 @@ if __name__ == "__main__":
         dev = InputDevice(device_path)
     else:
         print("Bluetooth media button device not found.")
-        os.system("killall -9 python3")
+        sys.exit(0)
 
-    MUSIC_DIR = '/home/pi/mp3player/songs'
-    PLAYLIST_DIR = '/home/pi/mp3player/playlists'
+    MUSIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'songs')
+    PLAYLIST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'playlists')
     INPUT_DEVICE = device_path
     os.makedirs(PLAYLIST_DIR, exist_ok=True)
     daemonRunning = False
@@ -1292,7 +1289,7 @@ if __name__ == "__main__":
         print("Exception Deleteing __pycache__:" + str(e))
     if not playlist:
         speak("No songs found.")
-        os.system("killall -9 python3")
+        sys.exit(0)
     index = 0
     paused = False
     print("Loading Audio Driver")
@@ -1309,10 +1306,10 @@ if __name__ == "__main__":
         pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=4096)
         pygame.mixer.init()
     print("Loading sfx...")
-    pausesfx = pygame.mixer.Sound("/home/pi/mp3player/sfx/pause.mp3")
-    dialup = pygame.mixer.Sound("/home/pi/mp3player/sfx/dialup.mp3")
-    panel = pygame.mixer.Sound("/home/pi/mp3player/sfx/panel.mp3")
-    click = pygame.mixer.Sound("/home/pi/mp3player/sfx/click.mp3")
+    pausesfx = pygame.mixer.Sound("sfx/pause.mp3")
+    dialup = pygame.mixer.Sound("sfx/dialup.mp3")
+    panel = pygame.mixer.Sound("sfx/panel.mp3")
+    click = pygame.mixer.Sound("sfx/click.mp3")
     print("Welcome to TailsMusic!")
     pygame.mixer.music.load(playlist[index])
     pygame.mixer.music.play()
