@@ -1315,7 +1315,7 @@ if __name__ == "__main__":
     pygame.mixer.music.play()
     update_tailsign()
 
-    playlist_counter = max((int(f.removeprefix("playlist").removesuffix(".json")) for f in os.listdir("/home/pi/mp3player/playlists/") if f.startswith("playlist") and f.endswith(".json")), default=-1) + 1
+    playlist_counter = max((int(f.removeprefix("playlist").removesuffix(".json")) for f in os.listdir(PLAYLIST_DIR) if f.startswith("playlist") and f.endswith(".json")), default=-1) + 1
     dev = InputDevice(INPUT_DEVICE)
     print(f"Listening on {INPUT_DEVICE}...")
     while True:
