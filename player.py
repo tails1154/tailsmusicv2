@@ -952,7 +952,7 @@ def create_playlist():
                             song_selected, action = menu_nav(evt, song_selected, song_files)
                             if action:
                                 click.play()
-                                songs.append(os.path.join(MUSIC_DIR, song_files[song_selected]))
+                                songs.append(song_files[song_selected])
                                 speak("Song added")
                                 break
 
@@ -991,7 +991,7 @@ def manage_playlist(name):
                 elif choice == "Play":
                     playlist_index = 0
                     while playlist_index < len(songs):
-                        song = songs[playlist_index]
+                        song = str(MUSIC_DIR / Path(songs[playlist_index]).name)
                         print(song)
                         pygame.mixer.music.load(song)
                         pygame.mixer.music.play()
@@ -1069,8 +1069,8 @@ def add_song_to_playlist(song_path):
             if action:
                 with open(os.path.join(PLAYLIST_DIR, playlists[selected]), "r+") as f:
                     songs = json.load(f)
-                    if song_path not in songs:
-                        songs.append(song_path)
+                    if Path(song_path).name not in songs:
+                        songs.append(Path(song_path).name)
                         f.seek(0)
                         json.dump(songs, f)
                         f.truncate()
