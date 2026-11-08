@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import json
 import subprocess
 import zipfile
@@ -6,8 +7,8 @@ import io
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
-MUSIC_DIR = '/home/pi/mp3player/songs'
-os.makedirs(MUSIC_DIR, exist_ok=True)
+MUSIC_DIR = Path(__file__).resolve().parent.parent / 'songs'
+MUSIC_DIR.mkdir(parents=True, exist_ok=True)
 
 HTML = {}
 
@@ -20,12 +21,11 @@ def load_templates():
                 HTML[name] = f.read()
 
 def serve_static(path):
-    base = os.path.dirname(__file__)
-    full = os.path.join(base, "static", path)
-    if os.path.exists(full):
-        with open(full, 'rb') as f:
-            return f.read()
-    return None
+    base = (Path(__file__).resolve().parent / "static").resolve()
+    full = (base / path).resolve()
+    if not full.is_relative_to(base) or not full.is_file():
+        return None
+    return full.read_bytes()
 
 MIME = {
     ".css": "text/css",
@@ -69,7 +69,7 @@ def _connect_wifi(ssid, password):
 
 def _bt_scan(timeout=8):
     try:
-        p = subprocess.Popen(["sudo", "bluetoothctl"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        p = subprocess.Popen(["bluetoothctl"], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         p.stdin.write("scan on\n")
         p.stdin.flush()
         import time as _t
@@ -96,7 +96,7 @@ def _bt_scan(timeout=8):
 
 def _bt_list():
     try:
-        out = subprocess.check_output(["sudo", "bluetoothctl", "devices"], text=True)
+        out = subprocess.check_output(["bluetoothctl", "devices"], text=True)
         devices = []
         for line in out.splitlines():
             parts = line.split(" ", 2)
@@ -277,8 +277,8 @@ class PortalHandler(SimpleHTTPRequestHandler):
                 files = self._parse_multipart(raw, boundary)
                 uploaded = []
                 for name, data in files:
-                    if name.lower().endswith('.mp3'):
-                        dest = os.path.join(MUSIC_DIR, name)
+                    if Path(name).name.lower().endswith('.mp3'):
+                        dest = MUSIC_DIR / Path(name).name
                         with open(dest, 'wb') as f:
                             f.write(data)
                         uploaded.append(name)
@@ -287,19 +287,17 @@ class PortalHandler(SimpleHTTPRequestHandler):
                 self._json_response({"success": False, "message": "Expected multipart form data"})
 
         elif path == '/api/hotspot/stop':
-            subprocess.Popen(["sh", "-c", "sleep 1 && sudo killall -9 python3"])
-            self._json_response({"success": True, "message": "Hotspot stopping"})
+            self._json_response({"success": False, "message": "Stop hotspot with the headset menu or nmcli."}, 409)
 
         elif path == '/api/ai/chat':
             length = int(self.headers.get('Content-Length', 0))
             body = json.loads(self.rfile.read(length).decode())
             msg = body.get("message", "")
             result = _ai_chat(msg)
-            for cmd in result.get("commands", []):
-                if cmd == "next":
-                    subprocess.run(["pkill", "-f", "next_song"])
-                elif cmd == "prev":
-                    subprocess.run(["pkill", "-f", "prev_song"])
+            # Do not kill processes matching common words. A future control
+            # API must communicate directly with the running player instance.
+            if result.get("commands"):
+                result["control_status"] = "Playback commands require player IPC."
             self._json_response(result)
 
         elif path == '/api/upload/zip':
@@ -312,12 +310,10 @@ class PortalHandler(SimpleHTTPRequestHandler):
                     if name.lower().endswith('.mp3'):
                         basename = os.path.basename(name)
                         if basename:
-                            z.extract(name, MUSIC_DIR)
-                            if basename != name:
-                                src = os.path.join(MUSIC_DIR, name)
-                                dst = os.path.join(MUSIC_DIR, basename)
-                                if os.path.exists(src) and not os.path.exists(dst):
-                                    os.rename(src, dst)
+                            dest = MUSIC_DIR / basename
+                            with z.open(name) as source, dest.open("wb") as output:
+                                import shutil
+                                shutil.copyfileobj(source, output)
                             extracted.append(basename)
                 self._json_response({"success": True, "files": extracted})
             except Exception as e:
@@ -367,8 +363,8 @@ class PortalHandler(SimpleHTTPRequestHandler):
 
 def start_server():
     load_templates()
-    port = 80
-    server = HTTPServer(("0.0.0.0", port), PortalHandler)
+    port = int(os.environ.get("TAILSMUSIC_PORTAL_PORT", "8080"))
+    server = HTTPServer((os.environ.get("TAILSMUSIC_PORTAL_HOST", "127.0.0.1"), port), PortalHandler)
     server.serve_forever()
 
 if __name__ == "__main__":

@@ -34,7 +34,10 @@ def install(args):
     username = args.user or os.environ.get("SUDO_USER") or "pi"
     if username == "root":
         raise RuntimeError("Choose a non-root user with --user.")
-    account = pwd.getpwnam(username)
+    try:
+        account = pwd.getpwnam(username)
+    except KeyError as exc:
+        raise RuntimeError(f"User {username!r} does not exist; pass --user LOGIN") from exc
     source = Path(__file__).resolve().parent
     target = Path(args.install_dir).expanduser().resolve() if args.install_dir else source
     if target != source:
@@ -43,15 +46,15 @@ def install(args):
     print(f"Install: {target}\nUser: {username}\nMode: {'Kivy + headless' if args.with_kivy else 'headless'}")
     packages = [
         "python3", "python3-venv", "python3-pip", "python3-dev",
-        "python3-evdev", "python3-pygame", "python3-pulsectl",
+        "python3-evdev", "python3-pygame",
         "espeak-ng", "pulseaudio", "pulseaudio-module-bluetooth",
         "bluez", "bluetooth", "rfkill", "network-manager",
-        "libasound2-dev", "libmtdev1", "git",
+        "libasound2-dev", "libmtdev1", "git", "sudo", "iproute2", "dbus-user-session",
     ]
     if args.with_kivy:
         packages += ["python3-kivy"]
     if args.with_hotspot:
-        packages += ["hostapd", "dnsmasq"]
+        print("Hotspot uses NetworkManager hotspot sharing; no global hostapd/dnsmasq management.")
     if not args.skip_apt:
         run("apt-get", "update", dry_run=args.dry_run)
         run("apt-get", "install", "-y", *packages, dry_run=args.dry_run)
@@ -62,7 +65,10 @@ def install(args):
     run(sys.executable, "-m", "venv", "--system-site-packages", str(venv), dry_run=args.dry_run)
     pip = str(venv / "bin" / "python")
     run(pip, "-m", "pip", "install", "--upgrade", "pip", dry_run=args.dry_run)
-    run(pip, "-m", "pip", "install", "requests", "bleak", dry_run=args.dry_run)
+    run(pip, "-m", "pip", "install", "-r", str(target / "requirements.txt"), dry_run=args.dry_run)
+    if not args.dry_run:
+        for module in ("pygame", "evdev", "pulsectl", "requests", "bleak", "gtts"):
+            run(pip, "-c", f"import {module}; print({module!r}, 'OK')")
     if args.with_kivy and args.skip_apt:
         print("Note: --skip-apt requires Kivy to be already installed and importable in the venv.")
     for name in ("songs", "playlists"):
@@ -88,33 +94,49 @@ def install(args):
         os.chown(cfg, account.pw_uid, account.pw_gid)
 
     if args.service:
+        # User units inherit the logged-in user's PulseAudio/PipeWire session.
+        # A system unit with User= is NOT a substitute for an audio user session.
+        uid = account.pw_uid
         unit_name = "tailsmusic.service"
+        unit_dir = Path(account.pw_dir) / ".config/systemd/user"
+        unit = unit_dir / unit_name
         service = f"""[Unit]
 Description=TailsMusic v2 Headless Player
-Wants=bluetooth.service
-After=bluetooth.service sound.target network.target
+Wants=bluetooth.target
+After=bluetooth.target
 
 [Service]
 Type=simple
-User={username}
 WorkingDirectory={target}
 ExecStart={venv}/bin/python {target}/player.py
 Restart=on-failure
 RestartSec=5
-SupplementaryGroups=audio input
 Environment=PYTHONUNBUFFERED=1
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
 """
-        path = Path("/etc/systemd/system") / unit_name
-        print("+ write", path)
+        print("+ write", unit)
         if not args.dry_run:
-            path.write_text(service, encoding="utf-8")
-        run("systemctl", "daemon-reload", dry_run=args.dry_run)
-        run("systemctl", "enable", unit_name, dry_run=args.dry_run)
+            unit_dir.mkdir(parents=True, exist_ok=True)
+            unit.write_text(service, encoding="utf-8")
+            for path in (unit_dir.parent, unit_dir, unit):
+                os.chown(path, uid, account.pw_gid)
+        # Users need read access to /dev/input/event* for headset controls.
+        # Membership takes effect on a new login.
+        for group in ("input", "audio"):
+            run("usermod", "-aG", group, username, dry_run=args.dry_run)
+        run("loginctl", "enable-linger", username, dry_run=args.dry_run)
+        run("systemctl", "start", f"user@{uid}.service", dry_run=args.dry_run)
+        def userctl(*command):
+            return run("runuser", "-u", username, "--", "env",
+                       f"XDG_RUNTIME_DIR=/run/user/{uid}",
+                       f"DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/{uid}/bus",
+                       "systemctl", "--user", *command, dry_run=args.dry_run)
+        userctl("daemon-reload")
+        userctl("enable", unit_name)
         if args.start_service:
-            run("systemctl", "restart", unit_name, dry_run=args.dry_run)
+            userctl("restart", unit_name)
 
     if args.with_kivy:
         desktop = Path(account.pw_dir) / ".local/share/applications/tailsmusic-kivy.desktop"
@@ -134,11 +156,13 @@ Categories=Audio;Player;
             os.chown(desktop, account.pw_uid, account.pw_gid)
 
     print("\nInstallation steps complete.")
-    print("Headless player: sudo systemctl start tailsmusic" if args.service else f"Headless player: {pip} {target}/player.py")
+    print(f"Headless player: systemctl --user start tailsmusic (as {username})" if args.service else f"Headless player: {pip} {target}/player.py")
     if args.with_kivy:
         print(f"Touchscreen UI: {pip} {target}/kivy_player.py")
         print("Stop the headless service first; both players cannot own audio playback simultaneously.")
     print("Pair headphones via bluetoothctl; set config.json evtestname for media-button input.")
+    print("NOTE: start the user audio service (PulseAudio/PipeWire), connect headset and check pactl info.")
+    print("NOTE: reopen your login session after installer adds the input/audio groups.")
     if args.dry_run:
         print("DRY RUN: no commands or filesystem changes were applied.")
 

@@ -7,6 +7,16 @@ global shuffleOn
 print(f"(0/{totalModules}) os")
 import os
 import sys
+from pathlib import Path
+import tempfile
+import importlib.util
+
+ROOT = Path(__file__).resolve().parent
+CONFIG_PATH = ROOT / 'config.json'
+MUSIC_DIR = ROOT / 'songs'
+PLAYLIST_DIR = ROOT / 'playlists'
+SFX_DIR = ROOT / 'sfx'
+APP_PATH = ROOT / 'app.py'
 print(f"(1/{totalModules}) pygame")
 import pygame
 print(f"(2/{totalModules}) evdev")
@@ -100,7 +110,7 @@ print("what is typing")
 from typing import Optional
 print("nice")
 print("Loading config.json")
-with open('config.json', 'r') as file:
+with CONFIG_PATH.open('r', encoding='utf-8') as file:
  config = json.load(file)
 print(f"okbutton: {config['okbutton']}")
 print(f"okbutton2: {config['okbutton2']}")
@@ -303,20 +313,62 @@ class CommandQueue:
 
 
 def find_simolio():
-    """This finds the bluetooth input device for button presses."""
+    """Find only the explicitly configured input device."""
+    match = config.get("evtestname", "").strip()
+    if not match:
+        print("Set evtestname in config.json to part of your headset's evdev name.")
+        return None
     for path in list_devices():
-        dev = InputDevice(path)
-        if config['evtestname'] in dev.name:
-            return path
+        try:
+            device = InputDevice(path)
+            name = device.name or ""
+            device.close()
+            if match.casefold() in name.casefold():
+                return path
+        except (OSError, PermissionError):
+            continue
     return None
+
+def bluetooth_recording_devices():
+    """Discover Bluetooth audio card and input source from PulseAudio."""
+    try:
+        cards = subprocess.run(["pactl", "list", "short", "cards"],
+                               capture_output=True, text=True, check=True).stdout
+        card = next((line.split("\t")[1] for line in cards.splitlines()
+                     if len(line.split("\t")) >= 2 and
+                     line.split("\t")[1].startswith("bluez_card.")), None)
+        sources = subprocess.run(["pactl", "list", "short", "sources"],
+                                capture_output=True, text=True, check=True).stdout
+        mic = next((line.split("\t")[1] for line in sources.splitlines()
+                    if len(line.split("\t")) >= 2 and
+                    line.split("\t")[1].startswith(("bluez_source.", "bluez_input."))), None)
+        return card, mic
+    except (OSError, subprocess.CalledProcessError):
+        return None, None
+
+_speech_process = None
+
+def _stop_own_speech():
+    global _speech_process
+    if _speech_process is not None and _speech_process.poll() is None:
+        _speech_process.terminate()
+        try:
+            _speech_process.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            _speech_process.kill()
+            _speech_process.wait()
+    _speech_process = None
 
 def speak_nointer(text):
     print(f"TTS: {text}")
-    subprocess.run(["killall", "espeak-ng"], capture_output=True, check=False)
+    _stop_own_speech()
     subprocess.run(["espeak-ng", "-s", "130", text], check=True)
+
 def speak(text):
-    subprocess.run(["killall", "espeak-ng"], capture_output=True, check=False)
-    subprocess.Popen(["espeak-ng", "-s", "130", text])
+    global _speech_process
+    _stop_own_speech()
+    _speech_process = subprocess.Popen(["espeak-ng", "-s", "130", text])
+
 def speak_allowinter(text):
     speak(text)
 
@@ -391,7 +443,7 @@ def manual_tts():
 
 def wifiSetup():
     speak("Loading wifi networks")
-    pygame.mixer.music.load("sfx/dialup.mp3")
+    pygame.mixer.music.load(str(SFX_DIR / "dialup.mp3"))
     pygame.mixer.music.play()
     networks = wifi.scan_wifi()
     if networks:
@@ -408,7 +460,7 @@ def wifiSetup():
                 if action:
                     click.play()
                     wifiName = options[selected]
-                    pygame.mixer.music.load("sfx/dialup.mp3")
+                    pygame.mixer.music.load(str(SFX_DIR / "dialup.mp3"))
                     speak("Enter your wifi password.")
                     speak("For an easier setup, Connect TailsMusic to Your monitor and type")
                     speak("n... m... t... u... i... with a keyboard and press enter.")
@@ -680,7 +732,7 @@ def bluetooth_menu():
 
 def run_script_menu():
     py_files = []
-    apps_dir = os.path.join(os.path.dirname(__file__), 'apps')
+    apps_dir = str(ROOT / 'apps')
     if os.path.exists(apps_dir):
         py_files = [os.path.join(root, f) 
                    for root, _, files in os.walk(apps_dir) 
@@ -703,9 +755,17 @@ def run_script_menu():
                     return
                 else:
                     speak(f"Running {options[selected]}")
-                    subprocess.run(["cp", "apps/" + options[selected], "app.py"])
-                    import app as appModule
-                    app = appModule.APP(dev, cmdq)
+                    selected_script = next((p for p in py_files if os.path.basename(p) == options[selected]), None)
+                    if selected_script is None:
+                        speak("Script not found")
+                        return
+                    spec = importlib.util.spec_from_file_location("tailsmusic_selected_app", selected_script)
+                    if spec is None or spec.loader is None:
+                        speak("Cannot load selected script")
+                        return
+                    app_module = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(app_module)
+                    app = app_module.APP(dev, cmdq)
                     if app.checkDaemon():
                         speak("App is a daemon. Running in background")
                         thread = multiprocessing.Process(target=app.start)
@@ -713,16 +773,18 @@ def run_script_menu():
                         daemonRunning = True
                     else:
                         app.start()
-                        os.remove("app.py")
                         speak("Script finished")
                     return
 
 def portal_setup():
     speak("Starting setup hotspot")
     msg = hotspot.start()
-    speak("Hotspot started")
     print(msg)
-    speak("Connect to TailsMusic Setup WiFi. It is an open network")
+    if not hotspot.is_running():
+        speak("Hotspot failed. Check terminal logs and NetworkManager permissions.")
+        return
+    speak("Hotspot started. Connect using the configured WiFi password.")
+    speak(msg)
     options = ["Stop Hotspot", "Back"]
     selected = 0
     speak(options[selected])
@@ -763,7 +825,7 @@ def shutdown_menu():
                 if choice and choice.startswith("Show on TailSign"):
                     current = config.get("show_on_tailsign", False)
                     config["show_on_tailsign"] = not current
-                    with open("config.json", "w") as cfg_f:
+                    with CONFIG_PATH.open("w", encoding="utf-8") as cfg_f:
                         json.dump(config, cfg_f, indent=4)
                     speak("Show on TailSign " + ("enabled" if not current else "disabled"))
                 elif choice == "Shut Down":
@@ -789,7 +851,7 @@ def shutdown_menu():
                 elif choice == "Random Song":
                     song_files = sorted([f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')], key=str.lower)
                     random_song = random.choice(song_files) if song_files else None
-                    pygame.mixer.music.load("songs/" + random_song)
+                    pygame.mixer.music.load(str(MUSIC_DIR / random_song))
                     pygame.mixer.music.play()
                     while pygame.mixer.music.get_busy():
                         event = dev.read_one()
@@ -841,10 +903,10 @@ def shutdown_menu():
                     return
                 elif choice == "Update TailsMusic":
                     speak("Updating TailsMusic")
-                    pygame.mixer.music.load("sfx/dialup.mp3")
+                    pygame.mixer.music.load(str(SFX_DIR / "dialup.mp3"))
                     pygame.mixer.music.play(-1)
                     try:
-                        subprocess.run(["git", "pull"], check=True)
+                        subprocess.run(["git", "-C", str(ROOT), "pull", "--ff-only"], check=True)
                         speak("Reloading TailsMusic")
                         sys.exit(0)
                     except Exception as e:
@@ -891,7 +953,7 @@ def create_playlist():
             if action:
                 click.play()
                 if options[selected] == "Finish":
-                    with open(f"{PLAYLIST_DIR}/playlist{playlist_counter}.json", 'w') as f:
+                    with (PLAYLIST_DIR / f"playlist{playlist_counter}.json").open("w") as f:
                         json.dump(songs, f)
                     speak("Playlist saved")
                     playlist_counter += 1
@@ -906,12 +968,12 @@ def create_playlist():
                             song_selected, action = menu_nav(evt, song_selected, song_files)
                             if action:
                                 click.play()
-                                songs.append(os.path.join(MUSIC_DIR, song_files[song_selected]))
+                                songs.append(song_files[song_selected])
                                 speak("Song added")
                                 break
 
 def manage_playlist(name):
-    with open(f"{PLAYLIST_DIR}/{name}") as f:
+    with (PLAYLIST_DIR / name).open() as f:
         songs = json.load(f)
     options = ["Play", "Delete", "Back"]
     selected = 0
@@ -936,7 +998,7 @@ def manage_playlist(name):
                             if action2:
                                 if ["Delete", "Cancel"][selected2] == "Delete":
                                     click.play()
-                                    os.remove(f"{PLAYLIST_DIR}/{name}")
+                                    os.remove(PLAYLIST_DIR / name)
                                     speak("Deleted")
                                     return
                                 else:
@@ -945,7 +1007,7 @@ def manage_playlist(name):
                 elif choice == "Play":
                     playlist_index = 0
                     while playlist_index < len(songs):
-                        song = songs[playlist_index]
+                        song = str(MUSIC_DIR / Path(songs[playlist_index]).name)
                         print(song)
                         pygame.mixer.music.load(song)
                         pygame.mixer.music.play()
@@ -1023,8 +1085,8 @@ def add_song_to_playlist(song_path):
             if action:
                 with open(os.path.join(PLAYLIST_DIR, playlists[selected]), "r+") as f:
                     songs = json.load(f)
-                    if song_path not in songs:
-                        songs.append(song_path)
+                    if Path(song_path).name not in songs:
+                        songs.append(Path(song_path).name)
                         f.seek(0)
                         json.dump(songs, f)
                         f.truncate()
@@ -1049,8 +1111,7 @@ def ai_mode():
         from gtts import gTTS
     except ImportError:
         speak("Installing Google TTS")
-        os.system("pip install gtts --break-system-packages")
-        sys.exit(0)
+        print("Install gTTS in the TailsMusic virtual environment using setup.sh")
         return
 
     STT_URL = "http://tails1154.com:25569/is_wake"
@@ -1088,13 +1149,19 @@ def ai_mode():
                 elif key in [config['okbutton'], config['okbutton2']]:
                     click.play()
                     try:
-                        subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "handsfree_head_unit"], capture_output=True)
+                        card, mic_source = bluetooth_recording_devices()
+                        if card:
+                            subprocess.run(["pactl", "set-card-profile", card, "headset-head-unit"], capture_output=True)
                         sleep(0.5)
                         speak("Recording")
                         raw_data = None
                         try:
-                            mic_source = "bluez_source.00_1E_7C_C8_C3_D8.handsfree_head_unit"
-                            rec_path = "/tmp/ai_recording.wav"
+                            _, detected_source = bluetooth_recording_devices()
+                            mic_source = detected_source or mic_source
+                            if not mic_source:
+                                speak("No Bluetooth microphone detected")
+                                continue
+                            rec_path = str(Path(tempfile.gettempdir()) / f"tailsmusic_ai_recording_{os.getuid()}.wav")
                             proc = subprocess.Popen(["parec", "--file-format=wav", "-d", mic_source, "--rate=16000", "--format=s16le", "--channels=1", rec_path], stderr=subprocess.DEVNULL)
                             while True:
                                 if daemonRunning: cmdq.process_Command()
@@ -1119,7 +1186,7 @@ def ai_mode():
                             speak("Mic error")
                             continue
                     finally:
-                        subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "a2dp_sink"], capture_output=True)
+                        subprocess.run(["pactl", "set-card-profile", card, "a2dp-sink"], capture_output=True) if card else None
                     if len(raw_data) < 8000:
                         speak("Nothing heard")
                         continue
@@ -1233,8 +1300,9 @@ def ai_mode():
                         if speech_text:
                             speak_nointer("Generating Text To Speech")
                             tts = gTTS(text=speech_text, lang="en")
-                            tts.save("/tmp/ai_response.mp3")
-                            sfx = pygame.mixer.Sound("/tmp/ai_response.mp3")
+                            response_path = str(Path(tempfile.gettempdir()) / f"tailsmusic_ai_response_{os.getuid()}.mp3")
+                            tts.save(response_path)
+                            sfx = pygame.mixer.Sound(response_path)
                             chan = sfx.play()
                             if chan:
                                 tts_len = sfx.get_length()
@@ -1258,38 +1326,34 @@ if __name__ == "__main__":
     print("Modules Loaded!")
     print("TailsMusic Loading...")
     print("Finding Headphones")
+    MUSIC_DIR.mkdir(parents=True, exist_ok=True)
+    PLAYLIST_DIR.mkdir(parents=True, exist_ok=True)
     device_path = find_simolio()
     if device_path:
         print("Using Headphone device:", device_path)
         dev = InputDevice(device_path)
     else:
         print("Bluetooth media button device not found.")
-        sys.exit(0)
+        sys.exit(1)
 
-    MUSIC_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'songs')
-    PLAYLIST_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'playlists')
     INPUT_DEVICE = device_path
     os.makedirs(PLAYLIST_DIR, exist_ok=True)
     daemonRunning = False
     try:
         print("Remvoing stale app.py")
-        os.remove("app.py")
+        os.remove(APP_PATH)
         print("Starting Voice")
     except Exception as e:
         print("Error removing app.py: " + str(e))
     tts_lock = threading.Lock()
     print("Loading Music Files")
     playlist = sorted(
-        [os.path.join(MUSIC_DIR, f) for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
+        [str(MUSIC_DIR / f) for f in os.listdir(MUSIC_DIR) if f.lower().endswith('.mp3')]
     )
-    print("Removing __pycache__")
-    try:
-        shutil.rmtree("__pycache__")
-    except Exception as e:
-        print("Exception Deleteing __pycache__:" + str(e))
+    # Python manages bytecode caches; do not delete them at every startup.
     if not playlist:
-        speak("No songs found.")
-        sys.exit(0)
+        print("No music found. Add MP3 files to", MUSIC_DIR)
+        sys.exit(1)
     index = 0
     paused = False
     print("Loading Audio Driver")
@@ -1306,16 +1370,16 @@ if __name__ == "__main__":
         pygame.mixer.pre_init(frequency=44100, size=-16, channels=2, buffer=4096)
         pygame.mixer.init()
     print("Loading sfx...")
-    pausesfx = pygame.mixer.Sound("sfx/pause.mp3")
-    dialup = pygame.mixer.Sound("sfx/dialup.mp3")
-    panel = pygame.mixer.Sound("sfx/panel.mp3")
-    click = pygame.mixer.Sound("sfx/click.mp3")
+    pausesfx = pygame.mixer.Sound(str(SFX_DIR / "pause.mp3"))
+    dialup = pygame.mixer.Sound(str(SFX_DIR / "dialup.mp3"))
+    panel = pygame.mixer.Sound(str(SFX_DIR / "panel.mp3"))
+    click = pygame.mixer.Sound(str(SFX_DIR / "click.mp3"))
     print("Welcome to TailsMusic!")
     pygame.mixer.music.load(playlist[index])
     pygame.mixer.music.play()
     update_tailsign()
 
-    playlist_counter = max((int(f.removeprefix("playlist").removesuffix(".json")) for f in os.listdir(PLAYLIST_DIR) if f.startswith("playlist") and f.endswith(".json")), default=-1) + 1
+    playlist_counter = max((int(f.removeprefix("playlist").removesuffix(".json")) for f in os.listdir(PLAYLIST_DIR) if f.startswith("playlist") and f.endswith(".json") and f.removeprefix("playlist").removesuffix(".json").isdigit()), default=-1) + 1
     dev = InputDevice(INPUT_DEVICE)
     print(f"Listening on {INPUT_DEVICE}...")
     while True:

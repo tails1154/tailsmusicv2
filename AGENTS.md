@@ -1,8 +1,8 @@
 # TailsMusic v2 — Agent Guide
 
 ## Entrypoint & runtime
-- `player.py` runs as `#!/bin/python3` on Raspberry Pi OS. Must run from `/home/pi/mp3player/`.
-- Hardcoded paths in code: `MUSIC_DIR = /home/pi/mp3player/songs`, `PLAYLIST_DIR = /home/pi/mp3player/playlists`, `sfx/`, `apps/` all under repo root.
+- `player.py` runs on Raspberry Pi OS with the project virtual environment; it resolves `config.json`, `songs`, `playlists`, `sfx`, and apps against `Path(__file__).resolve().parent` and must not rely on the launch working directory.
+- The headless service is a systemd **user** service, to share the user's PulseAudio/PipeWire session.
 
 ## Config
 - `config.json` maps button key codes (`okbutton`, `okbutton2`, `backbutton`, `skipbutton`) and `evtestname` (substring-matched against input device name).
@@ -25,19 +25,19 @@
 - `exampleApp.py` is the canonical template. `tools.py` provides `API(device)` for button polling and TTS.
 
 ## System dependencies (Raspberry Pi OS)
-- `pulseaudio`, `pulseaudio-module-bluetooth`, `espeak-ng`, `evtest`, `python3-evdev`, `nmcli` (NetworkManager for WiFi).
-- Captive portal hotspot: `hostapd`, `dnsmasq` (optional — only needed for the "Setup Hotspot" feature).
-- Python: `pygame`, `evdev`, `pulsectl` (optional), `bleak` (optional), `vosk`/`sounddevice`/`numpy` (optional).
+- `pulseaudio` or a compatible PulseAudio server, `espeak-ng`, `python3-evdev`, and `nmcli` (NetworkManager for WiFi).
+- Setup hotspot uses `nmcli device wifi hotspot`, needs user authorization, and serves the portal on hotspot IP port 8080; it does not change global iptables rules.
+- Python: distro `pygame` and `evdev`; virtualenv `requests`, `pulsectl`, `bleak`, `gTTS`.
 - The code uses `pip install --break-system-packages` for auto-install — do not replicate this pattern in new code.
 
 ## Code quirks & gotchas
 - Many `try/except Exception` swallowing errors silently. Avoid this in new code.
 - `os.system()` used for pip auto-install + restart. Prefer `subprocess.run()`.
-- `shutil.rmtree("__pycache__")` on startup — stale cache is expected.
+- Do not delete `__pycache__` on startup; Python manages caches automatically.
 - `global daemonRunning` flag controls `cmdq.process_Command()` polling in the main event loop.
-- `app.py` is deleted at startup (`os.remove("app.py")`) and after non-daemon apps finish. It is in `.gitignore`.
+- App plugins are loaded directly by path using importlib; avoid copying them to a global `app.py`.
 - `player.py` auto-advances to next song when `pygame.mixer.music.get_busy()` is false.
-- `sys.exit()` is intentionally replaced with `os.system("killall -9 python3")` — this is a hard-kill pattern for the single-process embedded environment.
+- Do not kill unrelated Python processes or restart the entire system to exit the player.
 
 ## Docs
 - Doxygen: `./docs.sh` regenerates HTML docs (runs `doxygen`, copies `docs/html/*` to `docs/`, removes source).

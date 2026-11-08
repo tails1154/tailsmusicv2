@@ -1,10 +1,6 @@
-pygame
-evdev
-
+# Runtime requirements installed inside the project virtual environment.
+# pygame, evdev and Kivy come from apt with --system-site-packages.
+requests
 pulsectl
-
 bleak
-
-vosk
-sounddevice
-numpy
+gTTS
