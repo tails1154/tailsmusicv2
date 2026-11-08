@@ -40,7 +40,8 @@ def start():
                            "device", "show", IFACE).splitlines()[0]
         address = _run("nmcli", "-g", "IP4.ADDRESS", "device", "show", IFACE)
         ip = address.splitlines()[0].split("/")[0]
-        env = dict(os.environ, TAILSMUSIC_PORTAL_PORT=str(PORT))
+        env = dict(os.environ, TAILSMUSIC_PORTAL_PORT=str(PORT),
+                   TAILSMUSIC_PORTAL_HOST=ip)
         _PORTAL = subprocess.Popen(
             [sys.executable, "-m", "portal.server"],
             cwd=ROOT, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
