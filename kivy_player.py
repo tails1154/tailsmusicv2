@@ -4,8 +4,24 @@
 Uses the same songs directory as the Bluetooth-button player. Run only one
 frontend at a time; both use an audio output device independently.
 """
+import os
+import sys
 from pathlib import Path
 import random
+
+# Set the video driver *before* importing Kivy or pygame. On Raspberry Pi
+# OS Lite, SDL2 can render directly to KMS/DRM without starting X11/Wayland.
+# SDL2 has no "fbcon" backend; that name only works with SDL 1.2.
+# Respect an existing display session or explicit user overrides.
+DIRECT_KMS = (
+    sys.platform.startswith("linux")
+    and not os.environ.get("DISPLAY")
+    and not os.environ.get("WAYLAND_DISPLAY")
+    and os.environ.get("SDL_VIDEODRIVER", "kmsdrm") == "kmsdrm"
+)
+if DIRECT_KMS:
+    os.environ.setdefault("SDL_VIDEODRIVER", "kmsdrm")
+    os.environ.setdefault("KIVY_WINDOW", "sdl2")
 
 from kivy.app import App
 from kivy.clock import Clock
@@ -38,6 +54,8 @@ class MusicTouchApp(App):
     title = "TailsMusic v2"
 
     def build(self):
+        if DIRECT_KMS:
+            Window.fullscreen = "auto"
         Window.minimum_width = 360
         Window.minimum_height = 300
         self.songs = []

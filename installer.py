@@ -2,6 +2,7 @@
 """TailsMusic installer for Debian/Raspberry Pi OS (non-destructive by default)."""
 import argparse
 import json
+import grp
 import os
 from pathlib import Path
 import pwd
@@ -52,7 +53,8 @@ def install(args):
         "libasound2-dev", "libmtdev1", "git", "sudo", "iproute2", "dbus-user-session",
     ]
     if args.with_kivy:
-        packages += ["python3-kivy"]
+        # SDL2 KMS/DRM enables Kivy directly on the Linux console.
+        packages += ["python3-kivy", "libdrm2", "libgbm1", "libsdl2-2.0-0"]
     if args.with_hotspot:
         print("Hotspot uses NetworkManager hotspot sharing; no global hostapd/dnsmasq management.")
     if not args.skip_apt:
@@ -67,7 +69,10 @@ def install(args):
     run(pip, "-m", "pip", "install", "--upgrade", "pip", dry_run=args.dry_run)
     run(pip, "-m", "pip", "install", "-r", str(target / "requirements.txt"), dry_run=args.dry_run)
     if not args.dry_run:
-        for module in ("pygame", "evdev", "pulsectl", "requests", "bleak", "gtts"):
+        modules = ["pygame", "evdev", "pulsectl", "requests", "bleak", "gtts"]
+        if args.with_kivy:
+            modules.append("kivy")
+        for module in modules:
             run(pip, "-c", f"import {module}; print({module!r}, 'OK')")
     if args.with_kivy and args.skip_apt:
         print("Note: --skip-apt requires Kivy to be already installed and importable in the venv.")
@@ -139,6 +144,16 @@ WantedBy=default.target
             userctl("restart", unit_name)
 
     if args.with_kivy:
+        # Console KMS/DRM needs access to the GPU node and the active VT.
+        # Keep the groups conditional for Debian derivatives without one.
+        for group in ("video", "render"):
+            try:
+                grp.getgrnam(group)
+            except KeyError:
+                print(f"Note: optional {group} group is absent")
+            else:
+                run("usermod", "-aG", group, username, dry_run=args.dry_run)
+
         desktop = Path(account.pw_dir) / ".local/share/applications/tailsmusic-kivy.desktop"
         entry = f"""[Desktop Entry]
 Type=Application
@@ -158,7 +173,9 @@ Categories=Audio;Player;
     print("\nInstallation steps complete.")
     print(f"Headless player: systemctl --user start tailsmusic (as {username})" if args.service else f"Headless player: {pip} {target}/player.py")
     if args.with_kivy:
-        print(f"Touchscreen UI: {pip} {target}/kivy_player.py")
+        print(f"Touchscreen UI (direct KMS/DRM on a local text console): {pip} {target}/kivy_player.py")
+        print("Run from a local Pi TTY, not SSH; no X11 or startx is required.")
+        print("SDL2 must be built with the kmsdrm driver and DRM display access is required.")
         print("Stop the headless service first; both players cannot own audio playback simultaneously.")
     print("Pair headphones via bluetoothctl; set config.json evtestname for media-button input.")
     print("NOTE: start the user audio service (PulseAudio/PipeWire), connect headset and check pactl info.")
