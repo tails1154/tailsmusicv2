@@ -8,7 +8,6 @@ import pwd
 import shutil
 import subprocess
 import sys
-import shlex
 
 DEFAULT_CONFIG = {
     "okbutton": "KEY_PLAYCD",
