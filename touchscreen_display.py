@@ -3,7 +3,6 @@
 This process NEVER initializes audio; all touch actions are fed back into the
 headset-controlled player's existing evdev menu path.
 """
-import argparse
 import os
 import sys
 
@@ -120,7 +119,5 @@ class TailsMusicDisplay(App):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--parent-pid", type=int)
-    args = parser.parse_args()
-    TailsMusicDisplay(parent_pid=args.parent_pid).run()
+    parent_pid = os.environ.get("TAILSMUSIC_PARENT_PID")
+    TailsMusicDisplay(parent_pid=int(parent_pid) if parent_pid else None).run()
