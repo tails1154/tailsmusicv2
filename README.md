@@ -135,6 +135,35 @@ When `turn_off_kivy` is missing or `false`, Kivy is **enabled by default**.
 Even in enabled mode, the player runs headlessly if the display or Kivy
 dependencies are absent.
 
+#### Raspberry Pi OS Lite display troubleshooting
+
+Kivy's SDL2 window backend requires a suitable display context. On Pi OS Lite,
+run the integrated player from a **local active text console** (for example
+`tty1`), not over SSH. The companion UI automatically requests
+`SDL_VIDEODRIVER=kmsdrm` and `KIVY_WINDOW=sdl2` before importing Kivy,
+unless you've already selected another driver. On a graphical desktop,
+it uses the existing X11 or Wayland session.
+
+A systemd **user service without access to a graphical session or active VT**
+cannot generally acquire the console for KMS/DRM. In that situation, the
+headphone player continues headlessly rather than continuously restarting.
+The service must run within a suitable graphical/console session for an
+integrated display. Kivy itself and the SDL2 build must support KMS/DRM.
+
+To inspect your setup, run these on the Pi:
+
+```bash
+cd ~/tailsmusicv2
+.venv/bin/python -c "import kivy; print(kivy.__version__)"
+ls -l /dev/dri
+echo "DISPLAY=${DISPLAY:-} WAYLAND_DISPLAY=${WAYLAND_DISPLAY:-}"
+```
+
+Check the Kivy startup traceback in the player console or
+`journalctl --user -u tailsmusic -n 100 --no-pager`. For an official Pi
+touchscreen, Kivy may need mtdev/hidinput providers configured as described
+in its [Raspberry Pi guide](https://kivy.org/doc/stable/installation/installation-rpi.html).
+
 The GUI uses local status and command files in the checkout; no network
 listener or new port is required. Both controls use the existing menu logic.
 The status file is `.touchscreen_status.json` and pending presses are
