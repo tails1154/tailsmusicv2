@@ -100,29 +100,45 @@ If you enabled the service, first run `sudo systemctl stop tailsmusic`.
 Audio requires a working user audio session; the installer enables systemd lingering for the selected user. Start PulseAudio or PipeWire-Pulse under that user and connect the Bluetooth headset. Re-log-in after setup so `input` and `audio` group membership takes effect. If Bluetooth playback is silent,
 check `pactl list short sinks` under the same user that runs the player.
 
-### Optional companion touchscreen (headphone player stays in control)
+### Integrated touchscreen (enabled by default)
 
-This is a **read-only** display for the original headphone-driven `player.py`.
-It shows the current song, playback state, and most recent text sent to the
-built-in speech functions. It does not launch another music player, steal the
-Bluetooth sink, or replace the headset menus. Full two-way synchronized
-menu navigation is planned for a later update.
+The original `player.py` now automatically launches the **companion Kivy
+touchscreen** when Kivy is installed and a display is detected. The display
+shows the current song, playback state, last spoken text and headset menu
+choices. Tap **Back / Prev**, **Select / Pause**, or **Next / Skip** to send
+the same commands as the headset buttons. Headset navigation changes the
+highlighted menu item on the touchscreen as well.
 
-Install the optional Kivy dependencies with `sudo bash setup.sh --with-kivy`.
-Then start the normal headless player as usual. In a **second local console
-or graphical session** (not SSH), run:
+No second music engine is started: `player.py` retains control of Bluetooth
+audio, input, menus and TTS. If the screen or Kivy is unavailable, playback
+continues without it. Install Kivy with:
 
 ```bash
-cd ~/tailsmusicv2
-.venv/bin/python touchscreen_display.py
+sudo bash setup.sh --with-kivy
 ```
 
-A small status snapshot (`.touchscreen_status.json`) is written by
-`player.py` and read by the screen four times a second. The display is
-optional: with no screen or Kivy installed, `player.py` continues working.
-No network port is opened. Launch both programs as the same user from the
-same checkout. The previous standalone `kivy_player.py` is a separate audio
-player; **do not run it alongside `player.py`**.
+Then run `player.py` normally (or via its existing user service).
+**Do not launch `touchscreen_display.py` manually** when using the
+integrated mode, and do not run the separate `kivy_player.py` alongside
+the headset player.
+
+To **disable the touchscreen**, add the following to your local
+`config.json` (keep the existing keys):
+
+```json
+"turn_off_kivy": true
+```
+
+This is a property within your existing JSON object, not an entire JSON
+configuration. Remember the comma separating it from the other properties.
+When `turn_off_kivy` is missing or `false`, Kivy is **enabled by default**.
+Even in enabled mode, the player runs headlessly if the display or Kivy
+dependencies are absent.
+
+The GUI uses local status and command files in the checkout; no network
+listener or new port is required. Both controls use the existing menu logic.
+The status file is `.touchscreen_status.json` and pending presses are
+stored in `.touchscreen_commands/`.
 
 ### Headless setup
 
