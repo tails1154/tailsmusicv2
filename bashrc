@@ -137,8 +137,9 @@ if [[ -z "${SSH_CONNECTION:-}" && -z "${SSH_TTY:-}" && "$(tty)" == "/dev/tty1" ]
                 python3 player.py
             fi
             tailsmusic_status=$?
-            if [[ $tailsmusic_status -eq 0 ]]; then
-                echo "TailsMusicV2 exited normally."
+            # 130 = Ctrl+C; 143 = SIGTERM. Treat these as intentional stops.
+            if [[ $tailsmusic_status -eq 0 || $tailsmusic_status -eq 130 || $tailsmusic_status -eq 143 ]]; then
+                echo "TailsMusicV2 stopped (status $tailsmusic_status)."
                 break
             fi
             echo "TailsMusicV2 failed with status $tailsmusic_status; restarting in 5 seconds..."
