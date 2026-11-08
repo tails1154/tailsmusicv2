@@ -332,9 +332,9 @@ def find_simolio():
 def read_input_event():
     """Exit the player if its Bluetooth media-button input device disappears.
 
-    SystemExit is deliberately not caught by the player's broad
-    'except Exception' handlers inside menus, so a stale evdev device never
-    leaves the process running without working controls. Exit code 19 lets
+    os._exit() bypasses Python exception handlers and shutdown cleanup, so
+    a stale evdev device cannot leave the process running without controls.
+    Exit code 19 lets
     the console launcher or a service supervisor restart the player.
     """
     try:
