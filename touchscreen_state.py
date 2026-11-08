@@ -20,10 +20,11 @@ _state = {
     "spoken_text": "",
     "playback": "stopped",
     "menu": None,
+    "last_activity": time.time(),
 }
 
 
-def publish(*, song=None, spoken_text=None, playback=None, menu=Ellipsis):
+def publish(*, song=None, spoken_text=None, playback=None, menu=Ellipsis, activity=False):
     """Atomically update the display snapshot without erasing unrelated fields."""
     with _lock:
         if song is not None:
@@ -34,6 +35,8 @@ def publish(*, song=None, spoken_text=None, playback=None, menu=Ellipsis):
             _state["playback"] = str(playback)
         if menu is not Ellipsis:
             _state["menu"] = menu
+        if activity:
+            _state["last_activity"] = time.time()
         fd, tmp = tempfile.mkstemp(prefix=".touchscreen-", dir=ROOT)
         try:
             with os.fdopen(fd, "w", encoding="utf-8") as stream:
@@ -59,7 +62,7 @@ def read():
 
 def send(action):
     """Submit a synthetic headphone button action from the touchscreen process."""
-    if action not in ("back", "skip", "ok", "playlists"):
+    if action not in ("back", "skip", "ok"):
         raise ValueError("Unknown touchscreen action")
     COMMAND_DIR.mkdir(mode=0o700, exist_ok=True)
     name = f"{time.time_ns():020d}-{uuid.uuid4().hex}.cmd"
