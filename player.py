@@ -447,9 +447,9 @@ def start_optional_touchscreen():
             sys.executable, str(ROOT / "touchscreen_display.py"),
             "--parent-pid", str(os.getpid()),
         ], cwd=str(ROOT))
-    except OSError as exc:
-        print(f"TailsMusic: could not start touchscreen: {exc}")
-        return None
+    except OSError:
+        print("TailsMusic: touchscreen launch failed; restarting through supervisor.", file=sys.stderr)
+        raise
 
 
 def update_tailsign(status=None):
@@ -1472,8 +1472,11 @@ if __name__ == "__main__":
     print(f"Listening on {INPUT_DEVICE}...")
     while True:
         if touchscreen_process is not None and touchscreen_process.poll() is not None:
-            print("TailsMusic: companion display exited; continuing headless.")
-            touchscreen_process = None
+            code = touchscreen_process.returncode
+            raise RuntimeError(
+                f"TailsMusic: companion display exited (status {code}); "
+                "crashing player so service supervisor can restart it."
+            )
         if daemonRunning: cmdq.process_Command()
         event = read_input_event()
         if event and event.type == ecodes.EV_KEY:
