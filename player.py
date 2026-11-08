@@ -394,17 +394,36 @@ def bluetooth_recording_devices():
         return None, None
 
 _speech_process = None
+_speech_lock = threading.RLock()
+
 
 def _stop_own_speech():
+    """Interrupt our current voice and always collect its exit status."""
     global _speech_process
-    if _speech_process is not None and _speech_process.poll() is None:
-        _speech_process.terminate()
-        try:
-            _speech_process.wait(timeout=2)
-        except subprocess.TimeoutExpired:
-            _speech_process.kill()
-            _speech_process.wait()
-    _speech_process = None
+    with _speech_lock:
+        process = _speech_process
+        _speech_process = None
+        if process is None:
+            return
+        if process.poll() is None:
+            process.terminate()
+            try:
+                process.wait(timeout=2)
+            except subprocess.TimeoutExpired:
+                process.kill()
+                process.wait()
+        else:
+            process.wait()
+
+
+def _reap_own_speech(process):
+    """Wait for natural completion, even if no next speech is requested."""
+    process.wait()
+    global _speech_process
+    with _speech_lock:
+        if _speech_process is process:
+            _speech_process = None
+
 
 def speak_nointer(text):
     publish_touchscreen(spoken_text=text)
@@ -412,11 +431,18 @@ def speak_nointer(text):
     _stop_own_speech()
     subprocess.run(["espeak-ng", "-s", "130", text], check=True)
 
+
 def speak(text):
     global _speech_process
     publish_touchscreen(spoken_text=text)
-    _stop_own_speech()
-    _speech_process = subprocess.Popen(["espeak-ng", "-s", "130", text])
+    with _speech_lock:
+        _stop_own_speech()
+        process = subprocess.Popen(["espeak-ng", "-s", "130", text])
+        _speech_process = process
+        threading.Thread(
+            target=_reap_own_speech, args=(process,),
+            name="TailsMusicSpeechReaper", daemon=True,
+        ).start()
 
 def speak_allowinter(text):
     speak(text)
