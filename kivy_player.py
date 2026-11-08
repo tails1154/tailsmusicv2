@@ -8,6 +8,8 @@ import os
 import sys
 from pathlib import Path
 import random
+import subprocess
+import time
 
 # Set the video driver *before* importing Kivy or pygame. On Raspberry Pi
 # OS Lite, SDL2 can render directly to KMS/DRM without starting X11/Wayland.
@@ -39,6 +41,78 @@ ROOT = Path(__file__).resolve().parent
 SONGS = ROOT / "songs"
 EXTENSIONS = {".mp3", ".ogg", ".wav", ".flac"}
 
+# TEMPORARY preferred headphones. Override with TAILSMUSIC_AUDIO_MAC
+# or set it to an empty string to disable automatic Bluetooth routing.
+PREFERRED_AUDIO_MAC = os.environ.get("TAILSMUSIC_AUDIO_MAC", "04:57:91:08:28:51")
+
+
+def _bluetooth_sink(mac):
+    """Return the available PulseAudio/PipeWire Bluetooth sink for this MAC."""
+    normalized = mac.replace(":", "_").upper()
+    try:
+        result = subprocess.run(
+            ["pactl", "list", "short", "sinks"],
+            capture_output=True, text=True, timeout=5, check=True,
+        )
+    except (OSError, subprocess.CalledProcessError, subprocess.TimeoutExpired):
+        return None
+    for line in result.stdout.splitlines():
+        fields = line.split()
+        if len(fields) > 1 and fields[1].upper().startswith(
+            "BLUEZ_SINK." + normalized
+        ):
+            return fields[1]
+    return None
+
+
+def configure_audio():
+    """Prefer our paired Bluetooth device; keep system output as fallback.
+
+    PULSE_SINK targets only this player's SDL audio stream, without changing
+    the system-wide default sink. The audio server must run as this user.
+    """
+    if "PULSE_SINK" in os.environ or not PREFERRED_AUDIO_MAC:
+        return
+    # Lite installations sometimes have PulseAudio installed but not started.
+    try:
+        server = subprocess.run(
+            ["pactl", "info"], capture_output=True, timeout=5
+        )
+        if server.returncode != 0:
+            subprocess.run(
+                ["pulseaudio", "--start"], capture_output=True, timeout=8,
+                check=False,
+            )
+    except (OSError, subprocess.TimeoutExpired):
+        pass
+
+    sink = _bluetooth_sink(PREFERRED_AUDIO_MAC)
+    if not sink:
+        # The headset is already paired/trusted; try reconnecting on launch.
+        try:
+            subprocess.run(
+                ["bluetoothctl", "connect", PREFERRED_AUDIO_MAC],
+                capture_output=True, timeout=12, check=False,
+            )
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+        for _ in range(6):
+            sink = _bluetooth_sink(PREFERRED_AUDIO_MAC)
+            if sink:
+                break
+            time.sleep(0.5)
+
+    if sink:
+        os.environ["SDL_AUDIODRIVER"] = "pulse"
+        os.environ["PULSE_SINK"] = sink
+        print(f"TailsMusic: selected Bluetooth audio sink {sink}", flush=True)
+    else:
+        print(
+            "TailsMusic: preferred Bluetooth headset is unavailable; "
+            "using system default audio output.", flush=True
+        )
+
+
 
 def list_songs():
     """Return music files in a predictable order without scanning subdirectories."""
@@ -64,6 +138,7 @@ class MusicTouchApp(App):
         self.started = False
         self.shuffle = False
         self.audio_error = ""
+        configure_audio()
         try:
             pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=4096)
             self.audio_ready = True
