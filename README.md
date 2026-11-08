@@ -45,6 +45,15 @@ login username cannot be inferred from sudo.
 
 ### Start the Kivy touchscreen interface (Raspberry Pi OS Lite)
 
+**Temporary headset preference:** The Kivy frontend currently tries to reconnect
+Bluetooth device `04:57:91:08:28:51` when launching, then selects its
+`bluez_sink` for SDL/PulseAudio playback if available. If the headset is absent,
+it uses the normal default audio output. This does not change the system default
+sink. Override with `TAILSMUSIC_AUDIO_MAC=AA:BB:CC:DD:EE:FF` or disable the
+preference with `TAILSMUSIC_AUDIO_MAC='' .venv/bin/python kivy_player.py`.
+If PulseAudio is installed but not running, the player attempts to start it in
+the current user's session; do not launch the player with `sudo`.
+
 On a **local Raspberry Pi text console** (not an SSH session), the Kivy
 frontend now selects SDL2's `kmsdrm` video backend by default. This draws
 directly to the KMS/DRM display device and **does not require X11, Wayland,
