@@ -106,10 +106,17 @@ The original `player.py` now automatically launches the **companion Kivy
 touchscreen** when Kivy is installed and a display is detected. The display
 shows the current song, playback state, last spoken text and headset menu
 choices. Tap **Back**, **Select / Pause**, or **Next** to send
-the same commands as the headset buttons. A separate **Playlists** button
-opens the existing playlist menu directly. Headset navigation changes the
+the same commands as the headset buttons. Headset navigation changes the
 highlighted menu item on the touchscreen as well. The touch controls use
 plain text labels without decorative symbols.
+
+**10-second idle screen timeout:** If nobody presses a headset or touchscreen
+control for 10 seconds, Kivy draws a fully black sleep screen. Touch once
+to wake the display without invoking any player action; pressing a headset
+control also wakes it and performs the requested action. Music keeps playing
+and navigation stays synchronized while the display is blank.
+This is software screen blanking, **not a guarantee that the LCD backlight
+or HDMI monitor physically powers down**.
 
 No second music engine is started: `player.py` retains control of Bluetooth
 audio, input, menus and TTS. If the screen or Kivy is unavailable, playback
