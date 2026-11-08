@@ -127,9 +127,9 @@ if [[ -z "${SSH_CONNECTION:-}" && -z "${SSH_TTY:-}" && "$(tty)" == "/dev/tty1" ]
     if [[ -n "$TAILSMUSIC_DIR" ]]; then
         echo "Starting TailsMusicV2 CLI player..."
         cd "$TAILSMUSIC_DIR" || return
-        # If the input device disappears, player.py exits with status 19.
-        # Retry after a delay so a disconnected Bluetooth headset can recover.
-        # Other failures return to the login shell instead of looping forever.
+        # Restart after any failure, including uncaught Python exceptions,
+        # missing Bluetooth input and audio errors. Exit 0 stops the loop.
+        # Back off briefly to avoid spinning at 100% when a device is absent.
         while true; do
             if [[ -x .venv/bin/python ]]; then
                 .venv/bin/python player.py
@@ -137,11 +137,11 @@ if [[ -z "${SSH_CONNECTION:-}" && -z "${SSH_TTY:-}" && "$(tty)" == "/dev/tty1" ]
                 python3 player.py
             fi
             tailsmusic_status=$?
-            if [[ $tailsmusic_status -ne 19 ]]; then
-                echo "TailsMusicV2 exited with status $tailsmusic_status."
+            if [[ $tailsmusic_status -eq 0 ]]; then
+                echo "TailsMusicV2 exited normally."
                 break
             fi
-            echo "TailsMusicV2 lost its input device; restarting in 5 seconds..."
+            echo "TailsMusicV2 failed with status $tailsmusic_status; restarting in 5 seconds..."
             sleep 5
         done
     else
