@@ -5,6 +5,7 @@ This UI only reads shared status and submits familiar headphone actions.
 """
 import os
 import sys
+import time
 
 # SDL2 must be configured before importing any Kivy module.
 DIRECT_KMS = (
@@ -22,6 +23,7 @@ from kivy.core.window import Window
 from kivy.graphics import Color, RoundedRectangle
 from kivy.metrics import dp, sp
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 
@@ -70,6 +72,8 @@ class TailsMusicDisplay(App):
     def __init__(self, parent_pid=None, **kwargs):
         super().__init__(**kwargs)
         self.parent_pid = parent_pid
+        self.last_activity = time.time()
+        self.asleep = False
 
     def build(self):
         # Fill the entire display in both desktop and direct-console modes.
@@ -153,29 +157,49 @@ class TailsMusicDisplay(App):
                 background_color=ACCENT if action == "ok" else CARD_ALT,
                 color=BG if action == "ok" else TEXT,
             )
-            button.bind(on_release=lambda _btn, cmd=action: send(cmd))
+            button.bind(on_release=lambda _btn, cmd=action: self.send_action(cmd))
             controls.add_widget(button)
         self.root_layout.add_widget(controls)
 
-        playlists = Button(
-            text="Playlists", font_size=sp(19), bold=True,
-            size_hint_y=None, height=dp(57),
-            background_normal="", background_down="",
-            background_color=CARD_ALT, color=TEXT,
-        )
-        playlists.bind(on_release=lambda _btn: send("playlists"))
-        self.root_layout.add_widget(playlists)
         self.root_layout.add_widget(text_label(
             "Back / Next: change song or browse menu   |   Select: pause or confirm",
             size=12, color=MUTED, halign="center",
             size_hint_y=None, height=dp(24)
         ))
 
+        # Full-window black wake surface: blanks rendered content without
+        # shutting down audio or the Kivy process. First touch only wakes.
+        self.stage = FloatLayout()
+        self.stage.add_widget(self.root_layout)
+        self.sleep_surface = Button(
+            text="", size_hint=(1, 1), pos_hint={"x": 0, "y": 0},
+            background_normal="", background_down="",
+            background_color=(0, 0, 0, 1),
+            opacity=0, disabled=True,
+        )
+        self.sleep_surface.bind(on_release=self.wake)
+        self.stage.add_widget(self.sleep_surface)
+
         Window.bind(size=self._resize)
         self._resize()
         Clock.schedule_interval(self.refresh, 0.25)
         self.refresh(0)
-        return self.root_layout
+        return self.stage
+
+    def send_action(self, action):
+        self.last_activity = time.time()
+        send(action)
+
+    def wake(self, *_args):
+        self.last_activity = time.time()
+        self._set_sleep(False)
+
+    def _set_sleep(self, sleeping):
+        if sleeping == self.asleep:
+            return
+        self.asleep = sleeping
+        self.sleep_surface.disabled = not sleeping
+        self.sleep_surface.opacity = 1 if sleeping else 0
 
     def _resize(self, *_args):
         # Landscape: split now-playing and menus. Portrait: stack them.
@@ -189,6 +213,13 @@ class TailsMusicDisplay(App):
             self.stop()
             return
         state = read()
+        # Headset events are published by player.py; touch events are local.
+        last_headset_action = state.get("last_activity", 0)
+        if isinstance(last_headset_action, (int, float)):
+            self.last_activity = max(self.last_activity, last_headset_action)
+        self._set_sleep(time.time() - self.last_activity >= 10)
+        if self.asleep:
+            return
         song = state.get("song") or "No song selected"
         speech = state.get("spoken_text") or "Nothing spoken yet"
         playback = (state.get("playback") or "stopped").capitalize()
