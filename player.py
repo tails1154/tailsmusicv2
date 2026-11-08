@@ -1043,7 +1043,8 @@ def shutdown_menu():
                     try:
                         subprocess.run(["git", "-C", str(ROOT), "pull", "--ff-only"], check=True)
                         speak("Reloading TailsMusic")
-                        sys.exit(0)
+                        print("TailsMusic: update completed; exiting for supervisor restart.", flush=True)
+                        os._exit(1)
                     except Exception as e:
                         raise
                 pausesfx.play()
