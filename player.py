@@ -313,12 +313,38 @@ class CommandQueue:
 
 
 def find_simolio():
-    """This finds the bluetooth input device for button presses."""
+    """Find only the explicitly configured input device."""
+    match = config.get("evtestname", "").strip()
+    if not match:
+        print("Set evtestname in config.json to part of your headset's evdev name.")
+        return None
     for path in list_devices():
-        dev = InputDevice(path)
-        if config.get("evtestname") and config["evtestname"] in dev.name:
-            return path
+        try:
+            device = InputDevice(path)
+            name = device.name or ""
+            device.close()
+            if match.casefold() in name.casefold():
+                return path
+        except (OSError, PermissionError):
+            continue
     return None
+
+def bluetooth_recording_devices():
+    """Discover Bluetooth audio card and input source from PulseAudio."""
+    try:
+        cards = subprocess.run(["pactl", "list", "short", "cards"],
+                               capture_output=True, text=True, check=True).stdout
+        card = next((line.split("\t")[1] for line in cards.splitlines()
+                     if len(line.split("\t")) >= 2 and
+                     line.split("\t")[1].startswith("bluez_card.")), None)
+        sources = subprocess.run(["pactl", "list", "short", "sources"],
+                                capture_output=True, text=True, check=True).stdout
+        mic = next((line.split("\t")[1] for line in sources.splitlines()
+                    if len(line.split("\t")) >= 2 and
+                    line.split("\t")[1].startswith(("bluez_source.", "bluez_input."))), None)
+        return card, mic
+    except (OSError, subprocess.CalledProcessError):
+        return None, None
 
 def speak_nointer(text):
     print(f"TTS: {text}")
@@ -737,9 +763,12 @@ def run_script_menu():
 def portal_setup():
     speak("Starting setup hotspot")
     msg = hotspot.start()
-    speak("Hotspot started")
     print(msg)
-    speak("Connect to TailsMusic Setup WiFi. It is an open network")
+    if not hotspot.is_running():
+        speak("Hotspot failed. Check terminal logs and NetworkManager permissions.")
+        return
+    speak("Hotspot started. Connect using the configured WiFi password.")
+    speak(msg)
     options = ["Stop Hotspot", "Back"]
     selected = 0
     speak(options[selected])
@@ -1104,12 +1133,18 @@ def ai_mode():
                 elif key in [config['okbutton'], config['okbutton2']]:
                     click.play()
                     try:
-                        subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "handsfree_head_unit"], capture_output=True)
+                        card, mic_source = bluetooth_recording_devices()
+                        if card:
+                            subprocess.run(["pactl", "set-card-profile", card, "headset-head-unit"], capture_output=True)
                         sleep(0.5)
                         speak("Recording")
                         raw_data = None
                         try:
-                            mic_source = "bluez_source.00_1E_7C_C8_C3_D8.handsfree_head_unit"
+                            _, detected_source = bluetooth_recording_devices()
+                            mic_source = detected_source or mic_source
+                            if not mic_source:
+                                speak("No Bluetooth microphone detected")
+                                continue
                             rec_path = str(Path(tempfile.gettempdir()) / f"tailsmusic_ai_recording_{os.getuid()}.wav")
                             proc = subprocess.Popen(["parec", "--file-format=wav", "-d", mic_source, "--rate=16000", "--format=s16le", "--channels=1", rec_path], stderr=subprocess.DEVNULL)
                             while True:
@@ -1135,7 +1170,7 @@ def ai_mode():
                             speak("Mic error")
                             continue
                     finally:
-                        subprocess.run(["pactl", "set-card-profile", "bluez_card.00_1E_7C_C8_C3_D8", "a2dp_sink"], capture_output=True)
+                        subprocess.run(["pactl", "set-card-profile", card, "a2dp-sink"], capture_output=True) if card else None
                     if len(raw_data) < 8000:
                         speak("Nothing heard")
                         continue
@@ -1297,16 +1332,12 @@ if __name__ == "__main__":
     tts_lock = threading.Lock()
     print("Loading Music Files")
     playlist = sorted(
-        [os.path.join(MUSIC_DIR, f) for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')]
+        [str(MUSIC_DIR / f) for f in os.listdir(MUSIC_DIR) if f.lower().endswith('.mp3')]
     )
-    print("Removing __pycache__")
-    try:
-        shutil.rmtree(ROOT / "__pycache__")
-    except Exception as e:
-        print("Exception Deleteing __pycache__:" + str(e))
+    # Python manages bytecode caches; do not delete them at every startup.
     if not playlist:
-        speak("No songs found.")
-        sys.exit(0)
+        print("No music found. Add MP3 files to", MUSIC_DIR)
+        sys.exit(1)
     index = 0
     paused = False
     print("Loading Audio Driver")
