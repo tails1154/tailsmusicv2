@@ -484,10 +484,11 @@ def start_optional_touchscreen():
         print("TailsMusic: no DRM device for KMS display; continuing headless.", flush=True)
         return None
     try:
+        child_env = os.environ.copy()
+        child_env["TAILSMUSIC_PARENT_PID"] = str(os.getpid())
         return subprocess.Popen([
             sys.executable, str(ROOT / "touchscreen_display.py"),
-            "--parent-pid", str(os.getpid()),
-        ], cwd=str(ROOT))
+        ], cwd=str(ROOT), env=child_env)
     except OSError:
         print("TailsMusic: touchscreen launch failed; restarting through supervisor.", file=sys.stderr)
         raise
