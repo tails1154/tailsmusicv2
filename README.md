@@ -100,6 +100,30 @@ If you enabled the service, first run `sudo systemctl stop tailsmusic`.
 Audio requires a working user audio session; the installer enables systemd lingering for the selected user. Start PulseAudio or PipeWire-Pulse under that user and connect the Bluetooth headset. Re-log-in after setup so `input` and `audio` group membership takes effect. If Bluetooth playback is silent,
 check `pactl list short sinks` under the same user that runs the player.
 
+### Optional companion touchscreen (headphone player stays in control)
+
+This is a **read-only** display for the original headphone-driven `player.py`.
+It shows the current song, playback state, and most recent text sent to the
+built-in speech functions. It does not launch another music player, steal the
+Bluetooth sink, or replace the headset menus. Full two-way synchronized
+menu navigation is planned for a later update.
+
+Install the optional Kivy dependencies with `sudo bash setup.sh --with-kivy`.
+Then start the normal headless player as usual. In a **second local console
+or graphical session** (not SSH), run:
+
+```bash
+cd ~/tailsmusicv2
+.venv/bin/python touchscreen_display.py
+```
+
+A small status snapshot (`.touchscreen_status.json`) is written by
+`player.py` and read by the screen four times a second. The display is
+optional: with no screen or Kivy installed, `player.py` continues working.
+No network port is opened. Launch both programs as the same user from the
+same checkout. The previous standalone `kivy_player.py` is a separate audio
+player; **do not run it alongside `player.py`**.
+
 ### Headless setup
 
 ```bash
