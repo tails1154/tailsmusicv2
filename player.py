@@ -464,9 +464,24 @@ def start_optional_touchscreen():
     if importlib.util.find_spec("kivy") is None:
         print("TailsMusic: Kivy not installed; continuing headless.")
         return None
-    if not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")
-            or Path("/dev/dri").exists() or Path("/dev/fb0").exists()):
-        print("TailsMusic: no display found; continuing headless.")
+    graphical_session = bool(os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY"))
+    # DRM devices alone do not grant a systemd user service access to the
+    # active virtual terminal. In console mode SDL2/kmsdrm needs a local VT.
+    local_console = False
+    if not graphical_session:
+        try:
+            local_console = os.isatty(0) and os.ttyname(0).startswith("/dev/tty")
+        except OSError:
+            local_console = False
+    if not graphical_session and not local_console:
+        print(
+            "TailsMusic: Kivy needs a graphical session or local active TTY; "
+            "service has neither, continuing headless.",
+            flush=True,
+        )
+        return None
+    if not graphical_session and not Path("/dev/dri").exists():
+        print("TailsMusic: no DRM device for KMS display; continuing headless.", flush=True)
         return None
     try:
         return subprocess.Popen([
