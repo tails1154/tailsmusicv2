@@ -24,7 +24,6 @@ from kivy.metrics import dp, sp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
 from kivy.uix.label import Label
-from kivy.uix.widget import Widget
 
 from touchscreen_state import read, send
 
@@ -144,9 +143,9 @@ class TailsMusicDisplay(App):
             size_hint_y=None, height=dp(74), spacing=dp(10)
         )
         for title, action in (
-            ("\u25c0  BACK", "back"),
-            ("\u25cf  SELECT", "ok"),
-            ("NEXT  \u25b6", "skip"),
+            ("Back", "back"),
+            ("Select / Pause", "ok"),
+            ("Next", "skip"),
         ):
             button = Button(
                 text=title, font_size=sp(18), bold=True,
@@ -157,6 +156,15 @@ class TailsMusicDisplay(App):
             button.bind(on_release=lambda _btn, cmd=action: send(cmd))
             controls.add_widget(button)
         self.root_layout.add_widget(controls)
+
+        playlists = Button(
+            text="Playlists", font_size=sp(19), bold=True,
+            size_hint_y=None, height=dp(57),
+            background_normal="", background_down="",
+            background_color=CARD_ALT, color=TEXT,
+        )
+        playlists.bind(on_release=lambda _btn: send("playlists"))
+        self.root_layout.add_widget(playlists)
         self.root_layout.add_widget(text_label(
             "Back / Next: change song or browse menu   |   Select: pause or confirm",
             size=12, color=MUTED, halign="center",
