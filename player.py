@@ -36,8 +36,7 @@ print(f"(8/{totalModules}) wifi.py")
 import wifi
 print("(8.5/10) hotspot.py")
 import hotspot
-print(f"(9/{totalModules}) shutil")
-import shutil
+print(f"(9/{totalModules}) traceback")
 import traceback
 print(f"(10/{totalModules}) queue")
 import queue
