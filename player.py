@@ -21,7 +21,7 @@ APP_PATH = ROOT / 'app.py'
 print(f"(1/{totalModules}) pygame")
 import pygame
 print(f"(2/{totalModules}) evdev")
-from evdev import InputDevice, categorize, ecodes, list_devices
+from evdev import InputDevice, InputEvent, categorize, ecodes, list_devices
 print("(3/10) time")
 from time import sleep
 import time
@@ -44,7 +44,11 @@ import queue
 import requests
 
 # The optional touchscreen is a status consumer, not a second audio player.
-from touchscreen_state import publish as publish_touchscreen
+from touchscreen_state import (
+    publish as publish_touchscreen,
+    next_command as next_touch_command,
+    clear_commands as clear_touch_commands,
+)
 
 print(f"(11/{totalModules}) pulsectl")
 try:
@@ -138,21 +142,22 @@ def menu_nav(event, selected, options, allowInterrupt: bool = False):
     Handle menu navigation: back cycles BACK, skip cycles FORWARD, play/pause (okbutton/okbutton2) selects.
     Returns tuple (selected, selected_action) where selected_action is True if play/pause was pressed.
     """
+    publish_touchscreen(menu={"options": list(options), "selected": selected})
     key_event = categorize(event)
     if key_event.keystate == 1:
         key = key_event.keycode
         if key == config['backbutton']:
             selected = (selected - 1) % len(options)
             if allowInterrupt:
-                speak_allowinter(options[selected])
+                speak_menu_option(options, selected, allow_interrupt=True)
             else:
-                speak(options[selected])
+                speak_menu_option(options, selected)
         elif key == config['skipbutton']:
             selected = (selected + 1) % len(options)
             if allowInterrupt:
-                speak_allowinter(options[selected])
+                speak_menu_option(options, selected, allow_interrupt=True)
             else:
-                speak(options[selected])
+                speak_menu_option(options, selected)
         elif key in [config['okbutton'], config['okbutton2']]:
             return selected, True
     return selected, False
@@ -348,7 +353,17 @@ def read_input_event():
     the console launcher or a service supervisor restart the player.
     """
     try:
-        return dev.read_one()
+        event = dev.read_one()
+        if event is not None:
+            return event
+        if config.get("turn_off_kivy", False) is not True:
+            action = next_touch_command()
+            if action:
+                setting = {"back": "backbutton", "skip": "skipbutton", "ok": "okbutton"}[action]
+                code = ecodes.ecodes.get(config[setting])
+                if isinstance(code, int):
+                    return InputEvent(0, 0, ecodes.EV_KEY, code, 1)
+        return None
     except OSError as exc:
         if exc.errno == errno.ENODEV:
             print(
@@ -405,6 +420,37 @@ def speak(text):
 
 def speak_allowinter(text):
     speak(text)
+
+
+def speak_menu_option(options, selected, allow_interrupt=False):
+    """Keep headset narration and on-screen menu selections in sync."""
+    publish_touchscreen(menu={"options": [str(item) for item in options], "selected": selected})
+    if allow_interrupt:
+        speak_allowinter(str(options[selected]))
+    else:
+        speak(str(options[selected]))
+
+def start_optional_touchscreen():
+    """Launch the UI child when enabled, installed, and a display is present."""
+    if config.get("turn_off_kivy", False) is True:
+        print("TailsMusic: integrated touchscreen disabled by config.")
+        return None
+    if importlib.util.find_spec("kivy") is None:
+        print("TailsMusic: Kivy not installed; continuing headless.")
+        return None
+    if not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")
+            or Path("/dev/dri").exists() or Path("/dev/fb0").exists()):
+        print("TailsMusic: no display found; continuing headless.")
+        return None
+    try:
+        return subprocess.Popen([
+            sys.executable, str(ROOT / "touchscreen_display.py"),
+            "--parent-pid", str(os.getpid()),
+        ], cwd=str(ROOT))
+    except OSError as exc:
+        print(f"TailsMusic: could not start touchscreen: {exc}")
+        return None
+
 
 def update_tailsign(status=None):
     """Publish playback status, and optionally update the external TailSign."""
@@ -489,7 +535,7 @@ def toggle_pause():
 def manual_tts():
     options = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "space", "Done"]
     selected = 0
-    speak(options[selected])
+    speak_menu_option(options, selected)
     toSpeak = ""
     while True:
         if daemonRunning: cmdq.process_Command()
@@ -517,7 +563,7 @@ def wifiSetup():
         pygame.mixer.music.stop()
         selected = 0
         speak("Choose your wifi network")
-        speak(options[selected])
+        speak_menu_option(options, selected)
         while True:
             if daemonRunning: cmdq.process_Command()
             event = read_input_event()
@@ -545,7 +591,7 @@ def wifiSetup():
                     ]
                     selected = 0
                     wifiPass = ""
-                    speak(options[selected])
+                    speak_menu_option(options, selected)
                     while True:
                         if daemonRunning: cmdq.process_Command()
                         event = read_input_event()
@@ -672,7 +718,7 @@ def bluetooth_menu():
     """UI menu (button-driven) for scanning, pairing and selecting a Bluetooth speaker sink."""
     options = ["Scan Devices", "Known Devices", "List Audio Sinks", "Back"]
     selected = 0
-    speak(options[selected])
+    speak_menu_option(options, selected)
     while True:
         if daemonRunning: cmdq.process_Command()
         event = read_input_event()
@@ -790,7 +836,7 @@ def run_script_menu():
         return
     options = [os.path.basename(f) for f in py_files] + ["Back"]
     selected = 0
-    speak(options[selected])
+    speak_menu_option(options, selected)
     while True:
         global daemonRunning
         if daemonRunning: cmdq.process_Command()
@@ -835,7 +881,7 @@ def portal_setup():
     speak(msg)
     options = ["Stop Hotspot", "Back"]
     selected = 0
-    speak(options[selected])
+    speak_menu_option(options, selected)
     while True:
         if daemonRunning: cmdq.process_Command()
         event = read_input_event()
@@ -861,7 +907,7 @@ def shutdown_menu():
                    "Connect to WiFi", "Setup Hotspot", "Bluetooth", "Get local IP", "Open App", 
                    f"Show on TailSign: {tailsign_status}", "AI Mode", "Shut Down", "Back"]
         if first_render:
-            speak(options[selected])
+            speak_menu_option(options, selected)
             first_render = False
         if daemonRunning: cmdq.process_Command()
         event = read_input_event()
@@ -968,7 +1014,7 @@ def playlist_menu():
         if daemonRunning: cmdq.process_Command()
         options = ["Create", *list_playlists(), "Back"]
         selected = 0
-        speak(options[selected])
+        speak_menu_option(options, selected)
         waiting = True
         while waiting:
             event = read_input_event()
@@ -1024,7 +1070,7 @@ def manage_playlist(name):
         songs = json.load(f)
     options = ["Play", "Delete", "Back"]
     selected = 0
-    speak(options[selected])
+    speak_menu_option(options, selected)
     while True:
         if daemonRunning: cmdq.process_Command()
         event = read_input_event()
@@ -1091,7 +1137,7 @@ def song_menu():
     global index
     options = ["Add to Playlist", "Show Info", "Back"]
     selected = 0
-    speak(options[selected])
+    speak_menu_option(options, selected)
     while True:
         if daemonRunning: cmdq.process_Command()
         event = read_input_event()
@@ -1414,15 +1460,20 @@ if __name__ == "__main__":
     panel = pygame.mixer.Sound(str(SFX_DIR / "panel.mp3"))
     click = pygame.mixer.Sound(str(SFX_DIR / "click.mp3"))
     print("Welcome to TailsMusic!")
+    clear_touch_commands()
     publish_touchscreen(song=Path(playlist[index]).stem, spoken_text="", playback="stopped")
     pygame.mixer.music.load(playlist[index])
     pygame.mixer.music.play()
     update_tailsign()
+    touchscreen_process = start_optional_touchscreen()
 
     playlist_counter = max((int(f.removeprefix("playlist").removesuffix(".json")) for f in os.listdir(PLAYLIST_DIR) if f.startswith("playlist") and f.endswith(".json") and f.removeprefix("playlist").removesuffix(".json").isdigit()), default=-1) + 1
     dev = InputDevice(INPUT_DEVICE)
     print(f"Listening on {INPUT_DEVICE}...")
     while True:
+        if touchscreen_process is not None and touchscreen_process.poll() is not None:
+            print("TailsMusic: companion display exited; continuing headless.")
+            touchscreen_process = None
         if daemonRunning: cmdq.process_Command()
         event = read_input_event()
         if event and event.type == ecodes.EV_KEY:
