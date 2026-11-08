@@ -11,3 +11,6 @@ tailsmusic.log
 
 .venv/
 *.pyc
+
+# Local companion touchscreen runtime state
+.touchscreen_status.json
