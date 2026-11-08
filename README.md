@@ -105,9 +105,11 @@ check `pactl list short sinks` under the same user that runs the player.
 The original `player.py` now automatically launches the **companion Kivy
 touchscreen** when Kivy is installed and a display is detected. The display
 shows the current song, playback state, last spoken text and headset menu
-choices. Tap **Back / Prev**, **Select / Pause**, or **Next / Skip** to send
-the same commands as the headset buttons. Headset navigation changes the
-highlighted menu item on the touchscreen as well.
+choices. Tap **Back**, **Select / Pause**, or **Next** to send
+the same commands as the headset buttons. A separate **Playlists** button
+opens the existing playlist menu directly. Headset navigation changes the
+highlighted menu item on the touchscreen as well. The touch controls use
+plain text labels without decorative symbols.
 
 No second music engine is started: `player.py` retains control of Bluetooth
 audio, input, menus and TTS. If the screen or Kivy is unavailable, playback
@@ -163,6 +165,14 @@ Check the Kivy startup traceback in the player console or
 `journalctl --user -u tailsmusic -n 100 --no-pager`. For an official Pi
 touchscreen, Kivy may need mtdev/hidinput providers configured as described
 in its [Raspberry Pi guide](https://kivy.org/doc/stable/installation/installation-rpi.html).
+
+
+**Process handling:** The touchscreen runs as a child of the audio player.
+The player polls the child process, which collects its exit status so the
+child cannot remain a zombie. If the screen exits unexpectedly while active,
+the player exits with an error and the existing `Restart=on-failure` service
+can restart it. A Linux zombie is already dead, so sending `SIGKILL` to
+one does not work; its parent must reap it instead.
 
 The GUI uses local status and command files in the checkout; no network
 listener or new port is required. Both controls use the existing menu logic.
