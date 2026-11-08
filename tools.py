@@ -2,9 +2,10 @@ import subprocess
 import threading
 from evdev import categorize, ecodes
 import json
+from pathlib import Path
 tts_lock = threading.Lock()
 print("[tools.py] Reading config.json")
-with open('config.json', 'r') as file:
+with (Path(__file__).resolve().parent / 'config.json').open('r', encoding='utf-8') as file:
  config = json.load(file)
 
 print("[tools.py] Loaded config.json!")
