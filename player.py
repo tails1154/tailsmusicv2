@@ -42,6 +42,10 @@ import traceback
 print(f"(10/{totalModules}) queue")
 import queue
 import requests
+
+# The optional touchscreen is a status consumer, not a second audio player.
+from touchscreen_state import publish as publish_touchscreen
+
 print(f"(11/{totalModules}) pulsectl")
 try:
     from pulsectl import Pulse
@@ -388,12 +392,14 @@ def _stop_own_speech():
     _speech_process = None
 
 def speak_nointer(text):
+    publish_touchscreen(spoken_text=text)
     print(f"TTS: {text}")
     _stop_own_speech()
     subprocess.run(["espeak-ng", "-s", "130", text], check=True)
 
 def speak(text):
     global _speech_process
+    publish_touchscreen(spoken_text=text)
     _stop_own_speech()
     _speech_process = subprocess.Popen(["espeak-ng", "-s", "130", text])
 
@@ -401,9 +407,12 @@ def speak_allowinter(text):
     speak(text)
 
 def update_tailsign(status=None):
-    """Update the TailSign display with current song info.
-    Only updates if 'show_on_tailsign' is enabled in config.
-    """
+    """Publish playback status, and optionally update the external TailSign."""
+    if playlist:
+        publish_touchscreen(
+            song=Path(playlist[index]).stem,
+            playback="paused" if status == "paused" else ("stopped" if status == "stopped" else "playing"),
+        )
     if not config.get("show_on_tailsign", False):
         return
     try:
@@ -1288,6 +1297,7 @@ def ai_mode():
                             elif cmd == "stop":
                                 pygame.mixer.music.stop()
                                 paused = False
+                                update_tailsign("stopped")
                             elif cmd.startswith("volume"):
                                 try:
                                     vol = int(cmd.split()[1])
@@ -1403,6 +1413,7 @@ if __name__ == "__main__":
     panel = pygame.mixer.Sound(str(SFX_DIR / "panel.mp3"))
     click = pygame.mixer.Sound(str(SFX_DIR / "click.mp3"))
     print("Welcome to TailsMusic!")
+    publish_touchscreen(song=Path(playlist[index]).stem, spoken_text="", playback="stopped")
     pygame.mixer.music.load(playlist[index])
     pygame.mixer.music.play()
     update_tailsign()
