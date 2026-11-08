@@ -56,6 +56,16 @@ except Exception:
     _HAS_BLEAK = False
     BleakScanner = None
     print("Optional Bluetooth LE scanning is unavailable; install bleak in the venv.")
+def _fatal_thread_exception(args):
+    """Restart the process on unhandled worker-thread exceptions."""
+    if args.exc_type is SystemExit:
+        return
+    traceback.print_exception(args.exc_type, args.exc_value, args.exc_traceback)
+    sys.stderr.flush()
+    os._exit(1)
+
+
+threading.excepthook = _fatal_thread_exception
 print("TailsMusic Loading...")
 global daemonRunning
 daemonRunning = False
@@ -211,8 +221,7 @@ class CommandQueue:
                 if not self.running:
                     break
             except Exception as e:
-                print(f"Remote processor error: {e}")
-
+                raise
     def stop(self) -> None:
         """Stop all components of the command queue."""
         with self.lock:
@@ -235,8 +244,7 @@ class CommandQueue:
             except (EOFError, KeyboardInterrupt):
                 break
             except Exception as e:
-                print(f"Command input error: {e}")
-
+                raise
     def process_Command(self, timeout: float = 0.01) -> None:
         """
         Process pending commands in the queue (in current process).
@@ -252,8 +260,7 @@ class CommandQueue:
             except queue.Empty:
                 break
             except Exception as e:
-                print(f"Command processing error: {e}")
-
+                raise
     def _execute_command(self, cmd: str) -> None:
         """Execute a single command with proper error handling."""
         if self.verbose:
@@ -277,12 +284,11 @@ class CommandQueue:
                     print(f"[CMD] Errors:\n{result.stderr}", file=sys.stderr)
                     
         except subprocess.TimeoutExpired:
-            print(f"[CMD] Timeout: Command took too long: {cmd}")
+            raise
         except subprocess.CalledProcessError as e:
-            print(f"[CMD] Failed (exit {e.returncode}): {cmd}\n{e.stderr}")
+            raise
         except Exception as e:
-            print(f"[CMD] Unexpected error: {e}")
-
+            raise
     def put_command(self, cmd: str, block: bool = True, 
                     timeout: Optional[float] = None) -> bool:
         """
@@ -412,7 +418,7 @@ def update_tailsign(status=None):
             text = "[TailsMusic] " + song_name
         requests.post("http://127.0.0.1:1998/postsign", data={"text": text}, timeout=2)
     except Exception:
-        pass
+        raise
 def next_song():
     global index
     index += 1
@@ -518,9 +524,7 @@ def wifiSetup():
                                     try:
                                         wifi.connect_wifi(wifiName, wifiPass)
                                     except Exception as e:
-                                        pygame.mixer.music.stop()
-                                        speak("Error connecting: " + str(e))
-                                        break
+                                        raise
                                     pygame.mixer.music.stop()
                                     speak("Your IP is " + str(wifi.get_ip()))
                                     break
@@ -536,10 +540,7 @@ def list_pulse_sinks():
         with Pulse('tailsmusic') as p:
             return [(s.index, s.name, s.description) for s in p.sink_list()]
     except Exception as e:
-        print("pulsectl list error:", e)
-        return []
-
-
+        raise
 def set_default_sink_by_name(sink_name: str) -> bool:
     """Set default sink and move existing sink inputs to it."""
     if not _HAS_PULSECTL:
@@ -557,13 +558,10 @@ def set_default_sink_by_name(sink_name: str) -> bool:
                 try:
                     p.sink_input_move(si.index, sinks[sink_name].index)
                 except Exception:
-                    pass
+                    raise
         return True
     except Exception as e:
-        print("Error setting default sink:", e)
-        return False
-
-
+        raise
 def bluetooth_list_devices():
     """Return list of known bluetooth devices using bluetoothctl."""
     try:
@@ -578,10 +576,7 @@ def bluetooth_list_devices():
                 devices.append((mac, name))
         return devices
     except Exception as e:
-        print('bluetoothctl devices error:', e)
-        return []
-
-
+        raise
 def bluetooth_scan(timeout=5):
     """Scan for bluetooth devices for `timeout` seconds and return devices."""
     # Prefer BLE scan with bleak if available
@@ -595,8 +590,7 @@ def bluetooth_scan(timeout=5):
             if devices:
                 return devices
         except Exception as e:
-            print('bleak scan error:', e)
-
+            raise
     # Fallback to bluetoothctl interactive scan for non-BLE or if bleak is unavailable
     try:
         p = subprocess.Popen(['bluetoothctl'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
@@ -621,15 +615,12 @@ def bluetooth_scan(timeout=5):
                     name = ' '.join(parts[i+2:]) if len(parts) > i+2 else ''
                     devices.append((mac, name))
                 except Exception:
-                    continue
+                    raise
         if not devices:
             return bluetooth_list_devices()
         return devices
     except Exception as e:
-        print('bluetooth scan error:', e)
-        return []
-
-
+        raise
 def bluetooth_pair_connect(mac: str) -> bool:
     """Attempt to pair, trust, and connect to a device via bluetoothctl."""
     try:
@@ -638,10 +629,7 @@ def bluetooth_pair_connect(mac: str) -> bool:
         res = subprocess.run(['bluetoothctl', 'connect', mac], check=False)
         return res.returncode == 0
     except Exception as e:
-        print('bluetooth connect error:', e)
-        return False
-
-
+        raise
 def bluetooth_menu():
     """UI menu (button-driven) for scanning, pairing and selecting a Bluetooth speaker sink."""
     options = ["Scan Devices", "Known Devices", "List Audio Sinks", "Back"]
@@ -932,7 +920,7 @@ def shutdown_menu():
                         speak("Reloading TailsMusic")
                         sys.exit(0)
                     except Exception as e:
-                        speak("Error updating: " + str(e))
+                        raise
                 pausesfx.play()
                 break
 
@@ -1086,7 +1074,7 @@ def song_menu():
                         del playlist[index]
                         index %= len(playlist)
                     except Exception as e:
-                        speak("Error deleting song: " + str(e))
+                        raise
                     break
                 elif choice == "Back":
                     break
@@ -1122,9 +1110,7 @@ def show_song_info(song_path):
         fname = os.path.basename(song_path)
         speak(f"Song name: {fname}")
     except Exception as e:
-        speak("Error showing song info: " + str(e))
-
-
+        raise
 def ai_mode():
     global index, paused, shuffleOn
     if 'shuffleOn' not in globals():
@@ -1203,10 +1189,7 @@ def ai_mode():
                                 with open(rec_path, "rb") as f:
                                     raw_data = f.read()
                         except Exception as e:
-                            print(f"Mic error: {e}")
-                            traceback.print_exc()
-                            speak("Mic error")
-                            continue
+                            raise
                     finally:
                         subprocess.run(["pactl", "set-card-profile", card, "a2dp-sink"], capture_output=True) if card else None
                     if len(raw_data) < 8000:
@@ -1218,9 +1201,7 @@ def ai_mode():
                         r.raise_for_status()
                         text = r.json().get("text", "")
                     except Exception as e:
-                        print(f"STT err: {e}")
-                        speak("STT error")
-                        continue
+                        raise
                     if not text or text.lower() in ("law", "claw", "wall"):
                         continue
                     speak_nointer("You said " + text)
@@ -1260,8 +1241,7 @@ def ai_mode():
                         else:
                             response_text = str(data)
                     except Exception as e:
-                        print(f"AI error: {e}")
-                        continue
+                        raise
                     context.pop()
                     context.pop()
                     context.append({"role": "user", "content": text})
@@ -1286,7 +1266,7 @@ def ai_mode():
                                     vol = max(0, min(100, vol))
                                     pygame.mixer.music.set_volume(vol / 100.0)
                                 except Exception:
-                                    pass
+                                    raise
                             elif cmd == "shuffle":
                                 shuffleOn = not shuffleOn
                             elif cmd.startswith("play"):
@@ -1338,9 +1318,7 @@ def ai_mode():
                                             break
                                     sleep(0.05)
                     except Exception:
-                        speak_nointer(speech_text)
-
-
+                        raise
 if __name__ == "__main__":
     cmdq = CommandQueue(20, True, True)
     cmdq.start_command_listener()
@@ -1365,8 +1343,8 @@ if __name__ == "__main__":
         print("Remvoing stale app.py")
         os.remove(APP_PATH)
         print("Starting Voice")
-    except Exception as e:
-        print("Error removing app.py: " + str(e))
+    except FileNotFoundError:
+        pass  # No stale app.py is normal.
     tts_lock = threading.Lock()
     print("Loading Music Files")
     playlist = sorted(
