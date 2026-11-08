@@ -366,7 +366,7 @@ class PortalHandler(SimpleHTTPRequestHandler):
 def start_server():
     load_templates()
     port = int(os.environ.get("TAILSMUSIC_PORTAL_PORT", "8080"))
-    server = HTTPServer(("0.0.0.0", port), PortalHandler)
+    server = HTTPServer((os.environ.get("TAILSMUSIC_PORTAL_HOST", "127.0.0.1"), port), PortalHandler)
     server.serve_forever()
 
 if __name__ == "__main__":
