@@ -175,10 +175,8 @@ class TailsMusicDisplay(App):
             text="", size_hint=(1, 1), pos_hint={"x": 0, "y": 0},
             background_normal="", background_down="",
             background_color=(0, 0, 0, 1),
-            opacity=0, disabled=True,
         )
         self.sleep_surface.bind(on_release=self.wake)
-        self.stage.add_widget(self.sleep_surface)
 
         Window.bind(size=self._resize)
         self._resize()
@@ -198,8 +196,10 @@ class TailsMusicDisplay(App):
         if sleeping == self.asleep:
             return
         self.asleep = sleeping
-        self.sleep_surface.disabled = not sleeping
-        self.sleep_surface.opacity = 1 if sleeping else 0
+        if sleeping:
+            self.stage.add_widget(self.sleep_surface)
+        else:
+            self.stage.remove_widget(self.sleep_surface)
 
     def _resize(self, *_args):
         # Landscape: split now-playing and menus. Portrait: stack them.
