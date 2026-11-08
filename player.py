@@ -419,6 +419,35 @@ def update_tailsign(status=None):
         requests.post("http://127.0.0.1:1998/postsign", data={"text": text}, timeout=2)
     except Exception:
         raise
+def rescan_songs():
+    """Refresh the MP3 list without restarting the player or interrupting playback."""
+    global playlist, index
+    new_playlist = sorted(
+        str(path) for path in MUSIC_DIR.iterdir()
+        if path.is_file() and path.suffix.lower() == ".mp3"
+    )
+    if not new_playlist:
+        print("Rescan: no MP3 files found; keeping the current playlist.", flush=True)
+        speak("No songs found")
+        return
+
+    current_song = playlist[index] if playlist and index < len(playlist) else None
+    old_count = len(playlist)
+    playlist = new_playlist
+    if current_song in playlist:
+        index = playlist.index(current_song)
+        print(f"Rescan: {old_count} -> {len(playlist)} songs; current song preserved.", flush=True)
+    else:
+        # The playing file was removed or renamed. Load an available song.
+        index = 0
+        pygame.mixer.music.load(playlist[index])
+        if not paused:
+            pygame.mixer.music.play()
+        update_tailsign()
+        print(f"Rescan: {old_count} -> {len(playlist)} songs; selected first song.", flush=True)
+    speak(f"Found {len(playlist)} songs")
+
+
 def next_song():
     global index
     index += 1
@@ -895,8 +924,7 @@ def shutdown_menu():
                 elif choice == "Manual text to speech":
                     manual_tts()
                 elif choice == "Re scan Songs":
-                    print("Rescan requested; restarting TailsMusic to reload songs.", flush=True)
-                    os._exit(19)
+                    rescan_songs()
                 elif choice == "Connect to WiFi":
                     wifiSetup()
                 elif choice == "Setup Hotspot":
