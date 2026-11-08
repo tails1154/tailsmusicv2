@@ -111,37 +111,29 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-echo "Press Ctrl-C now to enter terminal"
-echo "Waiting 2 seconds"
-sleep 2
-while [ yes ]; do
-echo "Connecting Bluetooth"
-sudo bluetoothctl connect 00:1E:7C:C8:C3:D8 2>/dev/null
-while [ "$?" != "0" ]; do
-echo "Retrying Bluetooth"
-sudo bluetoothctl connect 00:1E:7C:C8:C3:D8 2>/dev/null
-done
-sleep 1
-pactl set-default-sink bluez_sink.00_1E_7C_C8_C3_D8.a2dp_sink
+# TailsMusicV2: automatically start the Kivy touchscreen player only on the
+# Raspberry Pi's primary local console. Do not run from SSH, remote terminals,
+# a desktop terminal, or a second tty. This file must be installed as ~/.bashrc.
+if [[ -z "${SSH_CONNECTION:-}" && -z "${SSH_TTY:-}" && "$(tty)" == "/dev/tty1" ]]; then
+    # Determine the repository path from this file when it is sourced in place.
+    # If copied to ~/.bashrc, use the standard ~/tailsmusicv2 location instead.
+    if [[ -f "$HOME/tailsmusicv2/kivy_player.py" ]]; then
+        TAILSMUSIC_DIR="$HOME/tailsmusicv2"
+    elif [[ -f "/home/pi/mp3player/kivy_player.py" ]]; then
+        TAILSMUSIC_DIR="/home/pi/mp3player"
+    else
+        TAILSMUSIC_DIR=""
+    fi
 
-
-echo "Starting portal server"
-sudo pkill -9 -f portal.server 2>/dev/null
-sleep 0.5
-sudo python3 -m portal.server &
-
-# Created by `pipx` on 2025-06-24 04:44:52
-export PATH="$PATH:/home/tails1154/.local/bin"
-
-
-#while [ yes ]; do
-echo "Starting tailsmusic mp3 player"
-
-
-cd /home/pi/mp3player
-echo "=== tailsmusic started $(date) ===" >> tailsmusic.log
-PYTHONUNBUFFERED=1 python3 player.py >> tailsmusic.log 2>&1
-
-cd
-#done
-done
+    if [[ -n "$TAILSMUSIC_DIR" ]]; then
+        echo "Starting TailsMusicV2 touchscreen player..."
+        cd "$TAILSMUSIC_DIR" || return
+        if [[ -x .venv/bin/python ]]; then
+            exec .venv/bin/python kivy_player.py
+        else
+            python3 kivy_player.py
+        fi
+    else
+        echo "TailsMusicV2 not found; leaving the terminal available."
+    fi
+fi
