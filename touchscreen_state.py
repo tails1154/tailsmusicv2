@@ -59,7 +59,7 @@ def read():
 
 def send(action):
     """Submit a synthetic headphone button action from the touchscreen process."""
-    if action not in ("back", "skip", "ok"):
+    if action not in ("back", "skip", "ok", "playlists"):
         raise ValueError("Unknown touchscreen action")
     COMMAND_DIR.mkdir(mode=0o700, exist_ok=True)
     name = f"{time.time_ns():020d}-{uuid.uuid4().hex}.cmd"
