@@ -346,13 +346,29 @@ def bluetooth_recording_devices():
     except (OSError, subprocess.CalledProcessError):
         return None, None
 
+_speech_process = None
+
+def _stop_own_speech():
+    global _speech_process
+    if _speech_process is not None and _speech_process.poll() is None:
+        _speech_process.terminate()
+        try:
+            _speech_process.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            _speech_process.kill()
+            _speech_process.wait()
+    _speech_process = None
+
 def speak_nointer(text):
     print(f"TTS: {text}")
-    subprocess.run(["killall", "espeak-ng"], capture_output=True, check=False)
+    _stop_own_speech()
     subprocess.run(["espeak-ng", "-s", "130", text], check=True)
+
 def speak(text):
-    subprocess.run(["killall", "espeak-ng"], capture_output=True, check=False)
-    subprocess.Popen(["espeak-ng", "-s", "130", text])
+    global _speech_process
+    _stop_own_speech()
+    _speech_process = subprocess.Popen(["espeak-ng", "-s", "130", text])
+
 def speak_allowinter(text):
     speak(text)
 
