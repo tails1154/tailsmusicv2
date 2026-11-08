@@ -53,9 +53,11 @@ class Panel(BoxLayout):
 
 
 def text_label(value, size=18, color=TEXT, bold=False, **kwargs):
+    halign = kwargs.pop("halign", "left")
+    valign = kwargs.pop("valign", "middle")
     label = Label(
         text=value, font_size=sp(size), color=color, bold=bold,
-        halign="left", valign="middle", **kwargs
+        halign=halign, valign=valign, **kwargs
     )
     label.bind(size=lambda obj, dimensions: setattr(
         obj, "text_size", (max(0, dimensions[0] - dp(6)), dimensions[1])
