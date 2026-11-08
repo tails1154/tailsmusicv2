@@ -43,9 +43,37 @@ overwrite an existing `config.json`. Optional hotspot dependencies are
 installed only with `--with-hotspot`. Set `--user USERNAME` if your regular
 login username cannot be inferred from sudo.
 
-### Start the Kivy touchscreen interface
+### Start the Kivy touchscreen interface (Raspberry Pi OS Lite)
 
-On a Pi with a working desktop or other graphical session:
+On a **local Raspberry Pi text console** (not an SSH session), the Kivy
+frontend now selects SDL2's `kmsdrm` video backend by default. This draws
+directly to the KMS/DRM display device and **does not require X11, Wayland,
+a desktop, or `startx`**. SDL2 does not support the old SDL 1.2 `fbcon`
+backend. The Pi must have an active DRM/KMS display, SDL2 compiled with
+`kmsdrm`, and suitable `video`/`render` permissions. Log out and
+back in after the installer adds those groups. <https://kivy.org/doc/stable/installation/installation-rpi.html>
+
+Install once:
+
+```bash
+sudo bash setup.sh --with-kivy
+```
+
+Then log in on the Pi's local TTY and launch:
+
+```bash
+cd ~/tailsmusicv2
+.venv/bin/python kivy_player.py
+```
+
+The app enters fullscreen automatically in direct-console mode. In an
+existing desktop session it uses the available graphical backend instead.
+You can override the default explicitly using `SDL_VIDEODRIVER`.
+If SDL says `kmsdrm not available`, verify the installed SDL2 build,
+active DRM nodes under `/dev/dri`, and that another display server is
+not using the display; forcing the legacy `fbcon` driver will not fix it.
+
+#### Desktop mode
 
 ```bash
 cd tailsmusicv2
