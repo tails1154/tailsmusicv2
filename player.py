@@ -7,6 +7,7 @@ global shuffleOn
 print(f"(0/{totalModules}) os")
 import os
 import sys
+import errno
 from pathlib import Path
 import tempfile
 import importlib.util
@@ -328,6 +329,28 @@ def find_simolio():
             continue
     return None
 
+def read_input_event():
+    """Exit the player if its Bluetooth media-button input device disappears.
+
+    SystemExit is deliberately not caught by the player's broad
+    'except Exception' handlers inside menus, so a stale evdev device never
+    leaves the process running without working controls. Exit code 19 lets
+    the console launcher or a service supervisor restart the player.
+    """
+    try:
+        return dev.read_one()
+    except OSError as exc:
+        if exc.errno == errno.ENODEV:
+            print(
+                "TailsMusic: input device disappeared (ENODEV, errno 19); "
+                "exiting for supervisor restart.",
+                file=sys.stderr,
+                flush=True,
+            )
+            raise SystemExit(errno.ENODEV) from exc
+        raise
+
+
 def bluetooth_recording_devices():
     """Discover Bluetooth audio card and input source from PulseAudio."""
     try:
@@ -426,7 +449,7 @@ def manual_tts():
     toSpeak = ""
     while True:
         if daemonRunning: cmdq.process_Command()
-        event = dev.read_one()
+        event = read_input_event()
         if event and event.type == ecodes.EV_KEY:
             selected, action = menu_nav(event, selected, options)
             if action:
@@ -453,7 +476,7 @@ def wifiSetup():
         speak(options[selected])
         while True:
             if daemonRunning: cmdq.process_Command()
-            event = dev.read_one()
+            event = read_input_event()
             if event and event.type == ecodes.EV_KEY:
                 selected, action = menu_nav(event, selected, options)
                 if action:
@@ -481,7 +504,7 @@ def wifiSetup():
                     speak(options[selected])
                     while True:
                         if daemonRunning: cmdq.process_Command()
-                        event = dev.read_one()
+                        event = read_input_event()
                         if event and event.type == ecodes.EV_KEY:
                             selected, action = menu_nav(event, selected, options)
                             if action:
@@ -626,7 +649,7 @@ def bluetooth_menu():
     speak(options[selected])
     while True:
         if daemonRunning: cmdq.process_Command()
-        event = dev.read_one()
+        event = read_input_event()
         if event and event.type == ecodes.EV_KEY:
             selected, action = menu_nav(event, selected, options)
             if action:
@@ -647,7 +670,7 @@ def bluetooth_menu():
                     speak_allowinter(dev_opts[sel])
                     while True:
                         if daemonRunning: cmdq.process_Command()
-                        e = dev.read_one()
+                        e = read_input_event()
                         if e and e.type == ecodes.EV_KEY:
                             sel, act = menu_nav(e, sel, dev_opts, allowInterrupt=True)
                             if act:
@@ -687,7 +710,7 @@ def bluetooth_menu():
                     speak_allowinter(dev_opts[sel])
                     while True:
                         if daemonRunning: cmdq.process_Command()
-                        e = dev.read_one()
+                        e = read_input_event()
                         if e and e.type == ecodes.EV_KEY:
                             sel, act = menu_nav(e, sel, dev_opts, allowInterrupt=True)
                             if act:
@@ -714,7 +737,7 @@ def bluetooth_menu():
                     speak_allowinter(sink_opts[sel])
                     while True:
                         if daemonRunning: cmdq.process_Command()
-                        e = dev.read_one()
+                        e = read_input_event()
                         if e and e.type == ecodes.EV_KEY:
                             sel, act = menu_nav(e, sel, sink_opts, True)
                             if act:
@@ -745,7 +768,7 @@ def run_script_menu():
     while True:
         global daemonRunning
         if daemonRunning: cmdq.process_Command()
-        event = dev.read_one()
+        event = read_input_event()
         if event and event.type == ecodes.EV_KEY:
             selected, action = menu_nav(event, selected, options)
             if action:
@@ -789,7 +812,7 @@ def portal_setup():
     speak(options[selected])
     while True:
         if daemonRunning: cmdq.process_Command()
-        event = dev.read_one()
+        event = read_input_event()
         if event and event.type == ecodes.EV_KEY:
             selected, action = menu_nav(event, selected, options)
             if action:
@@ -815,7 +838,7 @@ def shutdown_menu():
             speak(options[selected])
             first_render = False
         if daemonRunning: cmdq.process_Command()
-        event = dev.read_one()
+        event = read_input_event()
         if event and event.type == ecodes.EV_KEY:
             selected, action = menu_nav(event, selected, options)
             if action:
@@ -833,7 +856,7 @@ def shutdown_menu():
                     conf_sel = 0
                     while True:
                         if daemonRunning: cmdq.process_Command()
-                        event = dev.read_one()
+                        event = read_input_event()
                         if event and event.type == ecodes.EV_KEY:
                             conf_sel, confirmed = menu_nav(event, conf_sel, confirm_opts)
                             if confirmed:
@@ -853,7 +876,7 @@ def shutdown_menu():
                     pygame.mixer.music.load(str(MUSIC_DIR / random_song))
                     pygame.mixer.music.play()
                     while pygame.mixer.music.get_busy():
-                        event = dev.read_one()
+                        event = read_input_event()
                         if event and event.type == ecodes.EV_KEY:
                             selected2, action2 = menu_nav(event, 0, ["Stop"])
                             print(selected2) # there ruff now i used selected2 are you happy
@@ -868,7 +891,7 @@ def shutdown_menu():
                         pygame.mixer.music.load(os.path.join(MUSIC_DIR, random_song))
                         pygame.mixer.music.play()
                         while pygame.mixer.music.get_busy():
-                            event = dev.read_one()
+                            event = read_input_event()
                             if event and event.type == ecodes.EV_KEY:
                                 key_event = categorize(event)
                                 key = key_event.keycode
@@ -923,7 +946,7 @@ def playlist_menu():
         speak(options[selected])
         waiting = True
         while waiting:
-            event = dev.read_one()
+            event = read_input_event()
             if event and event.type == ecodes.EV_KEY:
                 selected, action = menu_nav(event, selected, options)
                 if action:
@@ -946,7 +969,7 @@ def create_playlist():
     while True:
         if daemonRunning: cmdq.process_Command()
         options = ["Add song", "Finish"]
-        event = dev.read_one()
+        event = read_input_event()
         if event and event.type == ecodes.EV_KEY:
             selected, action = menu_nav(event, selected, options)
             if action:
@@ -962,7 +985,7 @@ def create_playlist():
                     speak_allowinter(song_files[song_selected])
                     while True:
                         if daemonRunning: cmdq.process_Command()
-                        evt = dev.read_one()
+                        evt = read_input_event()
                         if evt and evt.type == ecodes.EV_KEY:
                             song_selected, action = menu_nav(evt, song_selected, song_files)
                             if action:
@@ -979,7 +1002,7 @@ def manage_playlist(name):
     speak(options[selected])
     while True:
         if daemonRunning: cmdq.process_Command()
-        event = dev.read_one()
+        event = read_input_event()
         if event and event.type == ecodes.EV_KEY:
             selected, action = menu_nav(event, selected, options)
             if action:
@@ -991,7 +1014,7 @@ def manage_playlist(name):
                     speak("Confirm delete")
                     while True:
                         if daemonRunning: cmdq.process_Command()
-                        evt = dev.read_one()
+                        evt = read_input_event()
                         if evt and evt.type == ecodes.EV_KEY:
                             selected2, action2 = menu_nav(evt, 0, ["Delete", "Cancel"])
                             if action2:
@@ -1013,7 +1036,7 @@ def manage_playlist(name):
                         advance = True  # Flag to control playlist_index increment
 
                         while pygame.mixer.music.get_busy():
-                            event = dev.read_one()
+                            event = read_input_event()
                             if event and event.type == ecodes.EV_KEY:
                                 key_event = categorize(event)
                                 if key_event.keystate == 1:
@@ -1046,7 +1069,7 @@ def song_menu():
     speak(options[selected])
     while True:
         if daemonRunning: cmdq.process_Command()
-        event = dev.read_one()
+        event = read_input_event()
         if event and event.type == ecodes.EV_KEY:
             selected, action = menu_nav(event, selected, options)
             if action:
@@ -1078,7 +1101,7 @@ def add_song_to_playlist(song_path):
     speak("Select playlist to add")
     speak(playlists[selected])
     while True:
-        event = dev.read_one()
+        event = read_input_event()
         if event and event.type == ecodes.EV_KEY:
             selected, action = menu_nav(event, selected, playlists)
             if action:
@@ -1137,7 +1160,7 @@ def ai_mode():
     speak("AI mode")
     while True:
         if daemonRunning: cmdq.process_Command()
-        event = dev.read_one()
+        event = read_input_event()
         if event and event.type == ecodes.EV_KEY:
             key_event = categorize(event)
             if key_event.keystate == 1:
@@ -1164,7 +1187,7 @@ def ai_mode():
                             proc = subprocess.Popen(["parec", "--file-format=wav", "-d", mic_source, "--rate=16000", "--format=s16le", "--channels=1", rec_path], stderr=subprocess.DEVNULL)
                             while True:
                                 if daemonRunning: cmdq.process_Command()
-                                event = dev.read_one()
+                                event = read_input_event()
                                 if event and event.type == ecodes.EV_KEY:
                                     ke = categorize(event)
                                     if ke.keystate == 1 and ke.keycode == config['skipbutton']:
@@ -1205,7 +1228,7 @@ def ai_mode():
                     confirmed = False
                     while not confirmed:
                         if daemonRunning: cmdq.process_Command()
-                        event = dev.read_one()
+                        event = read_input_event()
                         if event and event.type == ecodes.EV_KEY:
                             ke = categorize(event)
                             if ke.keystate == 1:
@@ -1307,7 +1330,7 @@ def ai_mode():
                                 tts_len = sfx.get_length()
                                 for _ in range(int(tts_len / 0.05)):
                                     if daemonRunning: cmdq.process_Command()
-                                    event = dev.read_one()
+                                    event = read_input_event()
                                     if event and event.type == ecodes.EV_KEY:
                                         ke = categorize(event)
                                         if ke.keystate == 1 and ke.keycode in [config['skipbutton'], config['backbutton']]:
@@ -1383,7 +1406,7 @@ if __name__ == "__main__":
     print(f"Listening on {INPUT_DEVICE}...")
     while True:
         if daemonRunning: cmdq.process_Command()
-        event = dev.read_one()
+        event = read_input_event()
         if event and event.type == ecodes.EV_KEY:
             key_event = categorize(event)
             if key_event.keystate == 1:
