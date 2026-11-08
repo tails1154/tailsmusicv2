@@ -895,8 +895,8 @@ def shutdown_menu():
                 elif choice == "Manual text to speech":
                     manual_tts()
                 elif choice == "Re scan Songs":
-                    speak("Rescanning")
-                    sys.exit(0)
+                    print("Rescan requested; restarting TailsMusic to reload songs.", flush=True)
+                    os._exit(19)
                 elif choice == "Connect to WiFi":
                     wifiSetup()
                 elif choice == "Setup Hotspot":
