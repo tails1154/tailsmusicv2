@@ -1339,6 +1339,7 @@ def ai_mode():
                     try:
                         if speech_text:
                             speak_nointer("Generating Text To Speech")
+                            publish_touchscreen(spoken_text=speech_text)
                             tts = gTTS(text=speech_text, lang="en")
                             response_path = str(Path(tempfile.gettempdir()) / f"tailsmusic_ai_response_{os.getuid()}.mp3")
                             tts.save(response_path)
