@@ -21,12 +21,11 @@ def load_templates():
                 HTML[name] = f.read()
 
 def serve_static(path):
-    base = os.path.dirname(__file__)
-    full = os.path.join(base, "static", path)
-    if os.path.exists(full):
-        with open(full, 'rb') as f:
-            return f.read()
-    return None
+    base = (Path(__file__).resolve().parent / "static").resolve()
+    full = (base / path).resolve()
+    if not full.is_relative_to(base) or not full.is_file():
+        return None
+    return full.read_bytes()
 
 MIME = {
     ".css": "text/css",
@@ -295,11 +294,10 @@ class PortalHandler(SimpleHTTPRequestHandler):
             body = json.loads(self.rfile.read(length).decode())
             msg = body.get("message", "")
             result = _ai_chat(msg)
-            for cmd in result.get("commands", []):
-                if cmd == "next":
-                    subprocess.run(["pkill", "-f", "next_song"])
-                elif cmd == "prev":
-                    subprocess.run(["pkill", "-f", "prev_song"])
+            # Do not kill processes matching common words. A future control
+            # API must communicate directly with the running player instance.
+            if result.get("commands"):
+                result["control_status"] = "Playback commands require player IPC."
             self._json_response(result)
 
         elif path == '/api/upload/zip':
