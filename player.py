@@ -344,6 +344,22 @@ def find_simolio():
             continue
     return None
 
+_touchscreen_playlists_active = False
+
+
+def _open_touchscreen_playlists():
+    """Enter the existing headset playlist UI without a second menu engine."""
+    global _touchscreen_playlists_active
+    if _touchscreen_playlists_active:
+        return
+    _touchscreen_playlists_active = True
+    try:
+        playlist_menu()
+    finally:
+        _touchscreen_playlists_active = False
+        publish_touchscreen(menu=None)
+
+
 def read_input_event():
     """Exit the player if its Bluetooth media-button input device disappears.
 
@@ -358,6 +374,9 @@ def read_input_event():
             return event
         if config.get("turn_off_kivy", False) is not True:
             action = next_touch_command()
+            if action == "playlists":
+                _open_touchscreen_playlists()
+                return None
             if action:
                 setting = {"back": "backbutton", "skip": "skipbutton", "ok": "okbutton"}[action]
                 code = ecodes.ecodes.get(config[setting])
