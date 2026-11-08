@@ -111,27 +111,26 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
-# TailsMusicV2: automatically start the Kivy touchscreen player only on the
+# TailsMusicV2: automatically start the CLI player only on the
 # Raspberry Pi's primary local console. Do not run from SSH, remote terminals,
 # a desktop terminal, or a second tty. This file must be installed as ~/.bashrc.
 if [[ -z "${SSH_CONNECTION:-}" && -z "${SSH_TTY:-}" && "$(tty)" == "/dev/tty1" ]]; then
-    # Determine the repository path from this file when it is sourced in place.
-    # If copied to ~/.bashrc, use the standard ~/tailsmusicv2 location instead.
-    if [[ -f "$HOME/tailsmusicv2/kivy_player.py" ]]; then
+    # Look for the checked-out project in common installation paths.
+    if [[ -f "$HOME/tailsmusicv2/player.py" ]]; then
         TAILSMUSIC_DIR="$HOME/tailsmusicv2"
-    elif [[ -f "/home/pi/mp3player/kivy_player.py" ]]; then
+    elif [[ -f "/home/pi/mp3player/player.py" ]]; then
         TAILSMUSIC_DIR="/home/pi/mp3player"
     else
         TAILSMUSIC_DIR=""
     fi
 
     if [[ -n "$TAILSMUSIC_DIR" ]]; then
-        echo "Starting TailsMusicV2 touchscreen player..."
+        echo "Starting TailsMusicV2 CLI player..."
         cd "$TAILSMUSIC_DIR" || return
         if [[ -x .venv/bin/python ]]; then
-            exec .venv/bin/python kivy_player.py
+            exec .venv/bin/python player.py
         else
-            python3 kivy_player.py
+            python3 player.py
         fi
     else
         echo "TailsMusicV2 not found; leaving the terminal available."
