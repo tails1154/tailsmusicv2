@@ -5,6 +5,19 @@ headset-controlled player's existing evdev menu path.
 """
 import argparse
 import os
+import sys
+
+# Configure SDL BEFORE Kivy imports its window provider.
+# Raspberry Pi OS Lite needs KMS/DRM when running from a local text console.
+# Preserve overrides and normal X11/Wayland sessions.
+DIRECT_KMS = (
+    sys.platform.startswith("linux")
+    and not os.environ.get("DISPLAY")
+    and not os.environ.get("WAYLAND_DISPLAY")
+)
+if DIRECT_KMS:
+    os.environ.setdefault("SDL_VIDEODRIVER", "kmsdrm")
+    os.environ.setdefault("KIVY_WINDOW", "sdl2")
 
 from kivy.app import App
 from kivy.clock import Clock
