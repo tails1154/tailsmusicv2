@@ -31,7 +31,7 @@ cd tailsmusicv2
 sudo bash setup.sh --with-kivy
 ```
 
-Add `--service` to enable the **headless** player as a systemd service. Add
+Add `--service` to enable the **headless** player as a systemd **user service** (required to share the user's Bluetooth audio server). Add
 `--start-service` to also start it immediately; use neither when you intend
 to run only the touchscreen frontend. To preview commands without changing
 anything, run `sudo bash setup.sh --dry-run --with-kivy`.
@@ -60,15 +60,16 @@ original headless `player.py`, not the touchscreen frontend.
 
 **Do not run the touchscreen frontend and the headless player at the same time.**
 If you enabled the service, first run `sudo systemctl stop tailsmusic`.
-Audio requires a working user audio session; if Bluetooth playback is silent,
+Audio requires a working user audio session; the installer enables systemd lingering for the selected user. Start PulseAudio or PipeWire-Pulse under that user and connect the Bluetooth headset. Re-log-in after setup so `input` and `audio` group membership takes effect. If Bluetooth playback is silent,
 check `pactl list short sinks` under the same user that runs the player.
 
 ### Headless setup
 
 ```bash
 sudo bash setup.sh --service
-sudo systemctl start tailsmusic
-journalctl -u tailsmusic -f
+# Log in as the selected regular user (not root) before running:
+systemctl --user start tailsmusic
+journalctl --user -u tailsmusic -f
 ```
 
 Edit `config.json` to match the Bluetooth input device (especially
@@ -76,7 +77,7 @@ Edit `config.json` to match the Bluetooth input device (especially
 `songs/`. If you run without systemd: `.venv/bin/python player.py`.
 
 Existing installations can re-run setup without clearing stored music and
-playlists. The installer does not automatically migrate old shell-login startup
+playlists. The player and portal now resolve their runtime directories relative to the checkout, not `/home/pi/mp3player`, and saved playlists use portable filenames. The installer does not automatically migrate old shell-login startup
 edits: remove any previous TailsMusic loop from `~/.bashrc` to avoid duplicate
 players.
 
@@ -98,10 +99,10 @@ The main menu includes playlists, random playback, shuffle, Wi-Fi setup, the upl
 
 1. Pause playback and open the main menu.
 2. Select **Setup Hotspot**.
-3. Connect to `TailsMusic-Setup` with password `tailsmusic`.
-4. Open the captive portal and upload MP3 files or ZIP archives.
+3. Connect to `TailsMusic-Setup` with your configured password (`tailsmusic` if unchanged; change it before sharing the hotspot).
+4. Open the hotspot IP shown in logs, port `8080`, and upload MP3 files or ZIP archives. Automatic captive-portal redirection is not provided.
 
-The hotspot is optional and only requires `hostapd` and `dnsmasq` when enabled.
+The hotspot is optional and uses NetworkManager's built-in shared Wi-Fi hotspot instead of killing hostapd/dnsmasq or changing global firewall chains. It requires Wi-Fi AP support and NetworkManager authorization for the player user. The setup portal runs on port 8080 on the hotspot IP (shown in the player logs), not port 80. Set `TAILSMUSIC_HOTSPOT_PASSWORD` to a private password before starting the player.
 
 ## Audio reliability
 
