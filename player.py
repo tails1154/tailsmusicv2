@@ -347,7 +347,7 @@ def read_input_event():
                 file=sys.stderr,
                 flush=True,
             )
-            raise SystemExit(errno.ENODEV) from exc
+            os._exit(errno.ENODEV)  # Immediate exit; supervisor restarts us.
         raise
 
 
@@ -1356,7 +1356,7 @@ if __name__ == "__main__":
         dev = InputDevice(device_path)
     else:
         print("Bluetooth media button device not found; exiting for restart.", flush=True)
-        sys.exit(errno.ENODEV)
+        os._exit(errno.ENODEV)  # Immediately terminate only this process.
 
     INPUT_DEVICE = device_path
     os.makedirs(PLAYLIST_DIR, exist_ok=True)
