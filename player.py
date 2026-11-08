@@ -1355,8 +1355,8 @@ if __name__ == "__main__":
         print("Using Headphone device:", device_path)
         dev = InputDevice(device_path)
     else:
-        print("Bluetooth media button device not found.")
-        sys.exit(1)
+        print("Bluetooth media button device not found; exiting for restart.", flush=True)
+        sys.exit(errno.ENODEV)
 
     INPUT_DEVICE = device_path
     os.makedirs(PLAYLIST_DIR, exist_ok=True)
