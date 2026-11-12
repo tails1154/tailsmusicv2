@@ -945,14 +945,72 @@ def portal_setup():
                 elif options[selected] == "Back":
                     return
 
-def shutdown_menu():
+SHUFFLE_HISTORY_PATH = ROOT / 'shuffle_history.json'
+
+def load_shuffle_history():
+    """Return the set of songs already played in the current shuffle cycle."""
+    try:
+        with SHUFFLE_HISTORY_PATH.open('r', encoding='utf-8') as f:
+            return set(json.load(f))
+    except (OSError, ValueError):
+        return set()
+
+def save_shuffle_history(played):
+    with SHUFFLE_HISTORY_PATH.open('w', encoding='utf-8') as f:
+        json.dump(sorted(played), f, indent=4)
+
+def build_shuffle_queue(played):
+    """Shuffle the songs not yet played this cycle. Starts a new cycle when all have played."""
+    songs = sorted((f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')), key=str.lower)
+    played = played & set(songs)
+    remaining = [s for s in songs if s not in played]
+    if not remaining and songs:
+        played = set()
+        remaining = list(songs)
+        speak("Every song has played, starting over")
+    random.shuffle(remaining)
+    return remaining, played
+
+def shuffle_playback():
+    """Play every song once in random order, remembering progress between sessions."""
+    played = load_shuffle_history()
+    queue, played = build_shuffle_queue(played)
+    if not queue:
+        speak("No songs found")
+        return
+    while True:
+        if not queue:
+            queue, played = build_shuffle_queue(played)
+        song = queue.pop(0)
+        pygame.mixer.music.load(str(MUSIC_DIR / song))
+        pygame.mixer.music.play()
+        played.add(song)
+        save_shuffle_history(played)
+        while pygame.mixer.music.get_busy():
+            event = read_input_event()
+            if event and event.type == ecodes.EV_KEY:
+                key_event = categorize(event)
+                if key_event.keystate == 1:
+                    key = key_event.keycode
+                    if key == config["backbutton"]:
+                        pygame.mixer.music.stop()
+                        speak("Exiting shuffle")
+                        return
+                    if key == config["skipbutton"]:
+                        pygame.mixer.music.stop()
+                        break
+
+def main_menu():
     selected = 0
     first_render = True
     while True:
         tailsign_status = "On" if config.get("show_on_tailsign", False) else "Off"
-        options = ["Playlists", "Random Song", "Update TailsMusic", "Shuffle", "Re scan Songs", 
-                   "Connect to WiFi", "Setup Hotspot", "Bluetooth", "Get local IP", "Open App", 
-                   f"Show on TailSign: {tailsign_status}", "AI Mode", "Shut Down", "Back"]
+        options = [
+            "Shuffle", "Playlists", "Open App", "AI Mode",              # play
+            "Re scan Songs", "Update TailsMusic",                       # library
+            "Connect to WiFi", "Setup Hotspot", "Bluetooth", "Get local IP",  # connect
+            f"Show on TailSign: {tailsign_status}", "Shut Down", "Back",     # settings
+        ]
         if first_render:
             speak_menu_option(options, selected)
             first_render = False
@@ -989,42 +1047,8 @@ def shutdown_menu():
                     return
                 elif choice == "Playlists":
                     playlist_menu()
-                elif choice == "Random Song":
-                    song_files = sorted([f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')], key=str.lower)
-                    random_song = random.choice(song_files) if song_files else None
-                    pygame.mixer.music.load(str(MUSIC_DIR / random_song))
-                    pygame.mixer.music.play()
-                    while pygame.mixer.music.get_busy():
-                        event = read_input_event()
-                        if event and event.type == ecodes.EV_KEY:
-                            selected2, action2 = menu_nav(event, 0, ["Stop"])
-                            print(selected2) # there ruff now i used selected2 are you happy
-                            if action2 and options[0] == "Stop":
-                                pygame.mixer.music.stop()
-                                break
                 elif choice == "Shuffle":
-                    shuffleOn = True
-                    while shuffleOn:
-                        song_files = sorted([f for f in os.listdir(MUSIC_DIR) if f.endswith('.mp3')], key=str.lower)
-                        random_song = random.choice(song_files) if song_files else None
-                        pygame.mixer.music.load(os.path.join(MUSIC_DIR, random_song))
-                        pygame.mixer.music.play()
-                        while pygame.mixer.music.get_busy():
-                            event = read_input_event()
-                            if event and event.type == ecodes.EV_KEY:
-                                key_event = categorize(event)
-                                key = key_event.keycode
-                                if key_event.keystate == 1:
-                                    if key == config["backbutton"]:
-                                        pygame.mixer.music.stop()
-                                        speak("Exiting shuffle")
-                                        shuffleOn = False
-                                        break
-                                    if key == config["skipbutton"]:
-                                        pygame.mixer.music.stop()
-                                        break
-                elif choice == "Manual text to speech":
-                    manual_tts()
+                    shuffle_playback()
                 elif choice == "Re scan Songs":
                     rescan_songs()
                 elif choice == "Connect to WiFi":
@@ -1536,7 +1560,7 @@ if __name__ == "__main__":
                 elif key == config['skipbutton']:
                     if paused:
                         panel.play()
-                        shutdown_menu()
+                        main_menu()
                     else:
                         next_song()
                 elif key == config['backbutton']:

@@ -15,3 +15,6 @@ tailsmusic.log
 # Local companion touchscreen runtime state
 .touchscreen_status.json
 .touchscreen_commands/
+
+# Shuffle play history (runtime state)
+shuffle_history.json
